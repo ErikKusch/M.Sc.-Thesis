@@ -1,0 +1,1509 @@
+---
+title: "" # needs to be empty since it is specified in Title.Rmd
+author: ""
+date: ""
+documentclass: "report"
+classoption: twoside
+fontsize: 10pt
+glossary: true
+output: 
+  pdf_document:
+    keep_tex: true
+    includes:
+      in_header: MSc_Style.tex
+subparagraph: true # this is needed as a workaround to get titlesec to work
+graphics: yes
+geometry: "left= 2cm,right = 2cm, bottom = 1.5cm, top = 2cm"
+---
+
+```{r setup, include=FALSE}
+####--------------- PACKAGES ----
+options(repos="https://cran.rstudio.com" )
+library(knitr)
+library(raster)
+library(pracma)
+library(ggplot2)
+library(cowplot)
+library(grid)
+library(gridExtra) 
+oldSource <- knit_hooks$get("source")
+knit_hooks$set(source = function(x, options) {
+  x <- oldSource(x, options)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
+  ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
+})
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE, cache.lazy=FALSE, tidy.opts=list(width.cutoff=80),tidy=TRUE, fig.height=5.5)
+options(digits=2, width = 90)
+
+source("Y - Codes/S0b_Directories.R") # setting directories
+source("Y - Codes/S0c_Functions.R") # Loading miscellaneous functions
+
+col.NDVI <- rev(terrain.colors(100))
+col.qsoil <- colorRampPalette(c("yellow", "burlywood", "beige", "turquoise", "deepskyblue"))(100)
+col.tair <- colorRampPalette(c("blue","turquoise", "yellow", "orange", "red"))(100)
+SR_cols <- list(col.NDVI, col.tair, col.qsoil, col.qsoil, col.qsoil, col.qsoil)
+SR_Titles <- list("NDVI", "Air Temperature", "Soil Moisture (0-7cm)", "Soil Moisture (7-28cm)", "Soil Moisture (28-100cm)", "Soil Moisture (100-255cm)")
+setwd(Dir.KrigCov)
+Elevation <- raster(list.files()[2], varname = "Elevation")
+ElevationF <- raster(list.files()[1], varname = "Elevation")
+```
+
+```{r StudRegFun, echo = FALSE}
+SRData <- function(Region){
+  ### LOADING DATA ---- 
+  setwd(Dir.Gimms.Monthly)
+  SR_NDVI <- mean(brick(list.files()[grep(pattern = Region, list.files())]), na.rm = TRUE)
+  setwd(Dir.ERA.Monthly)
+  SR_Qsoil1 <- mean(brick(list.files()[grep(pattern = paste("Qsoil1_mean_", Region, sep=""), list.files())]), na.rm = TRUE)
+  SR_Qsoil2 <- mean(brick(list.files()[grep(pattern = paste("Qsoil2_mean_", Region, sep=""), list.files())]), na.rm = TRUE)
+  SR_Qsoil3 <- mean(brick(list.files()[grep(pattern = paste("Qsoil3_mean_", Region, sep=""), list.files())]), na.rm = TRUE)
+  SR_Qsoil4 <- mean(brick(list.files()[grep(pattern = paste("Qsoil4_mean_", Region, sep=""), list.files())]), na.rm = TRUE)
+  SR_Tair <- mean(brick(list.files()[grep(pattern = paste("Tair_mean_", Region, sep=""), list.files())]), na.rm = TRUE)
+  
+  ### FIXING VALUES ---- 
+  QsoilStack <- stack(SR_Qsoil1, SR_Qsoil2, SR_Qsoil3, SR_Qsoil4)
+  SR_Qsoil1[1:2] <- c(min(QsoilStack, na.rm = TRUE)@data@min, max(QsoilStack, na.rm = TRUE)@data@max)
+  SR_Qsoil2[1:2] <- c(min(QsoilStack, na.rm = TRUE)@data@min, max(QsoilStack, na.rm = TRUE)@data@max)
+  SR_Qsoil3[1:2] <- c(min(QsoilStack, na.rm = TRUE)@data@min, max(QsoilStack, na.rm = TRUE)@data@max)
+  SR_Qsoil4[1:2] <- c(min(QsoilStack, na.rm = TRUE)@data@min, max(QsoilStack, na.rm = TRUE)@data@max)
+  
+  ### PLOTTING ---- 
+  Plot_Stack <- stack(SR_NDVI, SR_Tair, SR_Qsoil1, SR_Qsoil2, SR_Qsoil3, SR_Qsoil4)
+  par(mfrow = c(3,2), mai = c(1, 0, 0.5, 0))
+  for(i in 1:length(SR_cols)){
+    if(i == 1){
+      plot(Plot_Stack[[i]], colNA = "black", main = paste("Mean", SR_Titles[[i]], "1982 - 2015"), cex.main = 3, legend.width = 3, legend.shrink=1, axis.args=list(cex.axis=2.5), cex.axis = 2,
+     col =SR_cols[[i]], axes = TRUE, legend = FALSE)
+    } else{
+      plot(Plot_Stack[[i]], colNA = "black", main = paste("Mean", SR_Titles[[i]], "1981 - 2015"), cex.main = 3, legend.width = 3, legend.shrink=1, axis.args=list(cex.axis=2.5), cex.axis = 2,
+     col =SR_cols[[i]], axes = TRUE, legend = FALSE)
+    } 
+    if(i <= 2){
+    plot(Plot_Stack[[i]], legend.only=TRUE, smallplot=c(0.0,.93,.12,.16), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = SR_cols[[i]])
+    }
+    if(i == 2){
+      par(mai = c(.5, 0, 0.5, 0))
+    }
+    }
+  return(SR_Qsoil4)
+}
+```
+
+```{r SRTRY, echo = FALSE}
+TRYRegions <- function(Region){
+### LOADING DATA ----
+setwd(Dir.Gimms.Monthly)
+Back_ras <- mean(brick(list.files()[1:7]), na.rm = TRUE) # background raster for later plots
+values(Back_ras)[which(!is.na(values(Back_ras)))] <- 8888
+Titles <- c("Height", "Nitrogen Content")
+### PLOTTING ----
+par(mfrow = c(2,2), mai = c(1, 0, 0.5, 0))
+  setwd(Dir.TRY)
+  Plot_ras <- brick(list.files(Dir.TRY)[grep(pattern = Region, list.files(Dir.TRY))][1]) # Raw file
+  Plot1_ras <- brick(list.files(Dir.TRY)[grep(pattern = Region, list.files(Dir.TRY))][2]) # Distrib file
+  Back_ras1 <- crop(Back_ras, extent(Plot_ras))
+  Back_ras1 <- stack(Back_ras1, Back_ras1)
+  names(Back_ras1) <- c("Height", "Nitrogen")
+  for(i in 1:2){
+  plot(Back_ras1[[i]], colNA = "black", main = Titles[i], cex.main = 3, legend = FALSE, col = "grey")
+  plot(Plot_ras[[i]], add = TRUE, legend = FALSE, col = col.tair, axes = TRUE)
+  plot(Plot_ras[[i]], legend.only=TRUE, smallplot=c(0,.95,.075,.115), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = col.tair)
+  }
+  for(i in 1:2){
+  plot(Back_ras1[[i]], colNA = "black", main = Titles[i], cex.main = 3, legend = FALSE, col = "grey")
+  plot(Plot1_ras[[i]], add = TRUE, legend = FALSE, col = col.tair, axes = TRUE)
+  plot(Plot1_ras[[i]], legend.only=TRUE, smallplot=c(0,.95,.075,.115), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = col.tair)
+  }
+}
+```
+
+<!--- ####### PREAMBLE -----------
+--------------------------------------------->
+
+\begin{titlepage}
+%\maketitle % this is the default. it does not comply with the requirements by UiB
+\includegraphics[height=2cm]{3 - Figures/uib-logo.png}
+\hspace{6cm}
+\includegraphics[height=2cm]{3 - Figures/Nansen-logo.jpg}\\
+\line(1,0){500} \\
+\begin{center}
+%	\line(1,0){500} \\
+%	\vspace{0.1cm}
+	\Huge{Inferring Vegetation Memory from Remote Sensing Data using novel Climate Reconstruction Products}
+%	\vspace{0.1cm}
+%	\line(1,0){300} \\
+	\vspace{2.5cm}\\
+	\Large{\textbf{Master's Thesis (M.Sc.)}}\\
+	\vspace{2.cm}
+	\large{31/05/2019}\\
+	\vspace{0.2cm}
+	\large{at Universitetet i Bergen}\\
+	\vspace{2cm}
+	\large{In Partial Fulfilment of the Requirements for the Degree Master of Science (M.Sc.)}\\
+	\vspace{3.5cm}
+   \hfill \textbf{by} \linebreak 
+    Primary Supervisor: Dr. Alistair Seddon \hfill  Erik Kusch  \linebreak 
+    Secondary Supervisor: Dr. Richard Davy \hfill born 03/01/1995 in Eilenburg, Germany \\ 
+    \hfill Enrolment number: 239977
+\end{center}
+\end{titlepage}
+
+
+\clearpage
+
+<!--- ####### TOC, TOF, TOT, TOL ------------------------------------------------>  
+\pagenumbering{gobble}
+\blankpage
+
+\begin{abstract}
+\Blindtext
+
+\end{abstract}
+
+\chapter*{Acknowledgements}
+\blindtext
+
+
+\pagenumbering{roman} 
+\setcounter{tocdepth}{3}
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+\printglossary[title=List of Abbreviations and Acronyms,toctitle=List of Abbreviations and Acronyms]
+\clearpage
+
+<!--- ####### DOCUMENT ---------------------------------------------------------->
+\pagenumbering{arabic}
+
+\fancypagestyle{plain}{%
+\fancyhead[OR]{\thepage}
+\fancyhead[EL]{\thepage}
+}
+\pagestyle{fancy}
+
+\titleformat{\chapter}{\normalfont\huge\bfseries}{}{0pt}{\thechapter. \Huge}
+\titlespacing*{\chapter}{0pt}{00pt}{20pt}
+
+
+\clearpage
+
+# Introduction
+Ecosystems are subject to disturbance regimes which can undergo substantial alterations\cite{Johnstone2016} thus causing growing concern that future disturbance dynamics will exceed tipping points and cause irreversible shifts in ecosystem state in relation to **attractors**\cite{Senf2017} (see table \ref{tab:ResTerm} for definitions of bold font terms relating to the resilience debate). Such a **regime shift**\cite{Scheffer2010,Xu2015,Vasilakopoulos2015} can have a tremendous impact on local as well as global welfare of mankind\cite{Cote2010,Scheffer2001,Genkai-Kato2007}. Therefore, policy makers have made it their mission statement to enforce actions which serve to maintain or boost **resilience**\cite{CBD2013} . Conceiving such strategies and evaluating their respective efficacies requires a thorough understanding of resilience theory and a robust set of tools to measure the resilience of ecosystems.  
+Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling et. al resilience thinking was envisaged to encompass two separate characteristics of ecosystems: *stability* and *resilience*\cite{Holling1973} . Stability was defined as the ability of a system to return to its original state after a temporary disturbance. The more stable a system, the less it fluctuates in its characteristics and the faster it returns to its initial conditions after a perturbation. Contemporary literature usually refers to this property as **engineering resilience**\cite{Liu2018,Mumby2015,Seidl2016b}. Resilience, on the other hand, was characterised as the property of a system that allowed it to withstand disturbances without collapsing. The more resilient a system, the higher its chances of persisting under changing conditions. Today this is mostly referred to as **ecological resilience**\cite{Scheffer2015,Standish2014,Gunderson2000}. Within this early context on resilience thinking, a system could be resilient whilst not being very stable and fluctuating in its properties a great deal\cite{Holling1973}.  
+Since then, the term 'resilience' itself has undergone a 'greenwash'\cite{Newton2016}, which has diminished its direct usefulness to researchers. This process has seen the term 'resilience' being introduced originally to ecological sciences but adapted by other branches of research (e.g. social sciences\cite{Carpenter2001}) and society (e.g. policy makers\cite{Newton2016}), modified for different purposes and re-introduced to ecological sciences with multiple altered definitions\cite{Brown2015} .  
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Basic vocabulary of the ecological stability debate]{\textbf{Basic vocabulary of the ecological stability debate -} A few definitions that are key to the understanding of the resilience framework.}
+    \begin{tabular}{|L{2.5cm}L{14cm}|}
+    \hline
+    \bfseries Term  & \bfseries Definition\\
+    \hline
+    \textbf{Attractor} 
+    & A regime towards which a system moves asymptotically\cite{Scheffer2003, Rist2014, Tabacchi2009, Mumby2014, Angeler2016, Scheffer2001, Vasilakopoulos2015}. Also known as \textit{stable state}\cite{Foley2003}, \textit{(stable) equilibrium}\cite{Mumby2015} or \textit{regime}\cite{Tabacchi2009}. \\ \hdashline
+    \textbf{Disturbance} 
+    & Any impact that perturbs a systems trajectory from a given attractor\cite{Mouillot2013,Tabacchi2009,Standish2014, Grimm1997,Wardle2014}.
+	\\ \hdashline  
+    \textbf{Regime shift} 
+    & The restructuring of a system from one set of dominant processes and feedbacks governed by one attractor to an alternate set governed by an alternate attractor\cite{Seddon2014,Scheffer2003,Mori2013,Rist2014, Selkoe2015}. Also known as \textit{tipping point}\cite{Scheffer2010} or \textit{bifurcation}\cite{Vasilakopoulos2015}.
+	\\ \hline
+    \textbf{Ecological Resilience} 
+    & '[...] measures the magnitude of disturbance that can be absorbed before the ecosystem's structure changes'\cite{DeKeersmaecker2015}. Also known as \textit{General resilience}\cite{Angeler2016}.
+    \linebreak Ecological resilience is a measure of how much a system can be changed until it shifts from one stable state/attractor to another\cite{Hodgson2015, Holling1973, Peterson1997, Angeler2016, DeKeersmaecker2015, Brown2015, Standish2014, Gunderson2000}.\\ \hdashline
+    \textbf{Engineering Resilience} 
+    & '[...] measures the speed of recovery after the disturbance'\cite{DeKeersmaecker2015}. Also known as \textit{Recovery}\cite{Standish2014}, \textit{Stability}\cite{Holling1973} or \textit{Resiliency}\cite{Angeler2016}.
+    \linebreak Engineering resilience is a measure of how fast a system reverts to its pre-change state. It can be measured by assessing the return time\cite{Hodgson2015, Holling1973, Peterson1997, Angeler2016, DeKeersmaecker2015, Brown2015, Standish2014, Gunderson2000, Tabacchi2009}.\\
+    \hline
+    \end{tabular}%
+  \label{tab:ResTerm}%
+\end{table*}
+
+\clearpage
+
+Whilst the state of any given ecosystem can be assessed without entertaining the underlying implications of a resilience framework, the conclusions from such a study may grossly differ from the actual processes in nature. Assumptions on ecosystem functioning that are made without including resilience thinking, irrespective of this caveat, may result in particularly dire consequences if the systems in question (also referred to as focal systems\cite{Rist2014,Allen2016}) are production ecosystems\cite{Rist2014,Brown2015} (ecosystems which are used by humans for resource allocation).  
+However, simultaneous assessment of components of any given ecosystem is a difficult task that often defies completion\cite{Standish2014} with most studies only being able to focus on a select few components at a time. Consequently, recent studies have focussed on identifying and quantifying resilience characteristics of ecosystems\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. Hodgson et. al tackled the problem of resilience measurements by building a framework for resilience assessments by first representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}.  
+Representing the *recovery* aspect contained within this framework to resilience is (amongst others) \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). However, even quantifying this component of an entire ecosystem is a Sisyphean endeavour at best as ecological memory is a compound metric unifying a multitude of sub-processes\cite{Walter2013}. Hence, ecosystem-scale studies have refocussed their attention on identifying components of ecological stress memory such as \textbf{vegetation memory}\cite{Walter2013,Johnstone2016}.  
+
+## Vegetation Memory
+
+Ecological memory effects can be understood as the influence of antecedent conditions on ecosystem properties given contemporary disturbance regimes\cite{Liu2018,Ogle2015}. The existence of such temporal effects emphasize the necessity of considering time in ecological frameworks by providing a link between antecedent environmental conditions and plant performance\cite{Seddon2016,Munne-Bosch2013,Papagiannopoulou2017a,Walter2013}. In fact, there is empirical evidence that past conditions inform contemporary vegetation morphology\cite{Walter2013}, phenology\cite{Liu2018}, primary productivity\cite{Ogle2015,Rudgers2018}, species composition\cite{Esper2015,Walter2013}, and carbon cycles\cite{Papagiannopoulou2017a,Liu2018}.  
+
+Studying vegetation memory sheds light on an important set of ecosystem processes which contain an outstanding potential to make ecosystems resilient in the face of climate change\cite{Walter2013}.
+
+### Terminology
+Vegetation memory can - in the broadest of terms - be understood as:
+
+\begin{center}
+\textbf{\textit{The impacts of antecedent conditions on current vegetation
+productivity.}}\cite{Liu2018,Ogle2015,Walter2013,DeKeersmaecker2015}
+\end{center}
+
+In a comprehensive paper, Ogle et al. expanded on this definition by identifying the following three important characteristics to vegetation memory\cite{Ogle2015}:
+\begin{enumerate}
+\item \textit{Length} - The extent of time through which past conditions significantly affect the current state of vegetation.
+\item \textit{Strength} - The magnitude of the effect that past events/conditions have on the current state of vegetation
+\item \textit{Temporal Patterns} - The variation in relative impacts of antecedent conditions at different points in time.
+\end{enumerate}
+
+The natural world is inherently complex and so I find it useful to add another criterion:
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item \textit{Extrinsic Source} - The nature of the antecedent extrinsic conditions that drive current states of vegetation (i.e. the origin/source of the extrinsic memory effect), including (but not limited to): herbivory pressure or climate events.
+\end{enumerate}
+
+Tackling the characteristic of vegetation memory origin, Ogle et al. introduced the notion of **intrinsic** and **extrinsic** memory effects\cite{Ogle2015} (see table \ref{tab:MemTerm}).
+
+\clearpage
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Basic vocabulary of the vegetation memory framework]{\textbf{Basic vocabulary of the vegetation memory framework -} A few definitions that are key to the understanding of vegetation memory and its components.}
+    \begin{tabular}{|L{4cm}L{12.5cm}|}
+    \hline
+    \bfseries Term  & \bfseries Definition\\
+    \hline
+    \textbf{Ecological Memory} & Ecological memory is synonymous with information and material legacies: adaptations, individuals, and materials that persist after a disturbance and drive the responses to future disturbances\cite{Johnstone2016,Nystrom2001}.
+\\ \hdashline  
+    \textbf{Vegetation Memory} & Vegetation memory is defined as any response of a single plant or vegetation compounds after following disturbance event that alters the response of the plant/plant community towards future stress events. This includes a modification of interaction with other ecological components\cite{Walter2013}.\\ \hline
+    \textbf{Intrinsic Memory} & Intrinsic memory refers to the influence of antecedent conditions of the focal system in determining contemporary conditions of the same system. Also known as \textit{endogenous memory}.\cite{Ogle2015} \\ \hdashline
+    \textbf{Extrinsic Memory} & Extrinsic memory refers to the influence of antecedent conditions of the environment (usually abiotic, climate factors) in determining contemporary conditions of the focal system. Also known as \textit{exogenous memory}.\cite{Ogle2015} \\ \hline
+    \end{tabular}%
+  \label{tab:MemTerm}%
+\end{table*}
+
+### Ecological Relevance
+Vegetation memory is identified as the effect of antecedent conditions on current vegetation patterns\cite{Ogle2015}. The stronger and longer the memory effect, the more vegetation will be influenced by antecedent anomalies of the ecosystem and abiotic processes thus signalling higher sensitivity to these drivers\cite{DeKeersmaecker2015}. A higher sensitivity translates to lower resilience and so:
+\begin{center}
+\textbf{Vegetation memory has been proposed as a proxy for engineering resilience.}\cite{Liu2018,DeKeersmaecker2017}
+\end{center}
+
+Due to the inverse relationship between vegetation memory and engineering resilience, patterns and characteristics of vegetation memory are a vital information criterion for \dss aimed at conservation or management efforts.
+
+### Quantifying Vegetation Memory
+Vegetation memory is influenced by a multitude of processes which range from abiotic characteristics\cite{DeKeersmaecker2015,Seddon2016,Papagiannopoulou2017a} to biotic system components\cite{Johnstone2016,DeKeersmaecker2015}. Comprehensive studies of vegetation response to biotic and abiotic forcing are numerous\cite{Liu2018,Seddon2016,Papagiannopoulou2017a,Ogle2015,Cole2014,Seddon2016}. These studies have established a multitude of approaches to delineating vegetation memory from a variety of data sets. Examples include the use of (1) correlation coefficients of different lags of drought indices\cite{Liu2018,Vicente-Serrano2013}, (2) mixed effect models of antecedent vegetation and climate characteristics and subsequent model selection\cite{DeKeersmaecker2015}, and (3) Bayesian models to distinguish intrinsic and extrinsic memory effects\cite{Ogle2015}. Some common practices have emerged from this variety of approaches: 
+\begin{enumerate}
+\item \textbf{Intrinsic Memory} is usually identified as the relationship between vegetation properties at time step $t$ a prior time $t-1$ (usually at monthly intervals)\cite{DeKeersmaecker2015}. See figure \ref{fig:SchemaVegMem} for a visual representation.
+\item \textbf{Extrinsic Memory} is attributed to combinations of temperature, precipitation, and/or drought records\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015,Ogle2015}. See figure \ref{fig:SchemaVegMem} for a visual representation.
+\item \textbf{Model Selection} is used to determine the length of extrinsic memory effects by identifying the time window during which extrinsic forcing holds the most explanatory power of vegetation characteristics\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015}.
+\item \textbf{Anomalies} of both response and predictor variables are used as these are metrics which can be linked directly to perturbation events\cite{DeKeersmaecker2015}.
+\end{enumerate}
+
+\clearpage
+
+Vegetation memory models can thus usually be summarised as:
+
+\begin{equation}
+Y_t = \alpha * Y_{t-1} + \sum_{e = 1}^{E}(\beta_e * X_e)
+\end{equation}
+
+with $Y_t$ and $Y_{t-1}$ denoting anomalies of vegetation properties at times $t$ and $t-1$ respectively, $X_e$ indexing anomalies of the $e$'th extrinsic force (out of a total $E$ extrinsic drivers), and $\alpha$ and $\beta$ representing the **coeffcients** of **intrinsic** and **extrinsic** memory effects respectively. Rerunning such a model with independent, extrinsic inputs ($X_e$'s) at different time lags and subsequent model selection can then be employed to identify the length of the extrinsic vegetation memory related to the $e$'th extrinsic force.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.9\linewidth]{3 - Figures/Scheme_VegMem.jpg}
+\caption[Components of Vegetation Memory]{\textbf{Components of Vegetation Memory - }Conceptual layout of how intrinsic and extrinsic vegetation memory components can be identified from the data. The concept recognises two important variables: (1) \textit{Response} - contemporary vegetation properties at time $t$, and (2) \textit{Extrinsic} - antecedent environmental data. Within this framework, vegetation memory - both intrinsic and extrinsic - is identified as the predictability of the response variable through a regression onto itself and extrinsic variables respectively. Regressions of data onto each other are visualised as dashed arrows, lag effects are identified by numbers.}
+\label{fig:SchemaVegMem}
+\end{figure}
+
+
+## Plant Functional Traits
+Studies of biotic forcing usually fall into one of two categories which can be seen as research representative of the world views of Schimper (focus on functional diversity) and Hubbel (focus on species diversity)\cite{Westoby2006}. Whilst the latter represents traditional approaches to understanding the natural world, Schimpers framework has received increased attention over the past few years. 
+<!-- This paradigm shift is due to the compelling evidence that a focus on functional aspects of biological systems may yield more refined understandings of the natural world than species-focused studies would\cite{DeBoeck2017}.   -->
+A functional approach to ecosystem processes can potentially explain what functional expressions allow said processes to be maintained in their structure despite perturbations\cite{DeBoeck2017,Truchy2015,Mace2014,Lavorel2002}. One of the most prominent tools of these 'Schimper' studies is the *functional trait frameworks*. The most important of these frameworks when understanding vegetation processes - such as vegetation memory - is that of **Plant Functional Traits (PFTs)**.  
+
+Functional traits capture a multitude of characteristics without the necessity for a focus on phylogenies of study organisms\cite{Nock2016} thus making landscape-scale studies required for identifying vegetation memory patterns far more feasible. The diverse range in which any given \textbf{\PFT} (see table \ref{tab:PFTTerm} for definitions of bold font terms relating to \PFT frameworks) can be expressed are representative of the diverse strategies for establishing, growing and reproducing of plants\cite{Laughlin2014}. Hence, understanding how plant functional traits enable plants to persist despite (a)biotic forcing is a promising first step to understanding ecosystem-scale responses to climate change.
+
+### Terminology
+Whilst \PFTs have been linked individually to evolution\cite{Ackerly2003} and community composition patterns\cite{Laughlin2014,Lavorel2002}, a change in their expression has been found to be correlated with climate change patterns\cite{Wright2005} thus suggesting a causal link between extrinsic vegetation memory and \PFT expressions. In order to classify the way in which \PFTs are related to community functions, Nock et al. present the concept of (1) \textbf{Effect Traits}, and (2) \textbf{Response Traits}\cite{Nock2016}. Classifying \PFTs according to this framework can profoundly aid the understanding of their influence on spatio-temporal patterns of vegetation performance\cite{Lavorel2002,Mori2013}.
+
+Recent studies suggest that vegetation community functions are governed by integrated phenotypes, which can be regarded as specific combinations of individual \PFT ranges, instead of single \PFTs\cite{Bonser2006, Nock2016} thus calling for a scientific approach focussed on \textbf{\FDR} which can be identified via an approach in which \PFT values of each individual are placed within a multidimensional system with each axis representing the range of values for one specific \PFT\cite{Ordonez2015}. Just as with species oriented studies, a measure of richness alone may be insufficient to capture necessary information to understanding biological systems. Therefore, one may also want to use a measure of evenness which, in a functional biology setting, can be referred to as \textbf{\FDD} which is representative of how evenly dispersed data records are in multidimensional space.  
+
+Recent studies in \PFT research have focussed heavily on methods of dimensionality reduction by identifying the \PFTs which capture a vast part of the global variation of plant function\cite{Laughlin2014,Diaz2015}. Díaz et al. identified:
+\begin{enumerate}
+\item \textit{Vegetative height} ($H$) an important criterion to accessing light resources
+\item \textit{Stem specific density} ($SSD$) reflecting a trade-off between growth potential and mortality risk
+\item \textit{Leaf area} ($LA$) vital consequences for leaf water balance
+\item \textit{Leaf mass per area} ($LMA$) a proxy for the trade-off between carbon gain and leaf longevity
+\item \textit{Leaf nitrogen content} ($Nmass$) reflects a trade-off between photosynthetic potential and acquiring nitrogen
+\item \textit{Diaspore mass} ($Dmass$) reflects a trade-off between seedling survival and colonization ability
+\end{enumerate}
+as the most important \PFTs to understanding the global spectrum of plant functioning\cite{Diaz2015}. A similar framework has been established by Westoby \& Wright in which three important \PFT dimensions are recognised: (1) the leaf economic spectrum, (2) the seed size/mass spectrum, and (3) the height of the canopy at maturity\cite{Westoby2006}.
+
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Basic vocabulary of Plant Functional Trait frameworks]{\textbf{Basic vocabulary of Plant Functional Trait frameworks -} A few definitions that are key to the understanding of Plant Functional Trait frameworks.}
+    \begin{tabular}{|L{3.5cm}L{13cm}|}
+    \hline
+    \bfseries Term  & \bfseries Definition\\
+    \hline
+    \textbf{Plant Functional Traits (PFTs)} & Plant Functional traits characterise morphological, biochemical, physiological, structural, phenological and/or behavioural aspects of organisms which influence the fitness of said organisms\cite{Nock2016}.\\ \hdashline  
+    \textbf{Effect Traits} & These determine a species influence on ecosystem processes\cite{Nock2016}.\\ \hdashline  
+    \textbf{Response Traits} & These determine a species ability to colonise a certain habitat and persist despite environmental pressures\cite{Nock2016}.\\ \hline  
+    \textbf{Functional Diversity Richness (FDR)} & Functional diversity richness measures the range of the PFT spectrum of a given study region/species assembly in multivariate trait space via a multivariate convex hull effectively measuring niche space\cite{Ordonez2015}.\\ \hdashline
+    \textbf{Functional Diversity Dispersion (FDD)} & Functional diversity dispersion measure the dispersion of PFT values in multivariate trait space with respect to the local functional space centre effectively measuring niche segregation\cite{Ordonez2015}.\\ \hline
+    \end{tabular}%
+  \label{tab:PFTTerm}%
+\end{table*}
+
+\clearpage
+
+### Ecological Relevance  
+The positive effect of biodiversity on ecological stability has long been recorded\cite{DeBoeck2017} and even led to the formulation of prominent concepts like Yacchi's insurance hypothesis which postulates that the loss of a subset of species can be compensated for by the presence of other species given a sufficient overlap in functional aspects of both thus leading to a stabilisation of ecosystem processes\cite{Yachi1999}. 
+
+\begin{center}
+\textbf{\PFTs capture information about a variety of ecosystem processes.}\cite{Butler2017}
+\end{center}
+
+Most studies to date have focussed on species diversity\cite{Vasilakopoulos2015,Cote2010,Brown2015}. Some made use of the concept of functional species\cite{Gunderson2000} which presents researchers with a species classification system that is vague at best due to loose definitions of where to draw the lines between functional species. Functional trait biology, which captures the functional diversity of biological systems, is often employed as an improvement to the functional species/type concept\cite{Munne-Bosch2013,Walter2013} as it eliminates the necessity of phylogenetic analyses\cite{Nock2016} and enables studies to capture intra-specific variation\cite{Violle2012,Dantas2013,Kattge2011}.
+
+\begin{center}
+\textbf{\PFTs can be captured irrespective of species relationships whilst presenting functional information at sub-species levels.}\cite{Violle2012,Dantas2013}
+\end{center}
+
+Thus, \PFTs make for \textit{highly informative} proxies of \textit{ecosystem functioning} which can be recorded across \textit{large spatial and temporal scales} since studies aren't constrained to a handful of species. Additionally, \PFTs represent an improved understanding of functional expressions of plant communities by \textit{expressing information at sub-species level}.
+
+
+### Unifying Information on Plant Functional Traits
+\PFTs are usually recorded through individual trait campaigns or for single-study purposes. Combining \PFT information from these individual data sets can prove challenging due to different measurement practices and understandings of \PFTs. A comprehensive handbook on \PFT data collection practices by Pérez-Harguindeguy et al.\cite{Perez-Harguindeguy2013} presents an elegant solution to making \PFT data sets more comparable. Additionally, \PFT data sets have been aggregated into large data bases within online repositories such as:
+\begin{itemize}
+\item The \textbf{\TRY}\cite{Kattge2011} is data base of \PFT records connecting vegetation scientists across the globe and hosted by the \idiv. Within it's current release version (version 4) \TRY contains almost seven million \PFT records for 1,800 traits with about half of all records being geo-referenced\cite{TRYOnline}.
+\item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline} (see figure \ref{fig:BIEN4}).
+\end{itemize}
+
+\vspace{-.8cm}
+\begin{figure}[b!]
+\resizebox{1\textwidth}{!}{\includegraphics[width=\linewidth]{3 - Figures/bien4.jpg}}
+\caption[BIEN PFT Coverage]{\textbf{\BIEN \PFT Coverage - }Geo-referenced records within version 4.1 of the \BIEN data base at logarithmic scale\cite{BIENOnline}.} 
+\label{fig:BIEN4}
+\end{figure}
+
+\clearpage
+
+\begin{itemize}
+\item The \textbf{\COMPADRE}\cite{Salguero-Gomez2015} contains \LHT, a subclass of \PFTs pertaining to life history characteristics (e.g. longevity, reproductive mode, etc.), driven matrix population models which produce important information about community processes through time based on records of different \LHTs\cite{Salguero-Gomez2016}. In its current release (version 4.0.1) it contains 7,024 matrix models\cite{COMPADREOnline}.
+\end{itemize}
+
+Combining information from these data bases should result in a holistic view of global plant function as such an approach would unify \PFTs and \LHTs to further a spatio-temporal understanding of global plant function.
+
+### Putting Plant Function on the Map
+Vegetation Memory patterns are inherently spatial phenomena\cite{DeKeersmaecker2015,Ogle2015,Vicente-Serrano2013,Liu2018}. So are patterns of plant functioning\cite{Ordonez2015}. Whilst the above mentioned data bases (\TRY, \BIEN, and \COMPADRE) contain vast amounts of geo-referenced \PFT and \LHT records, almost no comprehensive, gapless, and internally consistent global products of plant function are available\cite{Butler2017,Bruelheide2018}.  
+
+Currently, the most commonly used method for extrapolating \PFT records to local/global map products follows the methodology layed out by Ordonez \& Svenning\cite{Ordonez2015} which has species-specific \PFT means being combined with geo-referenced species occurrences (a conceptual depiction of this can be seen in figure \ref{fig:PFTCombining}).
+
+\begin{figure}[h!]
+\includegraphics[width=1\linewidth]{3 - Figures/PFTCombiningbw.png}
+\caption[Concept of Combining Plant Functional Trait Information with Species-Distribution Maps]{\textbf{Concept of Combining Plant Functional Trait Information with Species-Distribution Maps - }Conceptual framework of mapping plant function from \PFTs and species distribution maps into gridded map products of mean \PFT expressions. Inspired by Ordonez \& Svenning\cite{Ordonez2015}. Red cells indicate presence of a species, blue and yellow cells depict the average \PFT of species A and B respectively. Green cells represent the average of \PFT means of species A and B whilst white cells denote the absence of species and thus \PFT data.} 
+\label{fig:PFTCombining}
+\end{figure}
+
+Species occurrence data - referred to as **floral data** in the case of plant occurrences - can be obtained via the \textbf{\GBIF} data base which currently contains over 1 billion geo-referenced occurrence records of species across all kingdoms of life\cite{GBIFOnline}.
+
+Unfortunately, this approach is heavily reliant on geo-referenced occurrence records which are subject to sampling bias\cite{Sandel2015} and renders intra-specific expressions of \PFTs virtually non-existent as species are expressed via single mean values for each \PFT. Zoological studies have resolved these issues by recording relative abundances of species in addition to occurrence records\cite{Newbold2012}.  
+
+Recent approaches in \PFT ecology have seen the development of mapping procedures of \PFTs according to abiotic conditions through linear models with spatial components\cite{Bruelheide2018} and complex Bayesian methods\cite{Butler2017}.
+
+\clearpage 
+
+## Thesis Outline
+Remote sensing analyses have been the key to identifying vegetation memory patterns through time and space in a multitude of settings\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015}. Refining such approaches will facilitate important knowledge for \dss on environmental processes in the face of climate change as well as changes in land use by mankind\cite{Prestele2016}. Considering the direct link between vegetation memory and ecosystem resilience, this will garner an advanced comprehension of resilience and, in turn, enable maintenance and enhancement of ecosystems' resilience thus aiding to stabilize natural systems. It is therefore the **first main goal** (see figure \ref{fig:Outline} for an overview of how I am planning to achieve the research goals layed out here) of this study to
+\vspace{-.7cm}
+\begin{center}
+\item \textbf{I. Identify vegetation memory patterns while improve on contemporary approaches.}
+\end{center}
+
+To do so, I am going to answer the following research questions:
+\begin{enumerate}
+\item \textit{Which variables (climate and biological) make up robust vegetation memory metrics?}
+\item \textit{How can we distinguish between intrinsic and extrinsic memory?}
+\end{enumerate}
+\vspace{.1cm}
+
+A multitude of recent studies have identified vegetation memory characteristics of a diverse cast of focal ecosystems\cite{DeKeersmaecker2017,Liu2018,Papagiannopoulou2017a,Seddon2016,Peterson2002,Walter2013,Papagiannopoulou2017,Bell2018}. However, only a few of these have also delineated the ecological processes and causal pathways which have led to the observed patterns of vegetation memory and hence resilience. One notable example of these research efforts is a study by Foley et al. which expanded on the drivers behind the ecosystem collapse of the Sahara and Sahel regions\cite{Foley2003}. Therefore, the **second main goal** of my thesis is to:
+
+\vspace{-.7cm}
+\begin{center}
+\item \textbf{II. Determine how vegetation memory and plant function are linked.}
+\end{center}
+
+Achieving this goal is possible by answering the following research questions:
+\begin{enumerate}
+\item \textit{Which traits of biological function (\PFT and \LHT) are related to vegetation memory characteristics?}
+\item \textit{What biological traits cause areas to exert intrinsic and extrinsic memory?}
+\end{enumerate}
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.95\linewidth]{3 - Figures/ThesisOutlinebw.png}
+\caption[Study Outline]{\textbf{Study Outline - }Conceptual study flow-chart. Data sets and products are shown in boxes with solid outlines whilst data handling and computational procedures are depicted via dashed-outline boxes.} 
+\label{fig:Outline}
+\end{figure}
+
+
+
+# Material \& Methods
+
+All analyses have been carried out in `R`\cite{R} using the functionality contained within the base installation as well as the packages lined out in table \ref{tab:rPackages}. \ref{rPackages} contains the `R` commands used to install all packages needed to reproduce the analyses of this study from a base installation of `R`. Data sources and methods of data retrieval are stated for each data set individually.
+
+
+## Data 
+Identifying vegetation memory requires intrinsic data (e.g. proxies of vegetation performance), and extrinsic data (e.g. climate/weather indices)\cite{Ogle2015,DeKeersmaecker2015}. Measures of plant function or life histories (i.e. \PFTs and \LHTs) of local vegetation may be useful in uncovering causal pathways leading to vegetation memory behaviour.
+
+### Vegetation Indices
+Patterns of vegetation characteristics - both in time and space - can be assessed readily using remote sensing approaches\cite{Seddon2016,Nioti2015,Prince1995,Garroutte2016,DeKeersmaecker2017,Cammarano2014,Friedl2002}.  A \vi is a remote sensing proxy for different vegetation characteristics depending on the choice of \vi.
+
+#### Background
+\vis have seen various applications in remote sensing including deriving vegetation dynamics on the scale of countries\cite{Evrendilek2008,Colditz2012,Prasad2007} or regions\cite{Cammarano2014,Stow2004}, and analysing resilience of vegetation assemblages to short-term climate anomalies\cite{DeKeersmaecker2015}. Biome classifications have undoubtedly been one of the most prominent usages of the \vis\cite{Chen2007,Friedl2002, Lieng2002,Friedl2010} as have applications in agriculture\cite{Devadas2009,Ares2001}.  
+
+Whilst a vast arsenal of \vis are available to macroecologists (see Cammarano et al. for an overview\cite{Cammarano2014}), one of the main considerations in  choosing an appropriate \vi is that of **spatial resolution versus length of time series**. As satellite-born sensors receive hardware updates or other improvements - e.g. \avhrr versus \modis sensors - , spatial resolution capabilities of \vis increase. However, we can't enhance the resolution of older records of \vis and are thus limited to lower resolution \vis if longer time series are desired. Since vegetation memory is a temporal phenomenon first and foremost, I have prioritised **time series length** over spatial resolution. Within the confines of my thesis, \vis represent the intrinsic characteristics of vegetation systems which will both be used as response and explanatory variables as outlined in figure \ref{fig:SchemaVegMem}.
+
+#### Normalised Difference Vegetation Index (NDVI)
+The \ndvi has been selected as a proxy of vegetation characteristics in this study due to (1) its nature as an information criterion of biomass\cite{Fuller1996} and vegetation cover\cite{Cammarano2014} (indicators of vegetation performance and composition), (2) the availability of a long time series data with global coverage\cite{Pinzon2014}, and (3) its demonstrated utility in various ecosystem studies\cite{Garroutte2016} including assessments of vegetation sensitivity and memory\cite{Vicente-Serrano2013,Seddon2016,DeKeersmaecker2015}. See table \ref{tab:NDVICore} for an overview of the core characteristics of the \ndvi data set.
+
+Rouse et. al\cite{Rouse1974} first introduced the \ndvi in 1974 and initially coined it 'Vegetation Index'. The name was subsequently changed to \ndvi when other \vis were proposed in the ensuing years alongside the advent of remote sensing studies which relied on \vis\cite{Matsushita2007,Justice1985,Nioti2015}.  
+
+The \ndvi is a composite \vi that factors in measurements in the near infra-red wave band (NIR, 0.58-0.68 $\mu$m) and the red wave band (RED, 0.75-1.10 $\mu$m). These bands belong to the spectrum of light that is absorbed by chlorophyll and thus provide information on green vegetation\cite{Hao2008}. The formula for \ndvi is as follows\cite{Evrendilek2008,Hao2008}:
+
+\begin{equation}
+NDVI = \frac{\rho\textsubscript{NIR} - \rho\textsubscript{RED}}{\rho\textsubscript{NIR} + \rho\textsubscript{RED}}
+\end{equation}
+
+with $\rho_{NIR}$ being the reflection in the NIR band and $\rho_{RED}$ being the reflection in the RED band. The \ndvi is bound between 0 and 1 with higher values representing denser vegetation. For a more detailed mathematical background on the calculation of \ndvi scores see Matsushita et. al\cite{Matsushita2007}.  
+
+\ndvi data sets are readily available via the \gimms. For this study the GIMMS3g data set was used (available at \url{https://ecocast.arc.nasa.gov/data/pub/gimms/3g.v1/}), which provides \avhrr NDVI data as 15-day maximum-value composites from 1982 to 2015 at $0.083^\circ \times 0.083^\circ$ resolution\cite{Higgins2016}. See figure \ref{fig:NDVIOverview} for a representation of one such global monthly composite. The data was processed in `R`, downloaded and compiled into monthly composites using the raster\cite{R-Raster} and `gimms` package\cite{R-Gimms}. \ref{rGimms} contains the `R`-code used to process the data. 
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Core Information about NDVI data]{\textbf{Core Information about NDVI data -} Characteristics of the \gimms NDVI3g data set (v.1).}
+    \begin{tabular}{|L{4cm}L{12.5cm}|}
+    \hline
+    \bfseries Characteristic  & \bfseries Data\\
+    \hline
+    \textit{Resolution} & $0.083^\circ \times 0.083^\circ \sim 9.27km \times 9.27km$\\
+    \textit{Time Series} & Bi-weekly intervals from January 1982 to December 2015 \\
+    \textit{Source} & \url{https://ecocast.arc.nasa.gov/data/pub/gimms/3g.v1/} \\
+    \hline
+    \end{tabular}
+  \label{tab:NDVICore}
+\end{table*}
+
+```{r NDVIOverview, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{Global Representation of the Normalised Difference Vegetation Index (NDVI) -} Mean of monthly maximum composite representations of \\ndvi from January 1982 to December 2015 at global coverage. Higher values of \\ndvi indicate higher vegetation coverage, plant biomass, and primary production. Figure established via \\ref{rNDVIOverview}. \\label{fig:NDVIOverview}", fig.scap="Global Representation of the Normalised Difference Vegetation Index (NDVI)", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+setwd(Dir.Gimms.Monthly)
+NDVIMean_ras <- mean(brick(list.files()[1:7]), na.rm = TRUE)
+plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2, 
+     legend.width = 1.5, legend.shrink=1, axis.args=list(cex.axis=1.5), cex.axis = 1.5
+     )
+```
+
+\clearpage
+
+### Abiotic Data
+
+#### European Centre for Medium-range Weather Forecasts ReAnalysis 5 (ERA5)
+\label{sEra}
+
+Indices of climate metrics are used for the calculation of extrinsic memory components as outlined in figure \ref{fig:SchemaVegMem}. Contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}. 
+
+My study is using the \textbf{\era}\cite{Era5Online} data set which is a **reanalysis** data set. Reanalysis data sets are *self-consistent*, *gap-less* (in time and space) data sets and thus **superior** to many observational data sets. The superiority of \era over frequently used climate data sets is largely due to:
+
+\begin{enumerate}
+\item The \textbf{volume of observational data} used to create the \era product with data types ranging from satellite data to weather station/independent institute data collection efforts, and station data from a wide variety of data providers\cite{ECMWF2018a}. Traditional, observational data sets are often characterised by their individual biases in sampling, and coverage representativeness. 
+\item Its \textbf{sophisticated nature} building upon data assimilation procedures\cite{ECMWF2018b}, and complex models\cite{ECMWF2018} to shed light on physical processes\cite{ECMWF2018c}. As such, \era is currently the \textit{state-of-the-art} climate reanalysis product in climate science and benefits from the developments in data assimilation methodology, understanding of physics of the climate system and their interactions, which have come about in recent decades.
+\end{enumerate}
+
+Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim\cite{Seddon2016}, or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
+\begin{enumerate}
+\item Superior \textit{Temporal Resolution} (superior resolving of climate extremes)
+\item Superior \textit{Spatial Resolution} (advanced resolving of local/topographical features)
+\end{enumerate}
+
+See table \ref{tab:ERA5Core} for an overview of core characteristics of the \era data set.
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Core Information about ERA5 data]{\textbf{Core Information about ERA5 data -} Characteristics of the ERA5 data set.}
+    \begin{tabular}{|L{4cm}L{12.5cm}|}
+    \hline
+    \bfseries Characteristic  & \bfseries Data\\
+    \hline
+    \textit{Resolution} & $\sim 30km \times 30km$\\
+    \textit{Time Series} & Hourly intervals from January 1950 to TODAY \\
+    \textit{Source} & \url{https://apps.ecmwf.int/data-catalogues/era5} \\
+    \hline
+    \end{tabular}
+  \label{tab:ERA5Core}
+\end{table*}
+
+Extrinsic memory effects have largely been understood through processes of drought and water limitation\cite{Rudgers2018,Munne-Bosch2013,Gazol2018,Walter2013,Liu2018}. Hence a large number of contemporary studies of vegetation memory have included some form of information criterion on water availability, through precipitation records\cite{Papagiannopoulou2017a,Seddon2016}, or drought indices\cite{Liu2018,DeKeersmaecker2017,DeKeersmaecker2015}. Additionally, temperature has been found to be a major driver of drought severity, plant morphology, and vegetation memory effects\cite{Esper2015,Papagiannopoulou2017a,Seddon2016}.
+
+\era data is implemented into my analyses of vegetation memory using two environmental characteristics: (1) Soil Moisture (in four layers), and (2) Air Temperature (as observable at a height of 2m above the ground).  
+
+See \ref{ObtainEra5}, \ref{ProcessEra5}, and \ref{RegridEra5} for the codes used to download \era data from the \ecmwf servers, aggregate data to full time series and fix gridding mismatches to be comparable to \gimms data.
+
+\clearpage
+
+**Soil Moisture** recorded in $\frac{m^3_{H_2O}}{m_{soil}^3}$   
+
+\vspace{.2cm}
+
+My study uses \textit{\qsoil} as a proxy of local water regimes. Precipitation events are subject to further soil processes such as pore connectivity for precipitation water to be available to plants\cite{Smith2017}. Soil moisture should thus serve as a much more direct proxy of local water regimes. Additionally, \era includes four distinct layers in the soil for the calculation of \qsoil indices (see figure \ref{fig:QsoilOverview} for an overview): (1) \qsoila, (2) \qsoilb, (3) \qsoilc, and (4) \qsoild. Typical drought indices (i.e. \spei) do not allow for this additional distinction.
+
+
+```{r QsoilPlot, echo = FALSE, fig.width = 17, fig.height = 10.5, cache = TRUE, cache.lazy=FALSE}
+Variable <- c("Qsoil1", "Qsoil2", "Qsoil3", "Qsoil4")
+colour = col.qsoil
+par(mfrow = c(2,2))
+setwd(Dir.ERA)
+Era_list <- list(NA, NA, NA, NA)
+for(i in 1:4){
+  Era5ras <- mean(brick(list.files()[grep(pattern = Variable[i], list.files())]), na.rm = TRUE)
+  values(Era5ras)[which(is.na(values(Elevation)))] <- NA
+  Era_list[[i]] <- Era5ras
+}
+Era5ras <- brick(Era_list)
+Era5ras[1] <- max(Era5ras)@data@max
+for(i in 1:4){
+  plot(Era5ras[[i]], colNA = "black", main = paste("Mean", SR_Titles[i+2], "1980 - 2015"), 
+       cex.main = 2, legend.width = 1.5, legend.shrink=1, 
+       axis.args=list(cex.axis=1.5), cex.axis = 1.5, col = colour, legend = FALSE)
+}
+```
+
+\vspace{-1.5cm}
+```{r QsoilPlot2, echo = FALSE, fig.width = 17, fig.height = 2, fig.cap="\\textbf{Overview of soil moisture data -} Soil moisture data presented in layers as obtainable via the ERA5 reanalysis product (\\tair, \\qsoila, \\qsoilb, \\qsoilc, \\qsoild). Figure established via \\ref{rQsoilOverview}. \\label{fig:QsoilOverview}", fig.scap="Overview of soil moisture data", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+par(mfrow = c(1,1))
+plot(Era5ras[[4]], legend.only=TRUE, smallplot=c(0.05,.95,.2,.35), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = col.qsoil, legend.args = list(text='Soil Moisture', side = 3, line = .1, cex = 2))
+```
+
+Within \era, unfrozen ground water ($\theta$) across all four soil layers ($k$) is defined as:
+
+\begin{equation}
+\overline{\theta} = \sum_{k=1}^4 (R_k * max[f_{liq;k}\theta_k, \theta_{pwp}])
+\end{equation}
+
+with $R_k$ being the root fraction of soil layer $k$ which is a fixed metric according to \lccss, and the statement $max[f_{liq;k}\theta_k, \theta_{pwp}]$ calculating the amount of unfrozen soil water in soil layer $k$. $f_{liq;k}$ is a parametrised function of soil temperature; $\theta_{pwp}$ denotes the permanent wilting point according to soil texture. For a more in-depth explanation of how \qsoil is calculated within \era, see the IFS Documentation CY45R1 Chapter 4 \textit{Physical Processes}\cite{ECMWF2018c}.
+
+\clearpage
+
+**Air Temperature** recorded in $K$  
+
+ \vspace{.2cm}
+
+Temperature indices have been linked successfully to vegetation sensitivity\cite{Seddon2016}, tree-ring growth\cite{Esper2015,Pagotto2015}, global primary production\cite{Prince1995}, as well as severe drought events with possibly devastating consequences to local vegetation\cite{Allen2010}.  
+
+\era recognises several temperature variables (e.g. soil, snow and air temperature)\cite{ECMWF2018c}. Within this study, I  use \tair as contained within the \era data set, due to the demonstrated impact of \tair on different aspects of plant physiology and plant morphology which may manifest in vegetation memory effects. See figure \ref{fig:ATOverview} for an overview of the \era \tair data.
+
+```{r ATPlot, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{Overview of air temperature data -} Air temperature data presented in as obtainable via the ERA5 reanalysis product (\\tair). Figure established via \\ref{rATOverview}. \\label{fig:ATOverview}", fig.scap="Overview of air temperature data", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+Variable <- c("Tair")
+colour = col.tair
+setwd(Dir.ERA)
+Era5ras <- mean(brick(list.files()[grep(pattern = Variable, list.files())]), na.rm = TRUE)
+values(Era5ras)[which(is.na(values(Elevation)))] <- NA
+plot(Era5ras, colNA = "black", main = paste("Mean", SR_Titles[2], "1980 - 2015"), 
+     cex.main = 2, legend.width = 1.5, legend.shrink=1, 
+     axis.args=list(cex.axis=1.5), cex.axis = 1.5, col = colour, legend = TRUE)
+```
+
+\clearpage
+
+
+#### Digital Elevation Models
+
+Further abiotic data is needed for data preparation as outlined in section \ref{S:DataPrep} To this end, I am using \dem data obtained via the  \hwsd which contains different \dem outputs at 3 and 30 arc-second resolution\cite{Ele30,Ele3}. See table \ref{tab:HWSDCore} for an overview of \hwsd \dem data characteristics.
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Core Information about HWSD data]{\textbf{Core Information about HWSD data -} Characteristics of the HWSD data set.}
+    \begin{tabular}{|L{4cm}L{12.5cm}|}
+    \hline
+    \bfseries Characteristic  & \bfseries Data\\
+    \hline
+    \textit{Resolution} & $3arc \times 3arc \sim 31m \times 31m$\\
+    \textit{Time Series} & Static \\
+    \textit{Source} & \url{http://www.fao.org/soils-portal/soil-survey/soil-maps-and-databases/harmonized-world-soil-database-v12/en/} \\
+    \hline
+    \end{tabular}
+  \label{tab:HWSDCore}
+\end{table*}
+
+For an overview of all variables from the \hwsd used within this study see table \ref{tab:HWSDOverview}. See figure \ref{fig:EleOverview} for a global representation of \hwsd \dem data and figure \ref{fig:HWSDAOverview} and \ref{fig:HWSDIOverview} for an overview of \hwsd slope aspect and incline data respectively as described in table \ref{tab:HWSDOverview}. These haven been rescaled to match \gimms resolution (see table \ref{tab:NDVICore}).
+
+
+```{r CovPlot, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{DEM elevation data -} \\hwsd elevation data at \\gimms resolution. Figure established via \\ref{rEleOverview}. \\label{fig:EleOverview}", fig.scap="DEM elevation data", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+plot(ElevationF, colNA = "black", cex.main = 2, legend.width = 1.5, legend.shrink=1, axis.args=list(cex.axis=1.5), cex.axis = 1.5, legend = TRUE, col = terrain.colors(100), main = "DEM at GIMMs native resolution")
+```
+
+\clearpage
+
+### Plant Functional Trait Data
+Contemporary studies of vegetation memory largely describe memory effects in terms of spatial patterns and effect sizes, but forego analyses of plant physiology or morphology to **explain causal pathways** leading to vegetation memory.  
+
+Expressions of plant morphology and physiology are manifold and so one may wish to enlist multiple different proxies of these biological properties to rationalise vegetation memory effects.
+
+#### TRY
+Within this thesis, I am relating vegetation memory effects to two different \PFTs which have been selected because they represent two important plant characteristics/trade-off axes in plant function (1) Vegetative Height, and (2)  Leaf nitrogen content per leaf dry mass. 
+
+Additionally, these two \PFTs correspond to two of the three \PFT domains (i.e. stems and leaves) layed out in Westoby \& Wright's \PFT framework\cite{Westoby2006}. Examining \PFTs of multiple aspects of plant function in the face of adverse events is especially important as plant performance levels during and after disturbances often incur responses of all aspects of individual plant functional domains\cite{Bonser2006}.  
+
+For visualisations of the raw data, see figures \ref{fig:HOverview} and \ref{fig:NOverview}. These plots clearly depict the limitation of \TRY (and other \PFT data bases) - sampling bias and effort\cite{Sandel2015}. Certain regions of the earth are well-sampled for \PFTs (e.g. the Pyranees) although these sampling schemes are often limited to plot-level sampling campaigns. This data limitation highlights the potential importance of a mapping approach as lined out in figure \ref{fig:PFTCombining}. The \TRY data used for my thesis has been obtained via \TRY on 07/08/2018.
+
+\begin{enumerate}
+\item \textbf{\vh} recorded in $cm$. Taller plants are better at pre-empting light resources and dispersing diaspores\cite{Diaz2015}.
+\end{enumerate}
+
+```{r ShowTRYH, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{Global Vegetative Height ($H$) data as obtained via TRY -} \\vh data obtained via \\TRY, aggregated to rasters at \\gimms resolution. Grey pixels indicate terrestrial regions for which no \\vh data is available. Figure established via \\ref{rHOverview}. \\label{fig:HOverview}", fig.scap="Global Vegetative Height (H) data as obtained via TRY", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+# Data
+setwd(Dir.Gimms.Monthly)
+Back_ras <- mean(brick(list.files()[1:7]), na.rm = TRUE) # background raster for later plots
+values(Back_ras)[which(!is.na(values(Back_ras)))] <- 8888
+RawTry_ras <- brick(paste(Dir.TRY,"/RawTRY-Global.nc", sep=""))
+# Height plot
+plot(Back_ras, col = "grey", colNA = "black", main = "Mean Vegetative Height", cex.main = 2, legend = FALSE)
+plot(RawTry_ras[[1]], col = col.tair, add = TRUE, legend.width = 1.5, legend.shrink=1, axis.args=list(cex.axis=1.5), cex.axis = 1.5)
+```
+
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item \textbf{\nmass} recorded in $\frac{mg_{N}}{g_{leaf}}$. This is a valuable proxy for different strategies of resource allocation to leaf longevity vs. photosynthetic potential\cite{Diaz2015}.
+\end{enumerate}
+
+```{r ShowTRYN, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{Global Leaf Nitrogan Content ($N_{mass}$) data as obtained via TRY -} \\nmass data obtained via \\TRY, aggregated to rasters at \\gimms resolution. Grey pixels indicate terrestrial regions for which no \\nmass data is available. Figure established via \\ref{rNOverview}. \\label{fig:NOverview}", fig.scap="Global Leaf Nitrogan Content ($N_{mass}$) data as obtained via TRY", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+# Nmass plot
+plot(Back_ras, col = "grey", colNA = "black", main = "Mean Leaf Nitrogen Mass", cex.main = 2, legend = FALSE)
+plot(RawTry_ras[[2]], col = col.tair, add = TRUE, legend.width = 1.5, legend.shrink=1, axis.args=list(cex.axis=1.5), cex.axis = 1.5)
+```
+
+#### COMPADRE
+\PFTs convey information as *snapshots* of reality as their data sets usually do not contain repeated measures of the same individuals over a period of time. Another set of metrics related to plant characteristics through time are \textbf{\LHTs}. As such \LHTs capture different information than \PFTs and should thus be regarded as *complementary* to \PFTs.
+
+\LHT information for plants and animals can be retrieved via \COMPADRE; an extensive data base of different species and plot-scale ecosystems at different locations around the Earth\cite{Salguero-Gomez2015}. \COMPADRE is built around observational data and matrix models\cite{COMPADREGuide} which can be used to extract valuable information about temporal processes in biological communities\cite{Jongejans,DeKroon2008}. Recent research based upon this data base has revealed robust trade-off axes in plant\cite{Salguero-Gomez2016,Salguero-Gomez2017} as well as animal life histories\cite{Capdevila2018,Healy2018}. These axes are usually referred to as the \textbf{\fsc}\cite{Salguero-Gomez2016,Healy2018,Salguero-Gomez2017,Paniw2018}. 
+
+Information about \LHTs has been demonstrated to be of use in trying to understand biological responses to temporal phenomena\cite{Paniw2018} and should thus prove crucial in delineating causal, biological pathways to establishing vegetation memory. The outputs of \COMPADRE matrix models are manifold\cite{Salguero-Gomez2017} offering access to a host of biologically relevant proxies of population processes. For this study, I have selected the following \COMPADRE outputs as the most likely to be related to vegetation memory characteristics:
+
+\begin{enumerate}
+\item The \textbf{Fast-Slow Continuum (FSC)} is a \pca-based approach whose two main axes capture over 60\% of the variation in plant life history strategies\cite{Salguero-Gomez2017}. I hypothesize that expressions of the \fsc will strongly interact with vegetation memory effects due to the holistic nature of the \fsc and the temporal nature of both \LHTs and vegetation memory effects. The two axes read as follows:
+  \begin{enumerate}
+  \item \textit{\fsca} explains around 35\% of global \LHT variation and contrasts species of low generation times, early maturity, and fast growth with species of high generation times, delayed maturity, and slow growth\cite{Salguero-Gomez2017}. Fast species rank low on this axis\cite{Salguero-Gomez2016}.
+  \item \textit{\fscb} captures approximately 25\% of global \LHT variation and contrasts species low reproductive output with species that reproduce much, often, and for a long time\cite{Salguero-Gomez2017}. Species of low reproductive output rank low on this axis\cite{Salguero-Gomez2016}.
+  \end{enumerate}
+\item \textbf{Reactivity} is a \textit{first time-step} information criterion and a proxy for instantaneous biological responses\cite{Stott2011} and may thus be an important criterion in areas of high vegetation memory and thus low engineering resilience.
+\item The \textbf{\crho} can be regarded as a measure of intrinsic resilience as it indicates how fast transient dynamics of a perturbation event decay; the larger \crho, the faster the population will converge\cite{Stott2011}.
+\item The \textbf{\cpi} is a measure of population life cycles in periodic environments with more rapidly growing populations usually being classified by higher \cpi values\cite{Caswell2001}.
+\end{enumerate}
+
+With \COMPADRE, data for all variables contained within \COMPADRE can be retrieved for all locations contained within the current release of the data base. For an overview of the \COMPADRE sites available to this study using \COMPADRE 4.0.1, see figure \ref{fig:COMPADREOverview}.
+
+```{r ShowCOMPADRE, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{COMPADRE sites available to this study -} Data availability within \\COMPADRE 4.0.1 aggregated to a raster of \\gimms resolution. Presence of data per grid cell is indicated with red shading. \\label{fig:COMPADREOverview}. Figure established via \\ref{rCOMPADREOverview}", fig.scap="COMPADRE sites available to this study", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+# DATA
+Compadre_df <- read.csv(paste(Dir.Compadre, "/allCOMPADREOutput.csv", sep="")) # load data frame
+setwd(Dir.Gimms.Monthly)
+Back_ras <- mean(brick(list.files()[1:7]), na.rm = TRUE) # background raster for later plots
+values(Back_ras)[which(!is.na(values(Back_ras)))] <- 8888
+# RASTERISING
+pts <- na.omit(data.frame(y = Compadre_df$Lat, x = Compadre_df$Lon, z = rep(1, dim(Compadre_df)[1])))
+coordinates(pts) = ~x+y # convert x and y to coordinates
+rast <- raster(ext=extent(Back_ras), resolution=res(Back_ras)) # create raster to be filled
+rasOut<-rasterize(x = pts, y = rast, field = pts$z, fun = mean) # rasterize irregular points
+# PLOTTING
+plot(Back_ras, col = "grey", colNA = "black", main = "COMPADRE Data Locations", cex.main = 2, legend = FALSE)
+plot(rasOut, col = "red", add = TRUE, legend = FALSE, axis.args=list(cex.axis=1.5), cex.axis = 1.5)
+```
+
+Like with \PFTs, sampling effort for \LHTs within the \COMPADRE scheme can only cover a limited range of geological locations. The best sampled for regions on Earth - in terms of \COMPADRE sites - are the Iberian Peninsula and the contiguous United States of America. To date, no mapping approach beyond the rasterising of plot-level data of \COMPADRE \LHTs has been proposed.
+
+\clearpage
+
+### Floral Data
+
+Extrapolating \PFT records from species-referenced records to spatial products using species-specific \PFT means and species occurence records as layed out by Ordonoez \& Svenning\cite{Ordonez2015} (see figure \ref{fig:PFTCombining}) may prove to overcome the data limitations of \TRY \PFT data (see figures \ref{fig:HOverview} and \ref{fig:NOverview}).
+
+Plant species occurence records can be obtained via floral data repositories such as \GBIF (see figure \ref{fig:GBIFOverview} for a representation of \GBIF plant occurence data). Data in \GBIF are stored as geo-referenced records of species presence. Generating maps from geo-referenced data points can be achieved by aggregating data points to rasters of a desired extent and resolution (i.e. \gimms resolution).
+
+\begin{figure}[h!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/Gbif.png}
+\caption[GBIF \textit{Plantae} Occurrence Overview]{\textbf{GBIF \textit{Plantae} Occurrence Overview - }Global representation of occurence records for species within the \textit{plantae} kingdom available via \GBIF\cite{GBIFOnline} as of 21/04/19. Figure generated using the \GBIF occurence data exploration tool\cite{GbifRetrieve} obtaining records from 1982 to 2015 (same as \gimms data availability). Polygons have been drawn to omit occurence records of marine plantae species. Larger red plotting symbols indicate greater amounts of geo-referenced occurence records.}
+\label{fig:GBIFOverview}
+\end{figure}
+
+The floral data used within this study have been obtained for the time period of 1982 to 2015 (the same time span as the data availability for \gimms \ndvi data) via \GBIF on 19/04/19 through to 21/04/19.
+
+\clearpage
+
+## Study Regions  
+
+The spatial extent of study sites for assessing vegetation memory effects was limited to regions which were (1) suitable for remote sensing studies, (2) relatively well-sampled in terms of \PFTs, \LHTs and floral data, and (3) contain large areas classified as \textbf{drylands}. Since vegetation memory is largely researched in terms of water limitations and precipitation events, dryland regions (as classified via ombrotypes within Rivas-Martínez et al.\cite{Rivas-Martinez2011}) are expected to allow for identification of extrinsic memory effects.
+
+Within `R`, limiting to study regions is done using shapefiles (\url{http://www.naturalearthdata.com/downloads/10m-cultural-vectors/}) and the `rgdal`\cite{R-rgdal} package (see \ref{rFunctions}).
+
+### Iberian Region
+
+The Iberian region - said to encompass Portugal, Spain, Andorra and France within this study - has been selected as a study region due to a clear gradient in ombrotypes (see figure \ref{fig:OmbroEU}), its high density of \TRY \PFT and \COMPADRE \LHT data availability, and previously reportedly clear patterns of vegetation memory effects\cite{DeKeersmaecker2015} and vegetation sensitivity\cite{Seddon2016}.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/Ombro_EU.png}
+\caption[European Ombrotpyes]{\textbf{European Ombrotpyes - }Regions of mean precipitation rates of biological relevance across Europe according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroEU}.}
+\label{fig:OmbroEU}
+\end{figure}
+
+See figures \ref{fig:IBPDataOverview} and \ref{fig:IBPTRY} for an overview of \gimms \ndvi, \era data, and \TRY \PFT data (both raw and extrapolated) across the Iberian region.
+
+\clearpage
+
+### Caatinga, Brazil
+
+The Caatinga in Brazil - a dryland region located within northeastern Brazil - has been selected as a study region due to a predominance in dry ombrotypes and gradients of ombrotypes at its edges  (see figure \ref{fig:OmbroSA}) as well as previously identified strong vegetation memory effects\cite{DeKeersmaecker2015}.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/Ombro_SA.png}
+\caption[South-American Ombrotpyes]{\textbf{South-American Ombrotpyes - }Regions of mean precipitation rates of biological relevance across South-America according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroSA}.}
+\label{fig:OmbroSA}
+\end{figure}
+
+See figures \ref{fig:CaatDataOverview} and \ref{fig:CaatTRY} for an overview of \gimms \ndvi, \era data, and \TRY \PFT data (both raw and extrapolated) across the Caatinga.
+
+\clearpage
+
+### Australia
+
+Australia has been selected as a study region due to a predominance in dry and even arid ombrotypes as well as gradients of ombrotypes on its eastern coast  (see figure \ref{fig:OmbroAU}). Previous studies have identified clear patterns of vegetation memory across\cite{DeKeersmaecker2017,DeKeersmaecker2015}, vegetation sensitivity\cite{Seddon2016}, and water memory length and strength\cite{Gazol2017}.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/Ombro_AU.png}
+\caption[Australasian Ombrotpyes]{\textbf{Australasian Ombrotpyes - }Regions of mean precipitation rates of biological relevance across Australasia according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroAU}.}
+\label{fig:OmbroAU}
+\end{figure}
+
+See figures \ref{fig:AUDataOverview} and \ref{fig:AUTRY} for an overview of \gimms \ndvi, \era data, and \TRY \PFT data (both raw and extrapolated) across Australia.
+
+
+\clearpage
+
+## Analyses
+
+All analyses, with the exception of python, bash, and matlab scripts to obtain \era data, have been carried out in `R`. All codes needed to reproduce the analysis at the core of this thesis have been included to this document in section \ref{S:RAnalyses}. Note that the computation can be sped up by altering the `Cores` argument to enable parallel processing via the `foreach` and `doparallel`\cite{R-doParallel} packages.
+
+### Identifying Vegetation Memory
+
+#### Data Preparation
+\label{S:DataPrep}
+
+\paragraph*{Monthly Maximum Composites}  \hspace{.5cm}
+After retrieving \gimms \ndvi 3g data using the `gimms` package in `R`, bi-weekly \ndvi data is aggregated to monthly composites using the *maximum composite* method (see \ref{rGimms}). Doing so is a method for removing data uncertainty due to atmospheric interference which has seen application in recent remote-sensing-based studies of vegetation memory and resilience\cite{Gazol2018,Liu2018,Vicente-Serrano2013}.
+
+\paragraph*{Downscaling} \hspace{.5cm}
+In order to calculate vegetation memory effects, vegetation data and abiotic data should be represented at the same spatial and temporal resolution. Whilst both \ndvi and \era data are available at monthly intervals (after pre-processing as already described), their spatial resolutions differ (e.g. $\sim 9.27km \times \sim 9.27km$, vs. $30km \times 30km$, respectively; see tables \ref{tab:NDVICore} and \ref{tab:ERA5Core}).  
+
+There are two ways of remedying this spatial mismatch: (1) aggregating \gimms data to coarser resolution of \era data, or (2) downscaling of \era data to \gimms resolution. Whilst aggregating data to coarser resolutions is much easier and less computationally expensive, I have opted to apply **downscaling** to the \era data used within my study so as to retain valuable information within the \gimms \ndvi 3g data set. This will allow more precise vegetation memory identification and result in more biologically relevant patterns of vegetation memory characteristics.  
+
+A large host of downscaling methods is available and before choosing any method one has to settle on whether to perform *statistical* or *dynamic* downscaling\cite{Trzaska2014,Onyutha2016}:
+
+\begin{enumerate}
+\item \textit{Statistical Downscaling} is centred around statistical links between global and local climate patterns\cite{Maraun2010}, comparatively computationally cheap and easily transferable to different study regions but suffers from a strong dependency on the choice of predictors/co-variates\cite{Fowler2007}.
+\item \textit{Dynamic Downscaling} is built around regional climate models being implemented into global climate models\cite{Maraun2010}, produces results based on physically consistent processes but computationally expensive\cite{Fowler2007}.
+\end{enumerate}
+
+This study is focussed on three study regions (i.e. the Iberian Region, the Caatinga, and Australia) and five \era variables (\tair, \qsoila, \qsoilb, \qsoilc, and \qsoild) in monthly intervals from 1981 to 2015. \era data from 1981is being downscaled to match \gimms resolution to calculate cumulative lags of memory effect drivers (see section \ref{sMemMods}). With this, downscaling needs to be performed three times (study regions), for five variables, each with 420 individual time steps (twelve months per year times 35 years). In total, the downscaling process is thus required to be run 6,300 times. Using a computationally expensive method belonging to the group of dynamical downscaling approaches is thus undesireable and I have elected to employ a **statistical downscaling** method to match \era data with \gimms resolution.  
+
+More specifically, I am using **Kriging** - a method that is well-understood and has long been used in non-biological sciences for geostatistical interpolation purposes\cite{Hengl2011}. Kriging is a two-step process. First, one establishes statistical relationships between data which is to be kriged at its native resolution with covariate data at the same resolution. The second step sees the extrapolation of these relationships using target resolution covariate data. The way in which Kriging improves over other statistical downscaling methods centred around these two steps lies in the fact that the Kriging methodology not only *extrapolates* relationships but *residuals* as well (see figure \ref{fig:Krig} for a visual representation).
+
+Therefore, Kriging within my analyses requires three inputs: (1) \era data at native resolution, (2) \hwsd covariates (see table \ref{tab:HWSDOverview}) at \era resolution, and (3) \hwsd covariates (see table \ref{tab:HWSDOverview}) at \gimms resolution to produce sets of \era data at \gimms resolution. Kriging operations are built around formulae which establish response and predictor relationships. My kriging approaches are specified as follows:
+
+\begin{equation}
+Var_{ERA5} = \alpha + \sum_{i = 1}^{14}(\beta_i * Cov_{HWSD;i})
+\end{equation}
+
+with $Var_{ERA5}$ identifying any of the five \era variables \tair, \qsoila, \qsoilb, \qsoilc, or \qsoild at any given monthly interval between January 1981 and December 2015. $Cov_{HWSD;i}$ indexes the $i^{th}$ \hwsd covariate ranging from elevation and slope aspects to slope incline levels. Due to computational expense the kriging procedure only considers interaction effects between slope incline levels and slope aspects (see \ref{rEra5}).
+
+\begin{figure}[h!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/Kriging.jpg}
+\caption[Kriging Concept]{\textbf{Kriging Concept - } Statistical downscaling effects of Tair for the time step of January 1981 using \hwsd covariate data across the Iberian Region. Diagram source: Le Riche et al., 2012\cite{LeRiche2012}.}
+\label{fig:Krig}
+\end{figure}
+
+For an in-depth mathematical explanation of the Kriging methodology, see Hengl, 2011\cite{Hengl2011}. A practical example of its use can be retrieved in Lichtenstern, 2013\cite{Lichtenstern2013}.
+
+\clearpage
+
+#### Memory Models
+\label{sMemMods}
+
+Models of vegetation memory within this study come in two flavours:
+\begin{enumerate}
+  \item \textit{Vegetation Memory Coefficients} are being computed to identify intrinsic and extrinsic forcing factors.
+  \item \textit{Model Comparisons} and \textit{Variance Partitioning} are employed to assess relative importance of different factors.
+\end{enumerate}
+
+\paragraph*{Vegetation Memory Coefficients}  \hspace{.5cm}
+The analyses used to identify vegetation memory characteristics in this study have been informed heavily by DeKeersmaecker et al.'s work\cite{DeKeersmaecker2015}. In general, the vegetation memory models of this study are built upon the following basic specification:
+\vspace{-.2cm}
+\begin{equation}
+\label{eqMemMod}
+NDVI_t = \beta_{t-1}*NDVI_{[t-1]} + \beta_{Qsoil}*Qsoil_{k;m} + \beta_{Tair}*Tair_{t}
+\end{equation}
+with $NDVI_t$ being standardised \ndvi anomalies at time step $t$\cite{DeKeersmaecker2015}, $NDVI_{[t-1]}$ identifying the \ndvi anomalies at time step $t-1$, $Qsoil_{k;m}$ denoting \qsoil data at depth level $k$ (translating to \qsoila - \qsoild) and cumulative lag of standardised anomalies of lag $m$, and $Tair_t$ denoting \tair data at time $t$. See table \ref{tab:CoeffsOverview} for an interpretation of the model coefficients. The duality of memory effects as *intrinsic* and *extrinsic* in nature as proposed by Ogle et al\cite{Ogle2015} is embraced by my models as follows:
+
+\begin{enumerate}
+\item \textbf{Intrinsic Memory} is identified as coefficients of  $NDVI_{ [t-1]}$\cite{DeKeersmaecker2015,Liu2018} (see model formula \ref{eqMemMod}).
+\item \textbf{Extrinsic Memory} are implemented via \era data. See section \ref{sEra} for the rationale behind the inclusion of the different variables and model formula \ref{eqMemMod} for how they are included in vegetation memory models.
+  \begin{enumerate}
+  \item \textit{\tair} is implemented as an \textit{instantaneous} effect on plant performance.
+  \item \textit{\qsoila - \qsoild} effects are implemented as \textit{cumulative lag} effects ranging from instantaneous impacts to lags on annual time windows\cite{Vicente-Serrano2013}.
+  \end{enumerate}
+\end{enumerate}
+
+\vspace{-.8cm}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{table*}[b!]
+  \centering
+  \caption[Interpretation of Memory Model Coefficients]{\textbf{Interpretation of Memory Model Coefficients -} Biological Interpretation of Vegetation Memory Coefficients as portrayed in model formula \ref{eqMemMod}.}
+    \begin{tabular}{|L{1.7cm}L{5.5cm}L{9cm}|}
+    \hline
+    \bfseries Coefficient  & \bfseries Magnitude & \bfseries Sign \\
+    \hline
+    $\mathbf{\beta_{t-1}}$ & Absolute values depict the velocity at which systems return to equilibrium/pre-disturbance state. Large absolute values indicate low resilience (i.e. slow return). & \textit{Positive} - \ndvi anomalies resemble previous ones. \ndvi anomalies gradually diminish over time. \linebreak
+\textit{Negative} - \ndvi anomalies resemble previous ones, but with the opposite sign. The return to pre-disturbance is characterised through oscillations. \\
+    $\mathbf{\beta_{Qsoil}}$ & Absolute values depict the resistance to anomalies in \qsoil. Large absolute values indicate low resistance (i.e. strong vegetation responses) to \qsoil anomalies. & \textit{Positive} - Wetter soil conditions than average induce positive \ndvi anomalies; drier soil conditions than average induce negative \ndvi anomalies. \linebreak
+\textit{Negative} - Drier soil conditions than average induce positive \ndvi anomalies; wetter soil conditions than average induce negative \ndvi anomalies. \\
+  $\mathbf{\beta_{Tair}}$ & Absolute values depict the resistance to anomalies in air temperature. Large absolute values indicate low resistance (i.e. strong vegetation responses) to air temperature anomalies. & \textit{Positive} - Warmer air temperature than average induces positive \ndvi anomalies; colder air temperature than average induces negative \ndvi anomalies. \linebreak
+\textit{Negative} - Colder air temperature than average induces positive \ndvi anomalies; warmer air temperature than average induces negative \ndvi anomalies. \\
+    \hline
+    \end{tabular}%
+  \label{tab:CoeffsOverview}%
+\end{table*}
+
+\clearpage
+
+The coefficients of the above drivers of vegetation memory (see table \ref{tab:CoeffsOverview} and formula \ref{eqMemMod}) are identified for each data pixel in the data rasters of the three study regions in four separate models (one for each \qsoil layer).
+
+Doing so entails handling an immense amount of data which defies individual data preparation and model inspection and so one has to make generate a generalised, and automated approach. A visual representation of the automated modelling approach used within this study can be seen in figure \ref{fig:ModScheme} and is carried out for each pixel as follows using the code contained within \ref{rVegMem}:
+
+\begin{enumerate}
+\item Data for each variable (\ndvi, \tair, \qsoil) is \textbf{extracted and detrended} to avoid effects of changing abiotic conditions over long time-series\cite{DeKeersmaecker2015} using linear detrending with the pracma package in R.
+\item Detrended data is \textbf{standardised to Z-Scores} to obtain deviations of monthly means/monthly anomalies for each variable\cite{DeKeersmaecker2015}:
+\begin{equation}
+Anomaly_{i} = \frac{Detrended_{i} - \overline{Detrended_{month}}}{SD_{Detrended, month}}
+\end{equation}
+with $i$ indexing individual, detrended data records. In the case of \ndvi, one additionally calculates monthly means of untreated \ndvi data across the entire data range. See figure \ref{fig:NDVIMemMod} for an examplatory overview of \ndvi data treatment.
+\item Calculation of \textbf{lagged effects}:
+\begin{enumerate}
+  \item $NDVI_{t-1}$ is calculated from Z-Score \ndvi data.
+  \item Cumulative lags of \qsoil data are established for lags ranging from 0 (instantaneous effects) to annual effects (aggregated over twelve months of \qsoil Z-scores) in steps on one month at a time. See figure \ref{fig:QsoilMemMod} for an examplatory overview of \qsoil data treatment.
+  \item \tair data is implemented as instantaneous effects and so no lagged effects have to be calculated. 
+  \end{enumerate}
+\item Variables in nature are often collinear\cite{Butler2017,Goldsmith2018}. Failing to address this issue results in masking of information which might influence our understanding of processes in nature significantly\cite{Zuur2007}. One method of circumventing this issue lies with \textit{\pca}. More specifically, if regression modelling is the target, one may wish to employ \textbf{\pca regression} as a three-step process\cite{Zuur2007} for each of the cumulative \qsoil lags across all four \qsoil layers effectively adding the necessity for a model selection step:
+  \begin{enumerate}
+  \item Z-Score data for \ndvi, \tair, and \qsoil are fed to \pca via the vegan package in R. See figure \ref{fig:ExMod} for an examplatory overview of data and a \pca result.
+  \item Regression is performed as follows:
+  \begin{equation}
+  NDVI_t = \beta_1 * PC_1 + \beta_2 * PC2 + \beta_3 * PC3
+  \end{equation}
+  with $NDVI_t$ representing NDVI anomalies which have been set to NA (skipped in models) in months for which $Thresholds_{i} < 0.1$ with $Thresholds_{i} = \overline{Raw_{NDVI, month}}$\cite{Liu2018}. $PC_1$ through $PC_3$ and $\beta_1$ through $\beta_3$ indicate principal components 1 through 3 and coefficients of their effects in the model respectively.
+  \item Model selection is performed to identify the cumulative soil lag which presents the most explanatory power through comparison of model \aic values. The model with the \aic closest to 0 is said to be performing the best\cite{Cailleret2016}. This results in a proxy of \qsoil memory length of local vegetation.
+  \item The regression coefficients $\beta_1$ through $\beta_3$ can be back-transformed to represent \pca input variable effects (see formula \ref{eqMemMod}) using \pca loadings and \pca model coefficients (see figure \ref{fig:PCAREG}).
+  \end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+\begin{figure}[t!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/ModScheme.jpg}
+\caption[Vegetation Memory Model Flowchart]{\textbf{Vegetation Memory Model Flowchart - } Visual workflow of pixel-wise iterated vegetation memory model. $m$ denotes the currently considered cumulative lag of \qsoil data with $M$ being the maximum cumulative lag. \qsoil layers \qsoila - \qsoild are identified via $k$. $L_1$ through $L_3$ are the loadings of each detrended and standardised variable (\ndvi, \tair, and \qsoil) onto the principal components 1 through 3, respectively. \pca model coefficients are identified as $\beta_1$ through $\beta_3$. $l$ denotes the cumulative \qsoil lag offering the most explanatory power in terms of \aic values of \pca regression models and is thus a proxy for vegetation memory in terms of \qsoil.}
+\label{fig:ModScheme}
+\end{figure}
+
+\vspace{-4cm}
+
+```{r VegMemNDVI, echo = FALSE, fig.width = 17, fig.height = 8, fig.subcap=c('NDVI Time-Series (Untreated and Detrended)', 'Monthly Means of Untreated NDVI Data with 0.1 Threshold', 'Standardised Detrended NDVI Data (Z-Scores)', 'Plotting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Memory Model NDVI Data Treatment -} Overview of \\ndvi data treatment as outlined in figure \\ref{fig:ModScheme} and explained above. The data presented here represents a single pixel in the Iberian dryland region (see figure \\ref{fig:ExMod}). Figure established via \\ref{rVegMemNDVI}. \\label{fig:NDVIMemMod}", fig.scap="Memory Model NDVI Data Treatment", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+## load data
+IbRas <- grep(list.files(Dir.Gimms.Monthly), pattern = "Iberian Region")
+IBNDVI <- brick(paste(Dir.Gimms.Monthly, list.files(Dir.Gimms.Monthly)[IbRas], sep="/"))
+## extract data
+NDVI_vecraw <- as.vector(IBNDVI[35363])
+NDVI_vecdet <- detrend(NDVI_vecraw, tt = 'linear') # linear detrending
+NDVI_df <- data.frame(Month = rep(1:12, length(NDVI_vecraw)/12), NDVI_raw = NDVI_vecraw, NDVI_de = NDVI_vecdet) # create NDVI data frame
+## calculate anomalies (Z-scores) and monthly means
+NDVI_df <- transform(NDVI_df,
+                     NDVI_Anomalies = ave(NDVI_de, Month, FUN=scale),
+                     NDVI_Threshold = ave(NDVI_raw, Month, FUN=function(t) mean(t, na.rm=TRUE)))
+## plotting data frame
+NDVIplot_df <- data.frame(NDVI = c(NDVI_vecraw, NDVI_vecdet, 
+                                   NDVI_df$NDVI_Anomalies,
+                                   NDVI_df$NDVI_Threshold[1:12]),
+                          Ident = c(rep("Raw Data", length(NDVI_vecraw)),
+                                    rep("Detrended", length(NDVI_vecraw)),
+                                    rep("Z-Scores", length(NDVI_vecraw)),
+                                    rep("Monthly Means", 12)),
+                          Months = c(rep(1:length(NDVI_vecraw), 3), 1:12))
+## raw and detrended
+ggplot(NDVIplot_df[1:(length(NDVI_vecraw)*2),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("orange", "forestgreen"))
+## monthly means
+ggplot(NDVIplot_df[(length(NDVI_vecraw)*3+1):(dim(NDVIplot_df)[1]),], aes(x = as.factor(Months), y = NDVI, col = Ident)) + geom_bar(stat="identity", fill = "forestgreen") + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("forestgreen")) + xlab("Months") + geom_hline(aes(yintercept=.1), size = 1.5)
+## z-scores
+ggplot(NDVIplot_df[(length(NDVI_vecraw)*2+1):(length(NDVI_vecraw)*3),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("purple"))
+## legend
+leg <- ggplot(NDVIplot_df[1:(length(NDVI_vecraw)*3),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + scale_color_manual(values=c("orange", "forestgreen", "purple")) + theme_bw(base_size = 65) + 
+  guides(colour = guide_legend(override.aes = list(size=20))) + labs(col='GIMMs NDVI 3g data')
+legend <- cowplot::get_legend(leg)
+grid.newpage()
+grid.draw(legend)
+```
+
+\clearpage
+
+```{r VegMemQsoil, echo = FALSE, fig.width = 17, fig.height = 8, fig.subcap=c('Qsoil1 Time-Series (Untreated and Detrended)', 'Standardised Detrended Qsoil1 Data (Z-Scores)', 'Cummulative Qsoil1 Lags', 'Plotting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Memory Model Qsoil Data Treatment -} Overview of \\qsoil data treatment as outlined in figure \\ref{fig:ModScheme} and explained above. Only \\qsoila data is represented. The data presented here represents a single pixel in the Iberian dryland region (see figure \\ref{fig:ExMod}). Figure established via \\ref{rVegMemQsoil}. \\label{fig:NDVIMemMod}", fig.scap="Memory Model Qsoil Data Treatment", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+setwd(Dir.ERA.Monthly)
+Qsoil <- brick(list.files()[grep(list.files(), pattern = "Iberian Region_11981_122015.nc")[1]])
+load(paste(Dir.Data,"ModData_df.RData", sep ="/")) # model data for pixel 35363
+Clim <- as.vector(Qsoil[35363])[1:dim(ModData_df)[1]]
+Clim_vec <- detrend(Clim, tt = 'linear') # linear detrending
+## raw and detrended
+plot1_df <- with(ModData_df, data.frame(
+  Months = rep(1:dim(ModData_df)[1], 2),
+  Qsoil = c(Clim, Clim_vec),
+  Ident = rep(c("Raw Data", "Detrened"), each = dim(ModData_df)[1])
+))
+ggplot(plot1_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("orange", "navyblue"))
+## raw and detrended
+plot2_df <- with(ModData_df, data.frame(
+  Months = rep(1:dim(ModData_df)[1], 1),
+  Qsoil = c(Clim_raw),
+  Ident = rep(c("Z-Scores"), each = dim(ModData_df)[1])
+))
+ggplot(plot2_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("brown"))
+## Cummulative soil moisture lags
+plot3_df <- with(ModData_df, data.frame(
+  Months = rep(1:dim(ModData_df)[1], 13),
+  Qsoil = c(ClimCum_0, ClimCum_1, ClimCum_2, ClimCum_3, ClimCum_4, ClimCum_5, ClimCum_6, ClimCum_7, ClimCum_8, ClimCum_9, ClimCum_10, ClimCum_11, ClimCum_12),
+  Ident = as.factor(rep(c("Z-Scores", "Lag 01", "Lag 02", "Lag 03", "Lag 04", "Lag 05", "Lag 06", "Lag 07", "Lag 08", "Lag 09", "Lag 10", "Lag 11", "Lag 12"), each = dim(ModData_df)[1]))
+))
+ggplot(plot3_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 1) + theme_bw(base_size = 28) + theme(legend.position = "none") +  scale_color_manual(values=c(rainbow(12), "brown"))
+## legend
+Qsoilplot_df <- rbind(plot1_df, plot3_df)
+leg <- ggplot(Qsoilplot_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + scale_color_manual(values=c("orange", "navyblue", rainbow(12), "brown")) + theme_bw(base_size = 65) + guides(colour = guide_legend(ncol=3, override.aes = list(size=20))) + labs(col='ERA5 Qsoil1 data')
+legend <- cowplot::get_legend(leg)
+grid.newpage()
+grid.draw(legend)
+```
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.98\linewidth]{3 - Figures/ExMod.jpg}
+\caption[Examplatory Vegetation Memory PCA]{\textbf{Examplatory Vegetation Memory PCA - } Overview of Z-Score data for $NDVI_{t-1}$, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}).}
+\label{fig:ExMod}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[t!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/PCAREG.jpg}
+\caption[PCA Regression Coefficients]{\textbf{PCA Regression Coefficients - } Theoretical back-calculation of regression coefficients from \pca regression coefficients as lined out by Zuur et. al\cite{Zuur2007}. The data presented here (\pca loadings, \pca model coefficients, and final variable coefficients) represents a single pixel in the Iberian dryland region (see figure \ref{fig:ExMod}).}
+\label{fig:PCAREG}
+\end{figure}
+
+By following the vegetation memory modelling procedure outlined in figures \ref{fig:ModScheme} and \ref{fig:PCAREG} and explained above for each study region one obtains rasters containing the following information for each pixel:
+
+\begin{enumerate}
+\item \textbf{Vegetation Memory Coefficients} as established in formula \ref{eqMemMod}.
+\item \textbf{Vegetation Memory Length} in regards to \qsoila, \qsoilb, \qsoilc, and \qsoild.
+\end{enumerate}
+
+\vspace{.5cm}
+
+\paragraph*{Model Comparisons}  \hspace{.5cm}
+
+Assessments of differences in relative importance of vegetation memory coefficients in individual models and between models serve to answer the following questions:
+
+\begin{enumerate}
+\item \textbf{Which model variable exerts the greatest influence on vegetation anomalies?} - To answer this question, I am comparing absolute values of variable coefficients across all pixels \textit{within} each \textit{model} individually, separately for each study region.
+\item \textbf{Which \qsoil layer is the most biologically influential?} - The answer to this question can be retrieved by comparing absolute values of \qsoil coefficients for all pixel per model \textit{between} all four \textit{models} for each study region.
+\end{enumerate}
+
+Differences in absolute variable coefficient values within and between models has been assessed using Mann-Whitney-U Test (`wilcox.test(..., paired = FALSE)` in `R`). I have chosen the Mann-Whitney U-Test, since vegetation memory coefficient data cannot be expected to be normal distributed, nor to fall onto symmetrical distributions (hence, one should contrast median values rather than mean values). The code for these assessments can be retrieved in \ref{rVegMem} (`CoeffScaling`).
+
+Although allowing for region-wide generalisations, these assessments of statistical significance can not be used to identify or display spatial patterns of relative memory coefficient importance.
+
+\clearpage
+
+\paragraph*{Variance Partitioning}  \hspace{.5cm}
+
+Variance partitioning is a model-driven method of assessing relative importance of vegetation memory model variables. As opposed to Mann-Whitney U model comparisons, variance partitioning can be carried out for each pixel in my study region data rasters individually. This, in turn, results in the identification of patterns of relative model predictor importance.  
+
+It was my goal to assess the relative importance of intrinsic and extrinsic vegetation memory components. I have identified \qsoil layers to be of special interest in representing extrinsic vegetation memory (see section \ref{sResults}). Therefore, I am assessing the relative information contained in the vegetation memory model predictors $NDVI_{t-1}$ (intrinsic memory) and $Qsoil_{k;m}$ (extrinsic soil moisture memory of layer $k$ and cumulative lag $m$).  
+
+Zuur et al.\cite{Zuur2007} present a method developed by Legendre \& Legendre\cite{Legendre1998} for the purpose of variance partitioning between two explanatory variables. This approach (represented in figure \ref{fig:VarPar}) is carried out as follows:
+
+\begin{enumerate}
+\item Apply the full regression model $Z_{NDVI} = NDVI_{t-1} + Qsoil_{k;m}$ and obtain $R^2$ (the coefficient of determination). This is $R^2_{Full}$ and equal to all explained variance. Unexplained variance can then be calculated as $1 - R^2_{Full}$
+\item Obtain $R^2$ of the model $Z_{NDVI} = NDVI_{t-1}$. This is $R^2_{NDVI_{t-1}}$ and equal to all variance explained by $NDVI_{t-1}$.
+\item Obtain $R^2$ of the model $Z_{NDVI} = Qsoil_{k;m}$. This is $R^2_{Qsoil_{k;m}}$ and equal to all variance explained by $Qsoil_{k;m}$.
+\end{enumerate}
+
+The variance shared between $NDVI_{t-1}$ and $Qsoil_{k;m}$ - $R^2_{Shared}$ can then be calculated as:
+
+\vspace{-.2cm}
+\begin{equation}
+R^2_{Shared} = R^2_{NDVI_{t-1}} + R^2_{Qsoil_{k;m}} - R^2_{Full}
+\end{equation}
+
+The pure information contained within $NDVI_{t-1}$ ($R^2_{t-1}$) and $Qsoil_{k;m}$ ($R^2_{k;m}$) can then be calculated as follows:
+
+\vspace{-.2cm}
+\begin{equation}
+R^2_{t-1} = R^2_{NDVI_{t-1}} - R^2_{Shared}
+\end{equation}
+\vspace{-.4cm}
+\begin{equation}
+R^2_{k;m} = R^2_{Qsoil_{k;m}} - R^2_{Shared}
+\end{equation}
+
+\begin{figure}[h!]
+\centering \includegraphics[width=1\linewidth]{3 - Figures/VarParScheme.jpg}
+\caption[Variance Partitioning]{\textbf{Variance Partitioning - } Partitioning of variance in pure influence of $NDVI_{t-1}$ (Pure $[t-1]$), $Qsoil_{k;m}$ (Pure $Qsoil$, with $k$ identifying the \qsoil layer, and $m$ denoting the cumulative lag of \qsoil data), shared variance between the two (Shared), and residuals (Unexplained). The figure concept has been lifted from Zuur et al.\cite{Zuur2007} and adjusted to reflect the purpose of this study. Model specifications are contained within dashed boxes.}
+\label{fig:VarPar}
+\end{figure}
+
+This form of variance partitioning is carried out for each pixel across all study regions and contained in the vegetation memory model output of \ref{rVegMem} alongside \pca regression models.
+
+\clearpage
+
+### Linking Vegetation Memory and Plant Function
+
+My study employs \PFT and \LHT data to assess possible links between vegetation memory and expressions of plant function (*research goal 2*).
+
+#### Plant Functional Traits
+
+\PFT data has been obtained via \TRY on 07/08/18 in geo-referenced data table format.
+
+\paragraph*{Data Extraction}  \hspace{.5cm}
+Vegetation memory characteristics are stored as raster data sets to retain spatial patterns of memory coefficients. Therefore, \PFT data needs rasterising for comparability. \PFT data is extracted and rasterised in two ways:
+\begin{enumerate}
+\item \textbf{Raw geo-referenced \PFT records}. Geo-referenced \TRY data points are aggregated to rasters of \gimms resolution using a mean function (if multiple \PFT records fall onto the same raster cell, the mean value of these is assigned to the cell). This results in rasters of low data-coverage but peer-reviewed data records.
+\item \textbf{Species-specific mean \PFT records}. These are extracted for each species within the \TRY data set to enable \PFT mapping as depicted in figure \ref{fig:PFTCombining}.
+\end{enumerate}
+
+Data extraction of \PFT records is handled via \ref{rPFTs}.
+
+
+\paragraph*{Data Mapping}  \hspace{.5cm}
+
+Data mapping is carried out via \ref{rPFTs} and extrapolates species-specific \PFT mean values according to \GBIF occurence data (see figure \ref{fig:PFTCombining}). Using the approach presented by Ordonez \& Svenning\cite{Ordonez2015}, I am establishing rasters of mean \PFT expressions by:
+
+\begin{enumerate}
+\item Assigning species-specific mean \PFT values to all cells of individual species occurence according to \GBIF.
+\item Computing the mean \PFT value for each cell in the rasters.
+\item Removing all cells whose values exceed the upper 95\% quantile of mean \PFT records in these final mean rasters to remove outliers which may be due to sampling bias.
+\end{enumerate}
+
+This results in rasters of high data coverage but at a loss of data reliability.
+
+\paragraph*{Models}  \hspace{.5cm}
+
+I use regression models to assess causal links between \PFT expressions (both raw and mean-extrapolated).
+
+#### Life History Traits
+
+\LHT data has been obtained via \COMPADRE on 28/01/19 in geo-referenced table format.
+
+\paragraph*{Data Extraction}  \hspace{.5cm}
+
+Target \COMPADRE \LHTs are extracted using \ref{rCOMPADRE} by aggregating geo-referenced \LHT records to rasters of \gimms resolution using a mean function for each study region.
+
+\paragraph*{Models}  \hspace{.5cm}
+
+Like with \PFTs, I use regression models to assess causal links between \LHTs expressions (both raw and mean-extrapolated).
+
+# Results
+\label{sResults}
+
+## Iberian Region
+### Vegetation Memory
+### Plant Function
+## Caatinga, Brazil
+### Vegetation Memory
+### Plant Function
+## Australia
+### Vegetation Memory
+### Plant Function
+## Global Effects
+### Vegetation Memory
+### Plant Function
+
+# Discussion
+## Iberian Region
+### Vegetation Memory
+### Plant Function
+## Caatinga, Brazil
+### Vegetation Memory
+### Plant Function
+## Australia
+### Vegetation Memory
+### Plant Function
+## Global Effects
+### Vegetation Memory
+### Plant Function
+
+# Conclusion
+
+**Outlook**  
+1. Soil moisture-driven drought indices\cite{Sohrabi2015}?  
+2. Use \BIEN data
+
+
+<!--- ####### BIBLIOGRAPHY ---------------------------------------------------------->
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\titleformat{\chapter}{\normalfont\huge\bfseries}{}{0pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{10pt}{30pt}
+\MakeBib
+
+<!--- ####### APPENDIX ---------------------------------------------------------->
+\titleformat{\chapter}{\normalfont\huge\bfseries}{}{0pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-30pt}{30pt}
+\appendix  
+
+# Appendix
+
+## Project Requirements
+
+Following these steps ensures full reproducibility of the entire analysis. Alternatively, codes can be retrieved via \url{https://github.com/ErikKusch/M.Sc.Thesis}.
+
+### `R` Requirements
+
+#### `R` Packages
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[R Packages]{\textbf{R Packages -} Packages which need to be loaded into R to fully reproduce the analyses within this study.}
+    \begin{tabular}{|L{4cm}L{4cm}L{8.5cm}|}
+    \hline
+    \bfseries Package  & \bfseries Version & Use \\
+    \hline
+    automap\cite{R-automap} & 1.0-14 & Statistical Downscaling of \era5 data \\
+    doParallel\cite{R-doParallel} & 1.0.14 & Paralell processing \\
+    foreach\cite{R-foreach} &  1.4.4 &  Paralell processing \\
+    ggplot2\cite{R-ggplot2} &  3.1.0 &  Data visualisation\\
+    gimms\cite{R-Gimms} &  1.1.1 &  Downloading GIMMs NDVI3g data\\
+    ncdf4\cite{R-ncdf4} & 1.16.1 &  Namespace for NetCDF files\\
+    pracma\cite{R-pracma} & 2.2.2 &  Detrending time series\\
+    raster\cite{R-Raster} & 2.8-19 &  Rasterising NetCDF data\\
+    rgbif\cite{R-gbif} & 1.2.0 &  Downloading floral occurence data\\
+    rgdal\cite{R-rgdal} & 1.4-2 &  Loading and using shapefiles\\
+    sp\cite{R-sp} & 1.3-1 &  Converting point data to rasterised data\\
+    vegan\cite{R-vegan} & 2.5-4 &  PCA approach for model building\\
+    xlsx\cite{R-xlsx} & 0.6.1 &  Export of numeric results\\
+    \hline
+    \end{tabular}%
+  \label{tab:rPackages}%
+\end{table*}
+
+\footnotesize
+
+```{r, code = readLines('Y - Codes/S0a_Packages.R'), eval = FALSE, ref = "rPackages", codecap = "Installing and loading of R packages needed to reproduce the analyses of this study.", tidy = TRUE}
+```
+
+\clearpage
+
+#### Project Directories
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.9\linewidth]{3 - Figures/FolderHierarchy.png}
+\caption[Working Directories]{\textbf{Working Directories - }An overview of working directories established/required by \ref{rDirectories}.}
+\label{fig:WDs}
+\end{figure}
+
+\footnotesize
+```{r, code = readLines('Y - Codes/S0b_Directories.R'), eval = FALSE, ref = "rDirectories", codecap = "Identifing and generating the folder structure used within the computational steps. A visual overview is presented in \\ref{fig:WDs}.", tidy = FALSE}
+```
+
+\clearpage
+
+#### `R` Functions for Region Selection and Raster Names
+
+\footnotesize
+```{r, code = readLines('Y - Codes/S0c_Functions.R'), eval = FALSE, ref = "rFunctions", codecap = "User-defined functions used to optimise further functions of this analysis when (1) Limitting to study regions (RegionSelection), and (2) assigning names to model rasters (Fun\\_NamesRas).", tidy = FALSE}
+```
+
+\clearpage
+
+### ERA5 Data
+#### Obtaining ERA5 Data
+\footnotesize
+```{python, code = readLines('Y - Codes/ERA5/All_1980s.py'), eval = FALSE, ref = "ObtainEra5", codecap = "Obtaining ERA5 data from the \\ecmwf servers. Substitute the date statement to download the full data set. Python script.", tidy = FALSE}
+```
+
+\vspace{.7cm}
+
+#### Pre-Processing ERA5 Data
+```{bash, code = readLines('Y - Codes/ERA5/Process_raw_input.sh'), eval = FALSE, ref = "ProcessEra5", codecap = "Processing ERA5 data from local downloads to merge by time step. Bash script.", tidy = TRUE}
+```
+
+```{python, code = readLines('Y - Codes/ERA5/Regrid_the_data.m'), eval = FALSE, ref = "RegridEra5", codecap = "Regridding ERA5 data to fit \\gimms and \\hwsd extents. Matlab script.", tidy = TRUE}
+```
+
+\clearpage
+
+
+## Data
+### HWSD Data
+\vspace{-0.3cm}
+\renewcommand{\arraystretch}{.8}
+\begin{table*}[h!]
+  \centering
+  \caption[HWSD Variables and Explanations]{\textbf{HWSD Variables and Explanations -} HWSD variables used within this study and their explanations. Slope aspects and inclines are recorded as number of 3 arc-second cells falling into 5 minute cells}
+    \begin{tabular}{|L{4cm}L{12.5cm}|}
+    \hline
+    \bfseries HWSD Variable  & \bfseries Explanation\\ \hline
+    \textit{Elevation} & Altitude in metres as measured from sea-level\\
+    \textit{Slope\_aspect\_N} & $(0^\circ; 45^\circ]$; $(315^\circ; 360^\circ]$ \\
+    \textit{Slope\_aspect\_E} & $(45^\circ; 135^\circ]$ \\
+    \textit{Slope\_aspect\_S} & $(135^\circ; 225^\circ]$ \\
+    \textit{Slope\_aspect\_W} & $(225^\circ ; 315^\circ]$ \\
+    \textit{Slope\_aspect\_U} & Slope undefined or slope incline is less than $2\%$ \\
+    \textit{Slopes1} & $0\% \leq$ incline $\leq 0.5\%$ \\
+    \textit{Slopes2} & $0.5\% \leq$ incline $\leq 2\%$ \\
+    \textit{Slopes3} & $2\% \leq$ incline $\leq 5\%$ \\
+    \textit{Slopes4} & $5\% \leq$ incline $\leq 10\%$ \\
+    \textit{Slopes5} & $10\% \leq$ incline $\leq 15\%$ \\
+    \textit{Slopes6} & $15\% \leq$ incline $\leq 30\%$ \\
+    \textit{Slopes7} & $30\% \leq$ incline $\leq 45\%$ \\
+    \textit{Slopes8} & Incline $> 45\%$ \\
+    \hline
+    \end{tabular}
+  \label{tab:HWSDOverview}
+\end{table*}
+
+\vspace{-0.7cm}
+
+```{r CovPlota, echo = FALSE, fig.width = 16, fig.height = 12.5, fig.cap="\\textbf{HWSD slope aspect data -} \\hwsd data at \\gimms resolution divided by 1000 for displaying. Figure established via \\ref{rHWSDAOverview}. \\label{fig:HWSDAOverview}", fig.scap="HWSD slope aspect data", out.extra='',fig.pos = 'h!', cache = TRUE, cache.lazy=FALSE}
+Covariates_vec <- c("Slopes1", "Slopes2", "Slopes3", "Slopes4", "Slopes5", "Slopes6", "Slopes7", "Slopes8",
+                    "Slope_aspect_N", "Slope_aspect_E", "Slope_aspect_S", "Slope_aspect_W", "Slope_aspect_U", 
+                    "Elevation")
+Cov_fine <- list() # create empty list
+for(c in 1:length(Covariates_vec)){ # cycle through all covariates and load the data
+      Cov_fine[[c]] <- raster(paste(Dir.KrigCov, "/Co-variates_NativeResolution.nc", sep=""), 
+                              varname = Covariates_vec[c])
+      }
+Cov_fine <- brick(Cov_fine) # make fine covariate data into one big brick
+
+for(i in 1:13){
+values(Cov_fine[[i]]) <- values(Cov_fine[[i]])/1000
+}
+par(mfrow = c(3,2))
+for(i in 9:13){
+  plot(Cov_fine[[i]], colNA = "black", cex.main = 2, legend.width = 1.5, legend.shrink=1, 
+       axis.args=list(cex.axis=1.5), cex.axis = 1.5, legend = TRUE, col = terrain.colors(100), 
+       main = Covariates_vec[[i]])
+}
+```
+
+\clearpage
+
+```{r CovPlotb, echo = FALSE, fig.width = 17, fig.height = 20, fig.cap="\\textbf{HWSD slope incline data -} \\hwsd data at \\gimms resolution. Data has been divided by 1000 for displaying. Figure established via \\ref{rHWSDIOverview}. \\label{fig:HWSDIOverview}", fig.scap="HWSD slope incline data", out.extra='',fig.pos = 'h!', cache = TRUE, cache.lazy=FALSE}
+par(mfrow = c(4,2))
+for(i in 1:8){
+  plot(Cov_fine[[i]]/10, colNA = "black", cex.main = 2, legend.width = 1.5, legend.shrink=1, axis.args=list(cex.axis=1.5), cex.axis = 1.5, legend = TRUE, col = terrain.colors(100), main = Covariates_vec[[i]])
+}
+```
+
+
+\clearpage
+
+### Study Regions
+#### Iberian Region
+```{r SR_IBP1, echo = FALSE, fig.width = 17, fig.height = 19, out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+SR_Qsoil4 <- SRData("Iberian Region")
+```
+\vspace{-1.45cm}
+```{r SR_IBP2, echo = FALSE, fig.width = 17, fig.height = 2, fig.cap="\\textbf{Data Overview (Iberian Region) -} Data required for identificiation of vegetation memory: (1) \\gimms \\ndvi 3g; and (2) ERA5: \\tair, \\qsoila, \\qsoilb, \\qsoilc, \\qsoild. Figure established via \\ref{rStudRegFun}. \\label{fig:IBPDataOverview}", fig.scap="Data Overview (Iberian Region)", out.extra='',fig.pos = 'h'}
+plot(SR_Qsoil4, legend.only=TRUE, smallplot=c(0.05,.95,.2,.35), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = col.qsoil, legend.args = list(text='Soil Moisture', side = 3, line = .1, cex = 2))
+```
+
+\clearpage
+
+```{r SRIBP_TRY, echo = FALSE, fig.width = 17, fig.height = 17, fig.cap="\\textbf{TRY Data (Iberian Region) -} TRY PFT data across the Iberian Region: (1) Geo-referenced records (upper row), and (2) Extrapolated species-specific mean PFT records (lower row). Figure established via \\ref{rSRTRY}. \\label{fig:IBPTRY}", fig.scap="TRY Data (Iberian Region)", out.extra='',fig.pos = 'h', cache.lazy = FALSE}
+TRYRegions(Region = "Iberian Region")
+```
+\clearpage
+
+#### Caatinga, Brazil
+```{r SR_Caat1, echo = FALSE, fig.width = 17, fig.height = 19, out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+SR_Qsoil4 <- SRData("Caatinga")
+```
+\vspace{-1.45cm}
+```{r SR_Caat2, echo = FALSE, fig.width = 17, fig.height = 2, fig.cap="\\textbf{Data Overview (Caatinga, Brazil) -} Data required for identificiation of vegetation memory: (1) \\gimms \\ndvi 3g; and (2) ERA5: \\tair, \\qsoila, \\qsoilb, \\qsoilc, \\qsoild. Figure established via \\ref{rStudRegFun}. \\label{fig:CaatDataOverview}", fig.scap="Data Overview (Caatinga, Brazil)", out.extra='',fig.pos = 'h'}
+plot(SR_Qsoil4, legend.only=TRUE, smallplot=c(0.05,.95,.2,.35), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = col.qsoil, legend.args = list(text='Soil Moisture', side = 3, line = .1, cex = 2))
+```
+
+\clearpage
+
+```{r SRCaat_TRY, echo = FALSE, fig.width = 17, fig.height = 17, fig.cap="\\textbf{TRY Data (Caatinga, Brazil) -} TRY PFT data across Caatinga, Brazil: (1) Geo-referenced records (upper row), and (2) Extrapolated sepcies-specific mean PFT records (lower row). Figure established via \\ref{rSRTRY}. \\label{fig:CaatTRY}", fig.scap="TRY Data (Caatinga, Brazil", out.extra='',fig.pos = 'h', cache.lazy = FALSE}
+TRYRegions(Region = "Caatinga")
+```
+\clearpage
+
+#### Australia
+```{r SR_AU1, echo = FALSE, fig.width = 17, fig.height = 19, out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+SR_Qsoil4 <- SRData("Australia")
+```
+\vspace{-1.45cm}
+```{r SR_AU2, echo = FALSE, fig.width = 17, fig.height = 2, fig.cap="\\textbf{Data Overview (Australia) -} Data required for identificiation of vegetation memory: (1) \\gimms \\ndvi 3g; and (2) ERA5: \\tair, \\qsoila, \\qsoilb, \\qsoilc, \\qsoild. Figure established via \\ref{rStudRegFun}. \\label{fig:AUDataOverview}", fig.scap="Data Overview (Australia)", out.extra='',fig.pos = 'h'}
+plot(SR_Qsoil4, legend.only=TRUE, smallplot=c(0.05,.95,.2,.35), horizontal = TRUE, axis.args=list(cex.axis=2.5), col = col.qsoil, legend.args = list(text='Soil Moisture', side = 3, line = .1, cex = 2))
+```
+
+\clearpage
+
+```{r SRAU_TRY, echo = FALSE, fig.width = 17, fig.height = 17, fig.cap="\\textbf{TRY Data (Australia) -} TRY PFT data across Australia: (1) Geo-referenced records (upper row), and (2) Extrapolated species-specific mean PFT records (lower row). Figure established via \\ref{rSRTRY}. \\label{fig:AUTRY}", fig.scap="TRY Data (Australia)", out.extra='',fig.pos = 'h', cache.lazy = FALSE}
+TRYRegions(Region = "Australia")
+```
+\clearpage
+
+## `R` Analyses Codes
+\label{S:RAnalyses}
+
+### Master File
+\footnotesize
+```{r, code = readLines('MScMaster.R'), eval = FALSE, ref = "rMaster", codecap = "Running the entire analysis once data has been allocated to directories. S0a\\_Packages.R can be found in \\ref{rPackages}, S0b\\_Directories.R is located in \\ref{rDirectories} whilst S0c\\_Functions.R is contained in \\ref{rFunctions}. S1\\_GIMMs.R, S2\\_ERA5.R, S3\\_VegetationMemory.R, S4\\_PFTs.R, and S4\\_COMPADRE.R are included in \\ref{rGimms}, \\ref{rEra5}, \\ref{rVegMem}, \\ref{rPFTs}, and \\ref{rCOMPADRE}, respectively.", tidy = FALSE}
+```
+
+\clearpage
+
+### Vegetation Memory
+#### GIMMs Data
+\footnotesize
+```{r, code = readLines('Y - Codes/S1_GIMMs.R'), eval = FALSE, ref = "rGimms", codecap = "Downloading GIMMs NDVI3g data, establishing rasters of monthly composites (RasterGIMMs), and creating NDVI raster stacks for each study region (CombineCDFs).", tidy = TRUE, cache.lazy=FALSE}
+```
+
+#### ERA5
+\footnotesize
+```{r, code = readLines('Y - Codes/S2_ERA5.R'), eval = FALSE, ref = "rEra5", codecap = "Kriging ERA5 data from \\era to \\gimms resolution using \\hwsd covariates (table \\ref{tab:HWSDOverview}) (RasterEra5).", tidy = FALSE, cache.lazy=FALSE}
+```
+#### Calculation of Vegetation Memory
+\footnotesize
+```{r, code = readLines('Y - Codes/S3_VegetationMemory.R'), eval = FALSE, ref = "rVegMem", codecap = "Computing vegetation memory for study regions as specified by lags, time frame, and variables to be considered (VegMem), scaling rasters of vegetation memory to be on the same scale for each study region (CoeffScaling).", tidy = FALSE, cache.lazy=FALSE}
+```
+
+\clearpage
+### Plant Functional Traits
+\footnotesize
+```{r, code = readLines('Y - Codes/S4_PFTs.R'), eval = FALSE, ref = "rPFTs", codecap = "Calculating species-specific PFT means (PFTs), creating distribution maps from floral occurence data obtained from GBIF (DistMaps), and combine occurence maps with species trait means (PFTRasters).", tidy = FALSE, cache.lazy=FALSE}
+```
+
+\clearpage
+### COMPADRE
+\footnotesize
+```{r, code = readLines('Y - Codes/S4_COMPADRE.R'), eval = FALSE, ref = "rCOMPADRE", codecap = "Extracting and rasterising COMPADRE data from COMPADRE data base for each study region (RasterCOMPADRE).", tidy = TRUE, cache.lazy=FALSE}
+```
+
+\clearpage  
+
+
+## `R` Data Visualisation Codes
+
+### Preamble
+\footnotesize
+```{r PreambShow, eval = FALSE, ref = "rPreambsShow", codecap = "Preamble needed for processing the following chunks within this manuscript.", tidy = TRUE}
+source("S0a_Packages.R") # loading packages
+source("S0b_Directories.R") # setting directories
+source("S0c_Functions.R") # Loading miscellaneous functions
+col.NDVI <- rev(terrain.colors(100))
+col.qsoil <- colorRampPalette(c("yellow", "burlywood", "beige", "turquoise", "deepskyblue"))(100)
+col.tair <- colorRampPalette(c("blue","turquoise", "yellow", "orange", "red"))(100)
+SR_cols <- list(col.NDVI, col.tair, col.qsoil, col.qsoil, col.qsoil, col.qsoil)
+SR_Titles <- list("NDVI", "Air Temperature", "Soil Moisture (0-7cm)", "Soil Moisture (7-28cm)", "Soil Moisture (28-100cm)", "Soil Moisture (100-255cm)")
+setwd(Dir.KrigCov)
+Elevation <- raster(list.files()[2], varname = "Elevation")
+ElevationF <- raster(list.files()[1], varname = "Elevation")
+```
+
+### Data Overview
+
+#### NDVI
+\footnotesize
+```{r ref.label='NDVIOverview', eval = FALSE, ref = "rNDVIOverview", codecap = "Plotting global NDVI mean for the time frame of 1982 - 2015.", tidy = TRUE}
+```
+
+#### ERA5
+\footnotesize
+```{r ref.label='QsoilPlot', eval = FALSE, ref = "rQsoilOverview", codecap = "Two by two plotting of global soil moisture indices across four different soil layers all on the same scale.", tidy = FALSE}
+```
+\footnotesize
+```{r ref.label='ATPlot', eval = FALSE, ref = "rATOverview", codecap = "Plotting mean air temperature from 1982 - 2015 globally.", tidy = FALSE}
+```
+
+\clearpage
+
+#### HWSD 
+\footnotesize
+
+```{r ref.label='CovPlot', eval = FALSE, ref = "rEleOverview", codecap = "Plotting HWSD elevation data.", tidy = TRUE}
+```
+
+\footnotesize
+```{r ref.label='CovPlota', eval = FALSE, ref = "rHWSDAOverview", codecap = "Loading HWSD data and plotting HWSD slope incline data.", tidy = FALSE}
+```
+
+\footnotesize
+```{r ref.label='CovPlotb', eval = FALSE, ref = "rHWSDIOverview", codecap = "Plotting HWSD slope aspect data", tidy = TRUE}
+```
+
+\clearpage
+
+#### TRY
+\footnotesize
+```{r ref.label='ShowTRYH', eval = FALSE, ref = "rHOverview", codecap = "Plotting global \\vh \\TRY data with a background plot of land mass.", tidy = TRUE}
+```
+\footnotesize
+```{r ref.label='ShowTRYN', eval = FALSE, ref = "rNOverview", codecap = "Plotting global \\nmass \\TRY data with a background plot of land mass.", tidy = TRUE}
+```
+
+#### COMPADRE
+
+\footnotesize
+```{r ref.label='ShowCOMPADRE', eval = FALSE, ref = "rCOMPADREOverview", codecap = "Plotting global locations of COMPADRE data availability at \\gimms resolution.", tidy = TRUE}
+```
+
+\clearpage
+
+#### Study Regions
+
+\footnotesize
+```{r ref.label='StudRegFun', eval = FALSE, ref = "rStudRegFun", codecap = "Function for plotting data overviews in three-by-two plots for study regions.", tidy = TRUE}
+```
+
+\clearpage
+
+\footnotesize
+```{r ref.label='SRTRY', eval = FALSE, ref = "rSRTRY", codecap = "Function for plotting TRY data overviews in two-by-two plots for study regions.", tidy = TRUE}
+```
+
+\clearpage
+
+### Vegetation Memory Models
+
+\footnotesize
+```{r ref.label='VegMemNDVI', eval = FALSE, ref = "rVegMemNDVI", codecap = "Plotting \\ndvi data treatment in two-by-two plots.", tidy = TRUE, tidy.opts=list(width.cutoff=50)}
+```
+
+\clearpage
+
+\footnotesize
+```{r ref.label='VegMemQsoil', eval = FALSE, ref = "rVegMemQsoil", codecap = "Plotting \\qsoil1 data treatment in two-by-two plots.", tidy = TRUE, tidy.opts=list(width.cutoff=50)}
+```
+
+\clearpage
+
+## Declaration Of Authorship  
+\noindent\fbox{
+    \parbox{\textwidth}{
+I, Erik Kusch, hereby declare that this thesis and the work presented in it is entirely my own. Where I have consulted the work of others, this is always clearly stated.\\
+
+\noindent \namesigdate{Erik Kusch}
+    }
+
+}

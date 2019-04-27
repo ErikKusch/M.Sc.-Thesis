@@ -1,0 +1,19 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!D0_Manuscript.pdf
+!D0_Manuscript.Rmd
+!y - Codes/*
+!y - Codes/*/*
+!Thesis.bib
+!MSc_Style.tex
+
+# ...even if they are in subdirectories
+!*/
+!*/*/
+!*/*/*/
+
+
+.Rproj.user

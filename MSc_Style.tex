@@ -1,0 +1,299 @@
+%%%==========================================================================================
+%%%	PACKAGES
+%%%==========================================================================================
+\usepackage[utf8]{inputenc}
+%% Extensive support for hypertext
+%% Extensive support for hypertext
+\usepackage{hyperref}
+%% to call up url-environments using \url{}
+\PassOptionsToPackage{hyphens}{url}
+%% even more characters accepted now
+\usepackage{textcomp}
+%% Define used fonts
+\usepackage{lmodern}
+%% set doucment language
+\usepackage[british, UKenglish]{babel}
+%% AMS mathematical facilities
+\usepackage{amsmath}
+%% Enhanced support for graphics
+\usepackage{rotating, graphicx}
+%% Extensive control of page headers and footers
+\usepackage{fancyhdr}
+%% Layout with zero \parindent, non-zero \parskip
+\usepackage{parskip}
+%% To flip individual pages into landscape orientation using \begin{landscape} ... \end{landscape}
+\usepackage{lscape}
+%% Tbales spanning multiple pages
+\usepackage{longtable}
+%% Publication quality tables, also needed for Excel2Latex
+\usepackage{booktabs}
+%% Extending the array and tabular environments
+\usepackage{array}
+%% for tables with multiple rows
+\usepackage{multirow, makecell, caption}
+%% for better placement of figures
+%\usepackage{float}
+%for dashed lines in tables via  \hdashline or  \cdashline
+\usepackage{arydshln} 
+%% Select alternative section titles
+\usepackage{titlesec} 
+%% Support for footnote style author/affiliation
+\usepackage{authblk}
+%% for subfigures
+\usepackage{subfig}
+%% captions for chunks
+\usepackage{floatrow}
+\floatsetup[table]{capposition=top}
+\DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{Chunk~\arabic{chunk}}
+\makeatletter
+%\@addtoreset{chunk}{section}
+\makeatother
+%% customize caption sizes of figures and tables
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\captionsetup{justification=raggedright,singlelinecheck=false}
+%% for automatically correct spacing after gls macros
+\usepackage{xspace}
+%% for lorem ipsum placeholders
+\usepackage{blindtext}
+%****************************
+%*** Bibliography         ***
+%****************************
+\usepackage[numbers,square, super, sort&compress]{natbib}
+\newcommand{\PrintVol}[1]{\textit{#1}}
+\newcommand{\MakeBib}{%
+%  \setlength{\textheight}{24.8cm}
+%  \renewcommand{\baselinestretch}{1.16}\normalsize
+% The literature data base without .bib ending
+   \bibliography{Thesis}
+   %\bibliographystyle{Myunsrt} % Own style
+   \bibliographystyle{Nature} % Nature style
+
+   
+  }
+%\renewcommand{\bibsection}{}  % no separate title
+\setlength{\bibsep}{3pt}       % distance between references, war
+                               % vorher 0 pt, sieht so besser aus !
+\setlength{\bibhang}{2em}      % indentation
+
+%****************************
+%*** Glossary         ***
+%****************************
+%% package for glossary with: no main file (for compiling run custom command), no numbers corresponding to where the entries occur pagewise, the use of acronyms, the glossary to be included into the TOC, use of xindy in indexing phase
+%\usepackage[nomain,nonumberlist,acronyms,xindy]{glossaries}
+\usepackage[nomain,nonumberlist,acronyms]{glossaries}
+
+%% to have multipe column glossaries
+\usepackage{glossary-mcols}
+
+%%%==========================================================================================
+%%%	PAGE
+%%%==========================================================================================
+%% Set levels to be numbered in document
+\setcounter{secnumdepth}{5}
+
+%% Set levels to be included into TOC
+\setcounter{tocdepth}{5}
+
+%% Spacing around headings
+\titlespacing\chapter{0pt}{6pt plus 6pt minus 2pt}{0pt plus 4pt minus 4pt}
+\titlespacing\section{0pt}{4pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{1pt plus 1pt minus 1pt}{0pt plus 2pt minus 2pt}
+\titlespacing\subsubsection{2pt}{0pt plus 0pt minus 0pt}{1pt plus 0pt minus 0pt}
+\titlespacing\paragraph{4pt}{0pt plus 0pt minus 0pt}{0pt plus 0pt minus 0pt}
+
+%% Stop paragraphs first line to be set off to the right
+\setlength{\parindent}{0pt}
+
+%% Setting the line spacing
+\linespread{1.25}
+
+%% Spacing after dots and commas
+\frenchspacing
+
+\fancyhf{}
+%% set page header
+\fancyhead[OR]{\thepage}
+\fancyhead[EL]{\thepage}
+%\renewcommand{\headrulewidth}{0.4pt}
+
+%% set page footer
+%\cfoot{}
+%\renewcommand{\footrulewidth}{0.4pt}
+                                                
+%% for subfigures
+%\usepackage[font+=scriptsize, font=scriptsize, textfont=scriptsize]{subcaption}
+
+%%%==========================================================================================
+%%%	MACROS
+%%%==========================================================================================
+%\newcommand{\cm}[1]{{\tt \textcolor{orange}{#1}}}
+%\newcommand{\wl}[2]{\href{#2}{\textcolor{blue}{#1}}}
+%\newcommand{\att}[2]{\href{#2}{\textcolor{blue}{#1}}}
+
+% Removes dots at the end of each entry in the glossary
+\renewcommand*{\glspostdescription}{} 
+
+%% New custom command to create a new page
+\newcommand{\blankpage}{
+		\newpage
+		\thispagestyle{empty}
+		\mbox{}
+		\newpage
+	}
+
+%% defining new custom column types for tables to be used with width specification
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+%% defining a custom command to create signate lines with a separate date section
+\newcommand{\namesigdate}[2][5cm]{%
+\begin{minipage}{#1}
+    #2 \vspace{1.0cm}\hrule\smallskip
+    \small \textit{Signature}
+    \vspace{1.0cm}\hrule\smallskip
+    \small \textit{Date}
+\end{minipage}
+}
+
+
+
+%%%==========================================================================================
+%%%	GLOSSARY
+%%%==========================================================================================
+%------------------------------------------------------------------
+%--------------- SETTING UP ACRONYMS (use those by calling \gls{evi} (for example) later on), no numbers in gls calls
+%------------------------------------------------------------------
+
+%------------------------ Plant Functional Traits
+\newacronym{BIEN}{BIEN}{Botanical Information and Ecology Network}
+\newcommand{\BIEN}{\gls{BIEN}\xspace}
+
+\newacronym{COMPADRE}{COMPADRE}{COMPADRE Plant Matrix Data Base}
+\newcommand{\COMPADRE}{\gls{COMPADRE}\xspace} 
+
+\newacronym{TRY}{TRY}{TRY Plant Trait Data Base}
+\newcommand{\TRY}{\gls{TRY}\xspace} 
+
+\newacronym{GBIF}{GBIF}{Global Biodiversity Information Facility}
+\newcommand{\GBIF}{\gls{GBIF}\xspace} 
+
+\newacronym{iDiv}{iDiv}{Deutsches Zentrum für integrative Biodiversitätsforschung}
+\newcommand{\idiv}{\gls{iDiv}\xspace} 
+
+\newacronym{PFT}{PFT}{Plant Functional Trait}
+\newcommand{\PFT}{\gls{PFT}\xspace} 
+\newcommand{\PFTs}{\gls{PFT}\ignorespaces s\xspace}
+
+\newacronym{LHT}{LHT}{Life History Trait}
+\newcommand{\LHT}{\gls{LHT}\xspace} 
+\newcommand{\LHTs}{\gls{LHT}\ignorespaces s\xspace} 
+
+\newacronym{FDD}{FDD}{Functional Diversity Dispersion}
+\newcommand{\FDD}{\gls{FDD}\xspace} 
+
+\newacronym{FDR}{FDR}{Functional Diversity Richness}
+\newcommand{\FDR}{\gls{FDR}\xspace} 
+
+\newacronym{nmass}{$N_{mass}$}{Leaf nitrogen content per leaf dry mass}
+\newcommand{\nmass}{\gls{nmass}\xspace} 
+
+\newacronym{vh}{$H$}{Vegetative Height}
+\newcommand{\vh}{\gls{vh}\xspace} 
+
+\newacronym{fsc}{FSC}{Fast-Slow Continuum}
+\newcommand{\fsc}{\gls{fsc}\xspace} 
+
+\newacronym{fsca}{FSC-1}{Life History Speed within the Fast-Slow Continuum}
+\newcommand{\fsca}{\gls{fsca}\xspace} 
+
+\newacronym{fscb}{FSC-2}{Reproductive Strategy within the Fast-Slow Continuum}
+\newcommand{\fscb}{\gls{fscb}\xspace} 
+
+\newacronym{rho}{$\rho$}{Damping Ratio}
+\newcommand{\crho}{\gls{rho}\xspace} 
+
+\newacronym{pi}{$\pi$}{Period of Oscillation}
+\newcommand{\cpi}{\gls{pi}\xspace} 
+
+%------------------------ ERA5
+\newacronym{era}{ERA5}{European Centre for Medium-range Weather Forecasts ReAnalysis 5}
+\newcommand{\era}{\gls{era}\xspace}
+
+\newacronym{ecmwf}{ECMW}{European Centre for Medium-range Weather Forecasts}
+\newcommand{\ecmwf}{\gls{ecmwf}\xspace}
+
+\newacronym{tair}{Tair}{Air Temperature (0-2m)}
+\newcommand{\tair}{\gls{tair}\xspace}
+
+\newacronym{qsoil}{Qsoil}{Soil Moisture}
+\newcommand{\qsoil}{\gls{qsoil}\xspace}
+
+\newacronym{qsoila}{Qsoil1}{Soil Moisture (0-7cm)}
+\newcommand{\qsoila}{\gls{qsoila}\xspace}
+
+\newacronym{qsoilb}{Qsoil2}{Soil Moisture (7-28cm)}
+\newcommand{\qsoilb}{\gls{qsoilb}\xspace}
+
+\newacronym{qsoilc}{Qsoil3}{Soil Moisture (28-100cm)}
+\newcommand{\qsoilc}{\gls{qsoilc}\xspace}
+
+\newacronym{qsoild}{Qsoil4}{Soil Moisture (100-255cm)}
+\newcommand{\qsoild}{\gls{qsoild}\xspace}
+
+%------------------------ Vegetation Indices
+\newacronym{evi}{EVI}{Enhanced Vegetation Index}
+\newcommand{\evi}{\gls{evi}\xspace}
+
+\newacronym{ndvi}{NDVI}{Normalized Difference Vegetation Index}
+\newcommand{\ndvi}{\gls{ndvi}\xspace}
+
+\newacronym{vi}{VI}{Vegetation Index}
+\newcommand{\vi}{\gls{vi}\xspace}
+\newcommand{\vis}{\gls{vi}\ignorespaces s\xspace} 
+
+\newacronym{gimms}{GIMMS}{Global Inventory Modelling and Mapping Studies}
+\newcommand{\gimms}{\gls{gimms}\xspace}
+
+\newacronym{avhrr}{AVHRR}{Advanced Very High Resolution Radiometer}
+\newcommand{\avhrr}{\gls{avhrr}\xspace}
+
+\newacronym{modis}{MODIS}{Moderate-Resolution Imaging Spectroradiometer}
+\newcommand{\modis}{\gls{modis}\xspace}
+
+%------------------------ Abiotic Data
+\newacronym{lccss}{LCCSs}{Land-Cover Classification Systems}
+\newcommand{\lccss}{\gls{lccss}\xspace} 
+
+\newacronym{dem}{DEM}{Digital Elevation Model}
+\newcommand{\dem}{\gls{dem}\xspace} 
+
+\newacronym{hwsd}{HWSD}{Harmonized World Soil Database}
+\newcommand{\hwsd}{\gls{hwsd}\xspace} 
+
+\newacronym{cru}{CRU}{Climatic Research Unit}
+\newcommand{\cru}{\gls{cru}\xspace} 
+
+\newacronym{chelsa}{CHELSA}{Climatologies at High Resolution for the Earth's Land Surface Areas}
+\newcommand{\chelsa}{\gls{chelsa}\xspace} 
+
+\newacronym{spei}{SPEI}{standardized precipitation evapotranspiration index}
+\newcommand{\spei}{\gls{spei}\xspace} 
+
+%------------------------ Staistics and Methods
+\newacronym{pca}{PCA}{Principal Component Analysis}
+\newcommand{\pca}{\gls{pca}\xspace} 
+
+\newacronym{aic}{AIC}{Akaike Information Criterion}
+\newcommand{\aic}{\gls{aic}\xspace} 
+
+%------------------------ General/Outlook
+\newacronym{csd}{CSD}{Critical Slowing Down}
+\newcommand{\csd}{\gls{csd}\xspace} 
+
+\newacronym{dss}{DSSs}{Decision Support Systems}
+\newcommand{\dss}{\gls{dss}\xspace} 
+
+\makeglossaries
