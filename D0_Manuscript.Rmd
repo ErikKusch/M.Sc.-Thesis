@@ -117,6 +117,77 @@ par(mfrow = c(2,2), mai = c(1, 0, 0.5, 0))
 }
 ```
 
+```{r ModelRes, echo = FALSE}
+col.signeg <- colorRampPalette(c("blue","turquoise","lightgreen"))(1000)
+col.sigpos <- colorRampPalette(c("yellow","orange","red"))(1000)
+col.lags <- colorRampPalette(c("green", "purple"))(12)
+col.nonsig <- colorRampPalette(c("grey"))(1000)
+smallplotxpos <- c(0.5,.93,.03,.065) # where to put colour scales
+smallplotxneg <- c(0.05,.5,.03,.065) # where to put colour scales
+ModelRes <- function(Region, SoilLayer){
+  Files <- list.files(Dir.Memory)[grep(list.files(Dir.Memory), pattern = Region)]
+  Files <- Files[grep(Files, pattern = ".nc")]
+  plot_ras <- brick(paste(Dir.Memory, Files[SoilLayer], sep="/"))
+  plot(plot_ras[[1]], col = col.lags, colNA = "black", legend=FALSE, axes=FALSE)
+  plot(plot_ras[[1]], legend.only=TRUE, col=col.lags, smallplot=c(.05, .93, .03, .065), horizontal = TRUE, axis.args=list(cex.axis=2.5))
+  for(Plot in 4:6){
+    Neg_ras <- plot_ras[[Plot]]
+    Neg_ras[which(values(Neg_ras) >= 0)] <- NA
+    Pos_ras <- plot_ras[[Plot]]
+    Pos_ras[which(values(Pos_ras) < 0)] <- NA
+    plot(Neg_ras, col=col.signeg, colNA = "black", legend=FALSE, axes=FALSE)
+    if(Plot == 4){
+      plot(Pos_ras, col=col.sigpos, colNA = "black", legend=FALSE, axes=FALSE, add=TRUE)
+    }else{
+      plot(Pos_ras, col=col.sigpos, legend=FALSE, axes=FALSE, add=TRUE) 
+    }
+    plot(Neg_ras, legend.only=TRUE, col=col.signeg, colNA = "black", smallplot=smallplotxneg, horizontal = TRUE, axis.args=list(cex.axis=2.5))
+    if(Plot == 4){
+      plot(Pos_ras, legend.only=TRUE, col=col.sigpos, smallplot=c(.05, .93, .03, .065), horizontal = TRUE, axis.args=list(cex.axis=2.5))
+    }else{
+      plot(Pos_ras, legend.only=TRUE, col=col.sigpos, smallplot=smallplotxpos, horizontal = TRUE, axis.args=list(cex.axis=2.5))
+    }
+  }
+}
+```
+
+```{r VarParRes, echo = FALSE}
+col.varpar1 <- colorRampPalette(c("red", "bisque", "grey", "forestgreen"))(1000)
+col.varpar2 <- colorRampPalette(c("red", "bisque", "grey", "magenta1"))(1000)
+col.varpar3 <- colorRampPalette(c("red", "bisque", "grey", "blue"))(1000)
+col.list <- list(col.varpar1, col.varpar2, col.varpar3) 
+VarParRes <- function(Region, SoilLayer){
+  Files <- list.files(Dir.Memory)[grep(list.files(Dir.Memory), pattern = Region)]
+  Files <- Files[grep(Files, pattern = ".nc")]
+  Alter_ras <- brick(paste(Dir.Memory, Files[SoilLayer], sep="/"))[[7:10]]
+  # Alter_ras[1] <- quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)
+  Alter_ras[2] <- 0
+  values(Alter_ras)[which(values(Alter_ras) < 0)] <- 0
+  cells <- order(values(Alter_ras[[1]]))
+  plot_df <- data.frame(Variance =NA, 
+                        Cell =NA,
+                        Source =NA)
+  Idents <- c(NA, "t-1", "Shared", "Qsoil")
+  for(i in 1:4){
+    Alter_ras[[i]][which(values(Alter_ras[[i]])>quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE))] <- quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)
+    if(i > 1){
+      plot_df1 <- data.frame(Variance = values(Alter_ras[[i]])[cells],
+                             Cell = 1:length(cells), 
+                             Source = rep(Idents[i], length(cells)))
+      plot_df <- rbind(plot_df, plot_df1)
+    }
+  }
+  plot_df <- na.omit(plot_df)
+  p <- ggplot(data = plot_df, aes(y = Variance, x = Cell, fill = Source)) + geom_bar(stat = "identity") + ylim(0, quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)) + theme_bw(base_size= 20) + xlab("Raster Cells") + scale_fill_manual(values=c("blue", "magenta1", "forestgreen"))
+  print(p)
+  for(i in 2:4){
+    col.varpar <- col.list[[i-1]]
+    plot(Alter_ras[[i]], col=col.varpar, colNA = "black", legend=FALSE, axes=FALSE)
+    plot(Alter_ras[[i]], legend.only=TRUE, col=col.varpar, smallplot=c(.05, .93, .03, .065), horizontal = TRUE, axis.args=list(cex.axis=2.5))
+  }
+}
+```
+
 <!--- ####### PREAMBLE -----------
 --------------------------------------------->
 
@@ -302,8 +373,8 @@ Y_t = \alpha * Y_{t-1} + \sum_{e = 1}^{E}(\beta_e * X_e)
 with $Y_t$ and $Y_{t-1}$ denoting anomalies of vegetation properties at times $t$ and $t-1$ respectively, $X_e$ indexing anomalies of the $e$'th extrinsic force (out of a total $E$ extrinsic drivers), and $\alpha$ and $\beta$ representing the **coeffcients** of **intrinsic** and **extrinsic** memory effects respectively. Rerunning such a model with independent, extrinsic inputs ($X_e$'s) at different time lags and subsequent model selection can then be employed to identify the length of the extrinsic vegetation memory related to the $e$'th extrinsic force.
 
 \begin{figure}[h!]
-\centering \includegraphics[width=.9\linewidth]{3 - Figures/Scheme_VegMem.jpg}
-\caption[Components of Vegetation Memory]{\textbf{Components of Vegetation Memory - }Conceptual layout of how intrinsic and extrinsic vegetation memory components can be identified from the data. The concept recognises two important variables: (1) \textit{Response} - contemporary vegetation properties at time $t$, and (2) \textit{Extrinsic} - antecedent environmental data. Within this framework, vegetation memory - both intrinsic and extrinsic - is identified as the predictability of the response variable through a regression onto itself and extrinsic variables respectively. Regressions of data onto each other are visualised as dashed arrows, lag effects are identified by numbers.}
+\centering \includegraphics[width=.85\linewidth]{3 - Figures/Scheme_VegMem.jpg}
+\caption[Components of Vegetation Memory]{\textbf{Components of Vegetation Memory - }Conceptual layout of how intrinsic and extrinsic vegetation memory components can be identified from the data. The concept recognises two important variables: (1) \textit{Response} - contemporary vegetation properties at time $t$, and (2) \textit{Extrinsic} - antecedent environmental data. Within this framework, vegetation memory - both intrinsic and extrinsic - is identified as the predictability of the response variable through a regression onto itself and extrinsic variables respectively. Regressions of data onto each other are visualised as dashed arrows, lag effects are identified by numbers. Some parts of this figure have been generated via \ref{rFigs}.}
 \label{fig:SchemaVegMem}
 \end{figure}
 
@@ -821,7 +892,7 @@ with $Var_{ERA5}$ identifying any of the five \era variables \tair, \qsoila, \qs
 
 \begin{figure}[h!]
 \centering \includegraphics[width=1\linewidth]{3 - Figures/Kriging.jpg}
-\caption[Kriging Concept]{\textbf{Kriging Concept - } Statistical downscaling effects of Tair for the time step of January 1981 using \hwsd covariate data across the Iberian Region. Diagram source: Le Riche et al., 2012\cite{LeRiche2012}.}
+\caption[Kriging Concept]{\textbf{Kriging Concept - } Statistical downscaling effects of Tair for the time step of January 1981 using \hwsd covariate data across the Iberian Region. Diagram source: Le Riche et al., 2012\cite{LeRiche2012}. Some parts of this figure have been generated via \ref{rFigs}.}
 \label{fig:Krig}
 \end{figure}
 
@@ -992,8 +1063,8 @@ grid.draw(legend)
 ```
 
 \begin{figure}[h!]
-\centering \includegraphics[width=.98\linewidth]{3 - Figures/ExMod.jpg}
-\caption[Examplatory Vegetation Memory PCA]{\textbf{Examplatory Vegetation Memory PCA - } Overview of Z-Score data for $NDVI_{t-1}$, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}).}
+\centering \includegraphics[width=.9\linewidth]{3 - Figures/ExMod.jpg}
+\caption[Examplatory Vegetation Memory PCA]{\textbf{Examplatory Vegetation Memory PCA - } Overview of Z-Score data for $NDVI_{t-1}$, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}). Some parts of this figure have been generated via \ref{rFigs}.}
 \label{fig:ExMod}
 \end{figure}
 
@@ -1122,7 +1193,96 @@ Like with \PFTs, I use regression models to assess causal links between \LHTs ex
 
 ## Iberian Region
 ### Vegetation Memory
+
+\clearpage
+#### Memory Models
+
+\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
+
+```{r IBRVegMem1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Tair', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+ModelRes(Region = "Iberian Region", SoilLayer = 1)
+```
+
+\clearpage
+
+```{r IBRVarPar1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Iberian Region", SoilLayer = 1)
+```
+
+Utest
+
+
+
+\clearpage
+
+\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
+
+```{r IBRVegMem2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Tair', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+ModelRes(Region = "Iberian Region", SoilLayer = 2)
+```
+
+\clearpage
+
+```{r IBRVarPar2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Iberian Region", SoilLayer = 2)
+```
+
+Utest
+
+\clearpage
+
+\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
+
+```{r IBRVegMem3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Tair', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+ModelRes(Region = "Iberian Region", SoilLayer = 3)
+```
+
+\clearpage
+
+```{r IBRVarPar3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Iberian Region", SoilLayer = 3)
+```
+
+Utest
+
+\clearpage
+
+\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
+
+```{r IBRVegMem4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Tair', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+ModelRes(Region = "Iberian Region", SoilLayer = 4)
+```
+
+\clearpage
+
+```{r IBRVarPar4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Iberian Region", SoilLayer = 4)
+```
+
+Utest
+
+\clearpage
+
+#### Memory Coefficients
+
+Soil Layer Comparison (Plot scaled + Utest)
+
+#### Vegetation Memory Sensitivity
+
+Coefficients vs mean of qsoil 1-4, tair, and ndvi + lags vs means?
+
+\clearpage
+
 ### Plant Function
+
+#### Plant Functional Traits
+
+\clearpage
+
+#### Life History Traits
+
+\clearpage
+
 ## Caatinga, Brazil
 ### Vegetation Memory
 ### Plant Function
@@ -1495,6 +1655,14 @@ ElevationF <- raster(list.files()[1], varname = "Elevation")
 \footnotesize
 ```{r ref.label='VegMemQsoil', eval = FALSE, ref = "rVegMemQsoil", codecap = "Plotting \\qsoil1 data treatment in two-by-two plots.", tidy = TRUE, tidy.opts=list(width.cutoff=50)}
 ```
+
+\clearpage
+
+### Miscellaneous Figures\footnotesize
+\footnotesize
+```{r, code = readLines('3 - Figures/RFigures.R'), eval = FALSE, ref = "rFigs", codecap = "Producing miscellaneous figures used for flow charts and scheme overviews.", tidy = TRUE, cache.lazy=FALSE}
+```
+
 
 \clearpage
 
