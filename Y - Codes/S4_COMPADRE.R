@@ -41,6 +41,7 @@ RasterCOMPADRE <- function(Variable, Region, RegionFile, Extent){
     coordinates(pts) = ~x+y # convert x and y to coordinates
     rast <- raster(ext=extent(ref_ras), resolution=res(ref_ras)) # create raster to be filled
     rasOut<-rasterize(x = pts, y = rast, field = pts$z, fun = mean) # rasterize irregular points
+  }
     # CROPPING AND MASKING ----
     rasC <- crop(rasOut, area) ## Occurence cropping and masking
     rasF <- mask(rasC, Shapes[location,]) # masking via Shapefile
@@ -49,5 +50,5 @@ RasterCOMPADRE <- function(Variable, Region, RegionFile, Extent){
     dir.create(Dir.Temp.Compadre)
     values(rasF)[which(values(rasF) == Inf)] <- NA # get rid off Inf values (when dealing with Rho)
     invisible(writeRaster(rasF, filename = paste(Dir.Temp.Compadre, "/",Variable,"_",RegionFile,sep=""),
-                          overwrite=TRUE, format="CDF"))}
+                          overwrite=TRUE, format="CDF"))
 }# end of RasterCOMPADRE
