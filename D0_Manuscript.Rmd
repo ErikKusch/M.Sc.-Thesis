@@ -130,7 +130,12 @@ ModelRes <- function(Region, SoilLayer){
   plot_ras <- brick(paste(Dir.Memory, Files[SoilLayer], sep="/"))
   plot(plot_ras[[1]], col = col.lags, colNA = "black", legend=FALSE, axes=FALSE)
   plot(plot_ras[[1]], legend.only=TRUE, col=col.lags, smallplot=c(.05, .93, .03, .065), horizontal = TRUE, axis.args=list(cex.axis=2.5))
-  for(Plot in 4:6){
+  if(SoilLayer == 1){
+    RasLay <- 4:6
+  }else{
+    RasLay <- c(5)
+  }
+  for(Plot in RasLay){
     Neg_ras <- plot_ras[[Plot]]
     Neg_ras[which(values(Neg_ras) >= 0)] <- NA
     Pos_ras <- plot_ras[[Plot]]
@@ -242,24 +247,24 @@ PatcausRes <- function(Region, SoilLayer, SoilOnly){
   QsoilTitle <- c("(0-7cm)", "(7-28cm)", "(28-100cm)", "(100-255cm)")
   if(SoilOnly == TRUE){
     plotm <- ggplot(plot_df, aes(x = as.factor(Memory), y = EQsoil)) +
-  geom_boxplot() + theme_bw(base_size = 28) + xlab(paste("Mean Soil Moisture", QsoilTitle[SoilLayer])) + ylab(paste("Soil Moisture", QsoilTitle[SoilLayer], "Memory Length")) + coord_flip()
+  geom_boxplot() + theme_bw(base_size = 35) + xlab(paste("Mean Soil Moisture", QsoilTitle[SoilLayer])) + ylab(paste("Soil Moisture", QsoilTitle[SoilLayer], "Memory Length")) + coord_flip()
 print(plotm)
 plotq <- ggplot(plot_df, aes(x = EQsoil, y = Qsoil)) +
   geom_point(shape = ".", alpha = 0.5, col = "blue", size = 3.5) + 
-  theme_bw(base_size = 28) + xlab(paste("Mean Soil Moisture", QsoilTitle[SoilLayer])) + ylab(paste("Soil Moisture", QsoilTitle[SoilLayer], "Coefficients")) + 
+  theme_bw(base_size = 35) + xlab(paste("Mean Soil Moisture", QsoilTitle[SoilLayer])) + ylab(paste("Soil Moisture", QsoilTitle[SoilLayer], "Coefficients")) + 
   stat_smooth(method = "lm",col ="black",level = 0.95)+
   geom_hline(yintercept = 0, linetype="dotted")
 print(plotq)
   }else{
     plotN <- ggplot(plot_df, aes(x = ENDVI, y = NDVI)) +
   geom_point(shape = ".", alpha = 0.5, col = "forestgreen", size = 3.5) + 
-  theme_bw(base_size = 28) + xlab("Mean NDVI") + ylab("NDVI [t-1] Coefficients") + 
+  theme_bw(base_size = 35) + xlab("Mean NDVI") + ylab("NDVI [t-1] Coefficients") + 
   stat_smooth(method = "lm",col ="black",level = 0.95)+
   geom_hline(yintercept = 0, linetype="dotted")
 print(plotN)
 plotT <- ggplot(plot_df, aes(x = ETair, y = Tair)) +
   geom_point(shape = ".", alpha = 0.5, col = "red", size = 3.5) + 
-  theme_bw(base_size = 28) + xlab("Mean Air Temperature") + ylab("Air Temperature Coefficients") + 
+  theme_bw(base_size = 35) + xlab("Mean Air Temperature") + ylab("Air Temperature Coefficients") + 
   stat_smooth(method = "lm",col ="black",level = 0.95)+
   geom_hline(yintercept = 0, linetype="dotted")
 print(plotT)
@@ -268,22 +273,93 @@ print(plotT)
 ```
 
 ```{r TRYRes, echo = FALSE}
-TRY <- brick("Data/TRY-Iberian Region.nc")
-Coeffs <- brick("Data/Iberian Region/Qsoil1_mean_Tair_mean0_1_2_3_4_5_6_7_8_9_10_11_12Plots.nc")
+Tryres <- function(Region, SoilLayer, Variable){
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Variable_vec <- c("t-1", "Qsoil", "Tair")
+  LocVar <- which(Variable_vec == Variable) + 1
+  TryFiles <-  list.files(Dir.TRY)[grep(list.files(Dir.TRY), pattern = Region)]
+  TryRaw <- brick(paste(Dir.TRY, TryFiles[1], sep="/"))
+  values(TryRaw)[which(values(TryRaw) > quantile(values(TryRaw), .99, na.rm = TRUE))] <- NA
+  TryDis <- brick(paste(Dir.TRY, TryFiles[2], sep="/"))
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[LocVar]]
+  data <- data.frame(Height = c(values(TryRaw[[1]]), values(TryDis[[1]])), 
+                     Nitrogen = c(values(TryRaw[[2]]), values(TryDis[[2]])),
+                     Qsoil = c(values(Alter_ras), values(Alter_ras)),
+                     TRY = c(rep("Raw", length(values(Alter_ras))), rep("Mapped", length(values(Alter_ras)))))
+  data_df <- na.omit(data)
+  VarTitle <- c("NDVI [t-1] Coefficients", "Qsoil", "Air Tmperature Coefficients")[(LocVar-1)]
+  if(LocVar == 3){
+    VarTitle <- c("Soil Moisture (0-7cm) Coefficients", "Soil Moisture (7-28cm) Coefficients", "Soil Moisture (28-100cm) Coefficients", "Soil Moisture (100-255cm) Coefficients")[SoilLayer]
+  }
+p1 <- ggplot(data_df, aes(x = Height, y = Qsoil, col = TRY)) +
+  geom_point(shape = ".", alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab("Vegetative Height") + ylab(VarTitle) + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm") + scale_color_manual(values=c("lightgreen", "black"))
+print(p1)
+p2 <- ggplot(data_df, aes(x = Nitrogen, y = Qsoil, col = TRY)) +
+  geom_point(shape = ".", alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab("Leaf Nitrogen Content") + ylab(VarTitle) + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm") + scale_color_manual(values=c("orange", "black"))
+print(p2)
+}
+```
 
-Height <- values(TRY[[1]])
-
-Height[which(Height > quantile(Height, .95, na.rm = TRUE))] <- NA
-Qsoil <- values(Coeffs[[3]])
-
-data <- data.frame(Height = Height, Qsoil = Qsoil)
-data <- na.omit(data)
-
-ggplot(data, aes(x = Height, y = Qsoil)) +
-  geom_point(shape = ".", alpha = 0.5, col = "green", size = 3.5) + 
-  theme_bw(base_size = 28) + ggtitle(paste("Vegetative Height vs. Memory", sep="")) + xlab("Vegetative Height") + ylab("Soil Moisture (0-7cm) Coefficients") + 
-  stat_smooth(col ="black",level = 0.95)+
-  geom_hline(yintercept = 0, linetype="dotted")
+```{r COMRes, echo = FALSE}
+Comres <- function(Region, Variable){
+  VarHold <- Variable
+  if(Variable == "FSC-1" | Variable == "FSC-2"){
+    Variable <- "FastSlow"
+  }
+  ## Memory Data
+  # Memory
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  Memory_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
+  for(SoilLayer in 2:4){
+    Add_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
+    Memory_ras <- stack(Memory_ras, Add_ras)
+  }
+  # t-1
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  NDVI_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[2]]
+  # Qsoil
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  Qsoil_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
+  for(SoilLayer in 2:4){
+    Add_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
+    Qsoil_ras <- stack(Qsoil_ras, Add_ras)
+  }
+  # Tair
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  Tair_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[4]]
+  ## COMPADRE data
+  Dir.Comp <- paste(Dir.Compadre, Variable, sep="/")
+  Compad_ras <- list.files(Dir.Comp)[grep(list.files(Dir.Comp), pattern = Region)]
+  if(VarHold != "FSC-2"){
+    Compad_ras <- raster(paste(Dir.Comp, Compad_ras, sep="/"))[[1]]
+  }else{
+    Compad_ras <- brick(paste(Dir.Comp, Compad_ras, sep="/"))[[2]]
+  }
+  values(Compad_ras)[which(values(Compad_ras) > quantile(values(Compad_ras), .66, na.rm = TRUE))] <- quantile(values(Compad_ras), .66, na.rm = TRUE)
+  if(VarHold == "FSC-1" | VarHold == "FSC-2"){
+   values(Compad_ras)[which(values(Compad_ras) < quantile(values(Compad_ras), .05, na.rm = TRUE))] <- quantile(values(Compad_ras), .05, na.rm = TRUE) 
+  }
+  plot_df <- data.frame(
+    Data = c(values(Memory_ras[[1]]), values(Memory_ras[[2]]), values(Memory_ras[[3]]), values(Memory_ras[[4]]), values(NDVI_ras), values(Qsoil_ras[[1]]), values(Qsoil_ras[[2]]), values(Qsoil_ras[[3]]), values(Qsoil_ras[[4]]), values(Tair_ras)), 
+    Identifiers = rep(c("LagSoil1", "LagSoil2", "LagSoil3", "LagSoil4", "t-1", "Qsoil1", "Qsoil2", "Qsoil3", "Qsoil4", "Tair"), each = length(values(Memory_ras[[1]]))),
+   Compadre = rep(values(Compad_ras), 10)
+  )
+  Variable <- VarHold
+  plot_df <- na.omit(plot_df)
+  leg <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c("purple4", "purple2", "violetred2", "violet", "blue4", "blue2", "cyan4", "cyan2", "forestgreen", "red")) + guides(colour = guide_legend(ncol = 3, override.aes = list(size=20))) + labs(col='Memory Characteristics')
+  plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c("purple4", "purple2", "violetred2", "violet", "blue4", "blue2", "cyan4", "cyan2", "forestgreen", "red")) + theme(legend.position = "none")
+  print(plot)
+  return(leg)
+}
 ```
 
 <!--- ####### PREAMBLE -----------
@@ -1110,11 +1186,11 @@ NDVIplot_df <- data.frame(NDVI = c(NDVI_vecraw, NDVI_vecdet,
                                     rep("Monthly Means", 12)),
                           Months = c(rep(1:length(NDVI_vecraw), 3), 1:12))
 ## raw and detrended
-ggplot(NDVIplot_df[1:(length(NDVI_vecraw)*2),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("orange", "forestgreen"))
+ggplot(NDVIplot_df[1:(length(NDVI_vecraw)*2),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 35) + theme(legend.position = "none") + scale_color_manual(values=c("orange", "forestgreen"))
 ## monthly means
-ggplot(NDVIplot_df[(length(NDVI_vecraw)*3+1):(dim(NDVIplot_df)[1]),], aes(x = as.factor(Months), y = NDVI, col = Ident)) + geom_bar(stat="identity", fill = "forestgreen") + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("forestgreen")) + xlab("Months") + geom_hline(aes(yintercept=.1), size = 1.5)
+ggplot(NDVIplot_df[(length(NDVI_vecraw)*3+1):(dim(NDVIplot_df)[1]),], aes(x = as.factor(Months), y = NDVI, col = Ident)) + geom_bar(stat="identity", fill = "forestgreen") + theme_bw(base_size = 35) + theme(legend.position = "none") + scale_color_manual(values=c("forestgreen")) + xlab("Months") + geom_hline(aes(yintercept=.1), size = 1.5)
 ## z-scores
-ggplot(NDVIplot_df[(length(NDVI_vecraw)*2+1):(length(NDVI_vecraw)*3),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("purple"))
+ggplot(NDVIplot_df[(length(NDVI_vecraw)*2+1):(length(NDVI_vecraw)*3),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 35) + theme(legend.position = "none") + scale_color_manual(values=c("purple"))
 ## legend
 leg <- ggplot(NDVIplot_df[1:(length(NDVI_vecraw)*3),], aes(x = Months, y = NDVI, col = Ident)) + geom_line(size = 2) + scale_color_manual(values=c("orange", "forestgreen", "purple")) + theme_bw(base_size = 65) + 
   guides(colour = guide_legend(override.aes = list(size=20))) + labs(col='GIMMs NDVI 3g data')
@@ -1137,21 +1213,21 @@ plot1_df <- with(ModData_df, data.frame(
   Qsoil = c(Clim, Clim_vec),
   Ident = rep(c("Raw Data", "Detrened"), each = dim(ModData_df)[1])
 ))
-ggplot(plot1_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("orange", "navyblue"))
+ggplot(plot1_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 35) + theme(legend.position = "none") + scale_color_manual(values=c("orange", "navyblue"))
 ## raw and detrended
 plot2_df <- with(ModData_df, data.frame(
   Months = rep(1:dim(ModData_df)[1], 1),
   Qsoil = c(Clim_raw),
   Ident = rep(c("Z-Scores"), each = dim(ModData_df)[1])
 ))
-ggplot(plot2_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 28) + theme(legend.position = "none") + scale_color_manual(values=c("brown"))
+ggplot(plot2_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + theme_bw(base_size = 35) + theme(legend.position = "none") + scale_color_manual(values=c("brown"))
 ## Cummulative soil moisture lags
 plot3_df <- with(ModData_df, data.frame(
   Months = rep(1:dim(ModData_df)[1], 13),
   Qsoil = c(ClimCum_0, ClimCum_1, ClimCum_2, ClimCum_3, ClimCum_4, ClimCum_5, ClimCum_6, ClimCum_7, ClimCum_8, ClimCum_9, ClimCum_10, ClimCum_11, ClimCum_12),
   Ident = as.factor(rep(c("Z-Scores", "Lag 01", "Lag 02", "Lag 03", "Lag 04", "Lag 05", "Lag 06", "Lag 07", "Lag 08", "Lag 09", "Lag 10", "Lag 11", "Lag 12"), each = dim(ModData_df)[1]))
 ))
-ggplot(plot3_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 1) + theme_bw(base_size = 28) + theme(legend.position = "none") +  scale_color_manual(values=c(rainbow(12), "brown"))
+ggplot(plot3_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 1) + theme_bw(base_size = 35) + theme(legend.position = "none") +  scale_color_manual(values=c(rainbow(12), "brown"))
 ## legend
 Qsoilplot_df <- rbind(plot1_df, plot3_df)
 leg <- ggplot(Qsoilplot_df, aes(x = Months, y = Qsoil, col = Ident)) + geom_line(size = 2) + scale_color_manual(values=c("orange", "navyblue", rainbow(12), "brown")) + theme_bw(base_size = 65) + guides(colour = guide_legend(ncol=3, override.aes = list(size=20))) + labs(col='ERA5 Qsoil1 data')
@@ -1315,7 +1391,7 @@ Utest
 
 \paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
 
-```{r IBRVegMem2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 2)
 ```
 
@@ -1331,7 +1407,7 @@ Utest
 
 \paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
 
-```{r IBRVegMem3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 3)
 ```
 
@@ -1347,7 +1423,7 @@ Utest
 
 \paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
 
-```{r IBRVegMem4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 4)
 ```
 
@@ -1405,9 +1481,50 @@ PatcausRes(Region = "Iberian Region", SoilLayer = 4, SoilOnly = TRUE)
 
 #### Plant Functional Traits
 
+```{r IBPFT1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "t-1")
+```
+
+```{r IBPFT2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Tair")
+```
+
+\clearpage
+
+```{r IBPFT3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Qsoil")
+```
+
+```{r IBPFT4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Tryres(Region = "Iberian Region", SoilLayer = 2, Variable = "Qsoil")
+```
+
+\clearpage
+
+```{r IBPFT5, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Tryres(Region = "Iberian Region", SoilLayer = 3, Variable = "Qsoil")
+```
+
+```{r IBPFT6, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Tryres(Region = "Iberian Region", SoilLayer = 4, Variable = "Qsoil")
+```
+
 \clearpage
 
 #### Life History Traits
+
+```{r IBCOMPAD, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('FSC-1', 'FSC-2', 'Pi', 'Rho', 'Reactivity', 'Plotting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+leg <- Comres(Region = "Iberian Region", Variable = "FSC-1")
+leg <- Comres(Region = "Iberian Region", Variable = "FSC-2")
+leg <- Comres(Region = "Iberian Region", Variable = "Pi")
+leg <- Comres(Region = "Iberian Region", Variable = "Rho")
+leg <- Comres(Region = "Iberian Region", Variable = "Reactivity")
+legend <- cowplot::get_legend(leg)
+grid.newpage()
+grid.draw(legend)
+```
+
+
 
 \clearpage
 
