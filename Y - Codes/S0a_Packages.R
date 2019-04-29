@@ -1,6 +1,6 @@
 install.load.package <- function(x) {
   if (!require(x, character.only = TRUE))
-    install.packages(x)
+    install.packages(x, repos='http://cran.us.r-project.org')
   require(x, character.only = TRUE)
 }
 package_vec <- c("automap", "doParallel", "foreach", "ggplot2", "gimms", "gridExtra",
