@@ -434,9 +434,33 @@ Comres <- function(Region, Variable){
 \clearpage
 
 # Introduction
-Ecosystems are subject to disturbance regimes which can undergo substantial alterations\cite{Johnstone2016} thus causing growing concern that future disturbance dynamics will exceed tipping points and cause irreversible shifts in ecosystem state in relation to **attractors**\cite{Senf2017} (see table \ref{tab:ResTerm} for definitions of bold font terms relating to the resilience debate). Such a **regime shift**\cite{Scheffer2010,Xu2015,Vasilakopoulos2015} can have a tremendous impact on local as well as global welfare of mankind\cite{Cote2010,Scheffer2001,Genkai-Kato2007}. Therefore, policy makers have made it their mission statement to enforce actions which serve to maintain or boost **resilience**\cite{CBD2013} . Conceiving such strategies and evaluating their respective efficacies requires a thorough understanding of resilience theory and a robust set of tools to measure the resilience of ecosystems.  
-Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling et. al resilience thinking was envisaged to encompass two separate characteristics of ecosystems: *stability* and *resilience*\cite{Holling1973} . Stability was defined as the ability of a system to return to its original state after a temporary disturbance. The more stable a system, the less it fluctuates in its characteristics and the faster it returns to its initial conditions after a perturbation. Contemporary literature usually refers to this property as **engineering resilience**\cite{Liu2018,Mumby2015,Seidl2016b}. Resilience, on the other hand, was characterised as the property of a system that allowed it to withstand disturbances without collapsing. The more resilient a system, the higher its chances of persisting under changing conditions. Today this is mostly referred to as **ecological resilience**\cite{Scheffer2015,Standish2014,Gunderson2000}. Within this early context on resilience thinking, a system could be resilient whilst not being very stable and fluctuating in its properties a great deal\cite{Holling1973}.  
+Ecosystems are subject to disturbance regimes which can undergo substantial alterations\cite{Johnstone2016} causing bioclimatic challenges such as: (1) increased frequency and intensity of climate extremes\cite{Santiago2016}, (2) increasing temperatures and aridity\cite{Allen2010}, and (3) shifts in environemntal and ecosystem processes\cite{Kefi2016,Johnstone2016,Seidl2016b}. This has raised growing concern that future disturbance dynamics will exceed tipping points and cause non-linear shifts in ecosystem state in relation to **attractors**\cite{Senf2017} (see table \ref{tab:ResTerm} for definitions of bold font terms relating to the resilience debate). Such a **regime shift**\cite{Scheffer2010,Xu2015,Vasilakopoulos2015} can have a tremendous impact on local as well as global welfare of mankind\cite{Cote2010,Scheffer2001,Genkai-Kato2007}. Therefore, policy makers have made it their mission statement to enforce actions which serve to maintain or boost **resilience**: 
+
+\begin{center}
+\textit{"By 2020, ecosystem resilience [...] has been enhanced, [...] thereby contributing to climate change mitigation and adaptation and to combating desertification."}
+\end{center}
+\vspace{-.2cm}\flushright $\sim$ Aichi biodiversity target 15\cite{CBD2013}
+
+\begin{center}
+\textit{"We achieve climate resilience when short, medium and long-term decision making considers current climate risks and a changing climate."}
+\end{center}
+\vspace{-.2cm}\flushright $\sim$ Australian National Climate Resilience and Adaptation Strategy\cite{GovernmentDepartmentoftheEnvironment2015} \flushleft
+
+
+Conceiving such strategies and evaluating their respective efficacies requires a thorough understanding of resilience theory and a robust set of tools to measure the resilience of ecosystems.  
+
+Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling et. al resilience thinking was envisaged to encompass two separate characteristics of ecosystems *stability* and *resilience*\cite{Holling1973}:
+
+\begin{enumerate}
+\item \textit{Stability} was defined as the ability of a system to return to its original state after a temporary disturbance. The more stable a system, the less it fluctuates in its characteristics and the faster it returns to its initial conditions after a perturbation. Contemporary literature usually refers to this property as \textbf{engineering resilience}\cite{Liu2018,Mumby2015,Seidl2016b}. 
+\item \textit{Resilience}, on the other hand, was characterised as the property of a system that allowed it to withstand disturbances without collapsing. The more resilient a system, the higher its chances of persisting under changing conditions. Today this is mostly referred to as \textbf{ecological resilience}\cite{Scheffer2015,Standish2014,Gunderson2000}. Within this early context on resilience thinking, a system could be resilient whilst not being very stable and fluctuating in its properties a great deal\cite{Holling1973}.  
+\end{enumerate}
+
 Since then, the term 'resilience' itself has undergone a 'greenwash'\cite{Newton2016}, which has diminished its direct usefulness to researchers. This process has seen the term 'resilience' being introduced originally to ecological sciences but adapted by other branches of research (e.g. social sciences\cite{Carpenter2001}) and society (e.g. policy makers\cite{Newton2016}), modified for different purposes and re-introduced to ecological sciences with multiple altered definitions\cite{Brown2015} .  
+
+Whilst the state of any given ecosystem can be assessed without entertaining the underlying implications of a resilience framework, the conclusions from such a study may grossly differ from the actual processes in nature. Assumptions on ecosystem functioning that are made without including resilience thinking, irrespective of this caveat, may result in particularly dire consequences if the systems in question (also referred to as focal systems\cite{Rist2014,Allen2016}) are production ecosystems\cite{Rist2014,Brown2015} (ecosystems which are used by humans for resource allocation).  
+
+\clearpage
 
 \renewcommand{\arraystretch}{1}
 \begin{table*}[h!]
@@ -465,11 +489,17 @@ Since then, the term 'resilience' itself has undergone a 'greenwash'\cite{Newton
   \label{tab:ResTerm}%
 \end{table*}
 
-\clearpage
+However, simultaneous assessment of components of any given ecosystem is a difficult task that often defies completion\cite{Standish2014}. This poses a **major research challenge** of choosing a measure by which to assess resilience and ecosystem components reliably through time and space. Consequently, Recent studies have focussed on identifying and quantifying sub-components of ecosystem  resilience\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. Hodgson et. al tackled the problem of resilience measurements by building a framework for resilience assessments by first representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}. 
 
-Whilst the state of any given ecosystem can be assessed without entertaining the underlying implications of a resilience framework, the conclusions from such a study may grossly differ from the actual processes in nature. Assumptions on ecosystem functioning that are made without including resilience thinking, irrespective of this caveat, may result in particularly dire consequences if the systems in question (also referred to as focal systems\cite{Rist2014,Allen2016}) are production ecosystems\cite{Rist2014,Brown2015} (ecosystems which are used by humans for resource allocation).  
-However, simultaneous assessment of components of any given ecosystem is a difficult task that often defies completion\cite{Standish2014} with most studies only being able to focus on a select few components at a time. Consequently, recent studies have focussed on identifying and quantifying resilience characteristics of ecosystems\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. Hodgson et. al tackled the problem of resilience measurements by building a framework for resilience assessments by first representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}.  
-Representing the *recovery* aspect contained within this framework to resilience is (amongst others) \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). However, even quantifying this component of an entire ecosystem is a Sisyphean endeavour at best as ecological memory is a compound metric unifying a multitude of sub-processes\cite{Walter2013}. Hence, ecosystem-scale studies have refocussed their attention on identifying components of ecological stress memory such as \textbf{vegetation memory}\cite{Walter2013,Johnstone2016}.  
+Recovery rates have been used as proxies for resilience metrics in many study settings including (1) palaeoecologic research (e.g. by linking recovery rates of tropical ecosystems and disturbances categories\cite{Cole2014}), (2) observational studies (e.g. drought-impacts across different temporal and spatial scales\cite{Reyer2015}), or (3) experimental research (e.g. through applying small-scale disturbances and recording recovery rates\cite{VanBelzen2017a}).
+
+Representing the *recovery* aspect of the Hodgson et al. framework to resilience is (amongst others) \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). Ecological memory has been used to assess resilience of various different ecosystems. Nyström \& Folke reported a direct link between spatial resilience and ecological memory of coral reefs\cite{Nystrom2001}. In forest ecosystems, a positive link between ecological memory and ecosystem resilience has been identified by Johnstone et al\cite{Johnstone2016}.
+However, even quantifying ecological memory of an entire ecosystem is difficult as ecological memory is a compound metric unifying a multitude of sub-processes\cite{Walter2013}. For example, the aforementioned Nyström \& Folke recognised legacies, mobile links, and support areas as parts of ecological memory\cite{Nystrom2001} whilst Jonstone et al. propose information and material legacies as the key factors of ecological memory\cite{Johnstone2016}.
+
+
+Hence, ecosystem-scale studies have refocussed their attention on identifying components of ecological stress memory such as \textbf{vegetation memory}\cite{Walter2013,Johnstone2016}.  
+
+\clearpage
 
 ## Vegetation Memory
 
@@ -492,15 +522,9 @@ In a comprehensive paper, Ogle et al. expanded on this definition by identifying
 \item \textit{Temporal Patterns} - The variation in relative impacts of antecedent conditions at different points in time.
 \end{enumerate}
 
-The natural world is inherently complex and so I find it useful to add another criterion:
-\begin{enumerate}
-\setcounter{enumi}{3}
-\item \textit{Extrinsic Source} - The nature of the antecedent extrinsic conditions that drive current states of vegetation (i.e. the origin/source of the extrinsic memory effect), including (but not limited to): herbivory pressure or climate events.
-\end{enumerate}
+Tackling the characteristic of vegetation memory origin, Ogle et al. introduced the notion of **intrinsic** and **extrinsic** memory effects\cite{Ogle2015} (see table \ref{tab:MemTerm}). 
 
-Tackling the characteristic of vegetation memory origin, Ogle et al. introduced the notion of **intrinsic** and **extrinsic** memory effects\cite{Ogle2015} (see table \ref{tab:MemTerm}).
-
-\clearpage
+Due to the complexity of extrinsic memory components and drivers I find it useful to add another criterion to extrinsic memory characteristics: \textit{Extrinsic Source}. This represents the nature of the antecedent extrinsic conditions that drive current states of vegetation (i.e. the origin/source of the extrinsic memory effect), including (but not limited to): herbivory pressure or climate events.
 
 \renewcommand{\arraystretch}{1}
 \begin{table*}[h!]
@@ -519,24 +543,145 @@ Tackling the characteristic of vegetation memory origin, Ogle et al. introduced 
   \label{tab:MemTerm}%
 \end{table*}
 
+\clearpage
+
 ### Ecological Relevance
 Vegetation memory is identified as the effect of antecedent conditions on current vegetation patterns\cite{Ogle2015}. The stronger and longer the memory effect, the more vegetation will be influenced by antecedent anomalies of the ecosystem and abiotic processes thus signalling higher sensitivity to these drivers\cite{DeKeersmaecker2015}. A higher sensitivity translates to lower resilience and so:
 \begin{center}
 \textbf{Vegetation memory has been proposed as a proxy for engineering resilience.}\cite{Liu2018,DeKeersmaecker2017}
 \end{center}
 
-Due to the inverse relationship between vegetation memory and engineering resilience, patterns and characteristics of vegetation memory are a vital information criterion for \dss aimed at conservation or management efforts.
+Patterns and characteristics of vegetation memory are a vital information criterion for \dss aimed at conservation or management efforts due to the inverse relationship between vegetation memory and engineering resilience. However, one may also argue that vegetation memory indicates how well prepared a system is to face disturbances after experiencing similar perturbations. This issue is largely one of how vegetation memory is defined. Walter et al., for example, present an threefold understanding of vegetation responses built around memory\cite{Walter2013}:
+
+\begin{enumerate}
+\item \textit{Negative} response come about due to vegetation failing to adapt to stress conditions and suffering from decreased fitness upon a returning perturbation event.
+\item \textit{Neutral} responses translate to plants being as prepared to face disturbances as they have been prior to other disturbances of the same kind.
+\item \textit{Positive} responses are established through vegetation memory which is understood as an imprint on prior distrubance regimes and a bolstered resistance to these.
+\end{enumerate}
+
+For my work presented here, I will be regarding vegetation memory as the inverse of recovery rates (i.e. how long a perturbation effect persists).
 
 ### Quantifying Vegetation Memory
-Vegetation memory is influenced by a multitude of processes which range from abiotic characteristics\cite{DeKeersmaecker2015,Seddon2016,Papagiannopoulou2017a} to biotic system components\cite{Johnstone2016,DeKeersmaecker2015}. Comprehensive studies of vegetation response to biotic and abiotic forcing are numerous\cite{Liu2018,Seddon2016,Papagiannopoulou2017a,Ogle2015,Cole2014,Seddon2016}. These studies have established a multitude of approaches to delineating vegetation memory from a variety of data sets. Examples include the use of (1) correlation coefficients of different lags of drought indices\cite{Liu2018,Vicente-Serrano2013}, (2) mixed effect models of antecedent vegetation and climate characteristics and subsequent model selection\cite{DeKeersmaecker2015}, and (3) Bayesian models to distinguish intrinsic and extrinsic memory effects\cite{Ogle2015}. Some common practices have emerged from this variety of approaches: 
+Vegetation memory is influenced by a multitude of processes which range from abiotic characteristics\cite{DeKeersmaecker2015,Seddon2016,Papagiannopoulou2017a} to biotic system components\cite{Johnstone2016,DeKeersmaecker2015}. Comprehensive studies of vegetation response to biotic and abiotic forcing are numerous\cite{Liu2018,Seddon2016,Papagiannopoulou2017a,Ogle2015,Cole2014,Seddon2016}. 
+
+#### Traditional Approaches
+
+Traditional studies of vegetation memory leverage data obtained via extensive sampling campaigns and are thus laborious to carry out. Nevertheless, a multitude of such studies exist which provide a solid foundation for the understanding of ecological memory to date. 
+
+Some traditional approaches - like Johnstone et al.\cite{Johnstone2016} - establish theoretical frameworks of vegetation memory (i.e. as material and information legacies) which require empirical assessment through further research.
+
+One such study identified vegetation memory as spectral reddening as a proxy of spatial correlation of ecosystem properties. Increased spatial correlation is regarded as a proxy of high memory and ecosystems approaching regime shifts\cite{Kefi2014}. Additionally, these largely field-based studies are able to make use of a host of information criteria including but not limited to seed banks, wood thickness, canopy structure, and root depth\cite{Filotas2014}. Such information is often invaluable as it highlights the functional property of vegetation memory which is often identified through vegetation responses to different disturbances but rarely explained in terms of plant function that enables memory.
+
+Due to limited sampling effort, such traditional studies are - although vitally important for our understanding of vegetation memory pathways - limited in scope. This will often lead to an advanced causal understanding of vegetation memory but only at limited spatial and temporal extents.
+
+\clearpage
+
+#### Remote Sensing Approaches
+
+Remote sensing studies forego tedious field work data collection efforts and rely solely on easily available data. This data may either be obtained via remote sensing methods (i.e. satellite or drone imagery) or be pulled from published data sets from the field.
+
+Using these data sets, remote sensing studies of vegetation memory offer vast improvements in spatial and potentially temporal coverage when compared to traditional approaches. This, in turn, allows for landscape-scale patterns of vegetation memory characteristics to be identified. Unfortunately, to achieve these large spatial extents, one often has to sacrifice patial and temporal resolution. Especially climate data can be unreliable in some regions of the world.
+
+Recent remote sensing studies of vegetation memory have established a multitude of approaches to delineating vegetation memory from a variety of data sets. Examples include the use of:
+
+
+\begin{enumerate}
+\item \textbf{Correlation coefficients} of different lags of drought indices. 
+\end{enumerate}
+
+Vicente-Serrano et al. used correlation coefficients to assess drought-related vegetation memory by calculating pearson correlation coefficients between monthly \ndvi and \spei records. This was done after aggregating biweekly \ndvi data to monthly maximum composites as well as standardisation. Strength and length of the identified memory effects can be seen in figure \ref{fig:Vincente}.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.8\linewidth]{3 - Figures/Vincente.png}
+\caption[Drought Memory Length and Strength]{\textbf{Drought Memory Length and Strength - }Spatial patterns of drought memory length assessed via correlation coefficients. Figure lifted from Vicente-Serrano et al\cite{Vicente-Serrano2013}.}
+\label{fig:Vincente}
+\end{figure}
+
+\clearpage
+
+Liu et al. assessed vegetation memory in relation to water limitations on a global. To do so, they built models of measures of \ndvi as predicted through \spi records at different temporal lengths, temperature records, and irradiation data. \cite{Liu2018}. Memory length was subsequently assessed as the lag of the \spi effect with the highest correlation coefficient within the resulting models. Before model building commenced, Liu et al. applied data preparation steps which removed areas and time steps from the analysis which did not meet certain criteria (i.e. a 5\% threshold on missing vegetation data, monthly \ndvi data below $0.1$, and monthly temperature below $0$ degrees Celsius). Subsequently, data was detrended and standardised for all variables prior to model building. Results of this study are presented in figure \ref{fig:Liu}.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.6\linewidth]{3 - Figures/Liu.png}
+\caption[Water Memory Length]{\textbf{Water Memory Length - } Spatial patterns of water memory length assessed via correlation coefficients. Figure lifted from Liu et al\cite{Liu2018}.}
+\label{fig:Liu}
+\end{figure}
+
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item \textbf{Mixed effect models} of antecedent vegetation and climate characteristics and subsequent model selection.
+\end{enumerate}
+
+In their 2015 paper, De Keersmaecker et al. introduced a comprehensive vegetation memory modelling approach using \ndvi, temperature , and \spei data in a linear mixed effect model. Again, certain data preparation steps such as removal of low-quality data, calculation of maximum monthly composites of \ndvi and subsequent standardisation. Climate data which did not meet the same spatial resolution as the \ndvi data was resampled using the nearest neighbour method. Study results of the first autoregressive model (\ndvi data regressed via \ndvi data a previous time step, also referred to as *intrinsic memory*) are presented in figure \ref{fig:DeKeers}.
+
+\begin{figure}[h!]
+\centering \includegraphics[width=.8\linewidth]{3 - Figures/DeKeers.png}
+\caption[Intrinsic Vegetation Memory]{\textbf{Intrinsic Vegetation Memory - } Autoregressive coefficients of intrinsic vegetation memory depicting engineering resilience (high memory scores identify low resilience). Figured lifted from De Keersmaecker et al\cite{DeKeersmaecker2015}.}
+\label{fig:DeKeers}
+\end{figure}
+
+Seddon et al.\cite{Seddon2016} delineated autoregressive \ndvi patterns very similar to those presented in figure \ref{fig:DeKeers}.
+
+<!-- Seddon et al. -->
+
+<!-- \begin{figure}[h!] -->
+<!-- \centering \includegraphics[width=.7\linewidth]{3 - Figures/Seddon.png} -->
+<!-- \caption[Short]{\textbf{Short - }Long\cite{Seddon2015}} -->
+<!-- \label{fig:Seddon} -->
+<!-- \end{figure} -->
+
+<!-- \begin{enumerate} -->
+<!-- \setcounter{enumi}{2} -->
+<!-- \item \textbf{Bayesian models} to distinguish intrinsic and extrinsic memory effects.  -->
+<!-- \end{enumerate} -->
+
+<!-- Ogle et al.\cite{Ogle2015} -->
+
+#### Synthesis
+
+\paragraph*{Spatial Memory Patterns}  \hspace{.5cm}
+
+Results of the studies above clearly indcate some areas of special interest: 
+
+\begin{enumerate}
+\item \textit{High Memory Coefficients} indicating regions of low resilience can be found largely in \textit{dryland regions} (e.g.: North-East Brazil, Australia, and Spain)
+\item \textit{Trends in Memory Length} signalling a change in causal patterns of memory effects can be found across the Iberian Peninsula, and the contiguous United States of America.
+\end{enumerate}
+
+Furthermore, all of these regions are characterised by gradients in vegetation memory intensity. Any study researching vegetation memory should focus on these regions of interest.
+
+\paragraph*{Data}  \hspace{.5cm}
+
+Vegetation properties are usually assessed using \ndvi data. Additionally, indices of climate metrics are used for the calculation of extrinsic memory components. 
+
+Contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}.  contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}. 
+
+**Climate reanalysis** data sets are *self-consistent*, *gap-less* (in time and space) and thus **superior** to many observational data sets. One such reanalysis data set is the \textbf{\era}\cite{Era5Online}. The superiority of \era over frequently used climate data sets is largely due to:
+
+\begin{enumerate}
+\item The \textbf{volume of observational data} used to create the \era product with data types ranging from satellite data to weather station/independent institute data collection efforts, and station data from a wide variety of data providers\cite{ECMWF2018a}. Traditional, observational data sets are often characterised by their individual biases in sampling, and coverage representativeness. 
+\item Its \textbf{sophisticated nature} building upon data assimilation procedures\cite{ECMWF2018b}, and complex models\cite{ECMWF2018} to shed light on physical processes\cite{ECMWF2018c}. As such, \era is currently the \textit{state-of-the-art} climate reanalysis product in climate science and benefits from the developments in data assimilation methodology, understanding of physics of the climate system and their interactions, which have come about in recent decades.
+\end{enumerate}
+
+Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim\cite{Seddon2016}, or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
+\begin{enumerate}
+\item Superior \textit{Temporal Resolution} (superior resolving of climate extremes)
+\item Superior \textit{Spatial Resolution} (advanced resolving of local/topographical features)
+\end{enumerate}
+
+Unfortunately, none of the contemporary vegetation memory studies on landscape-scales include biological ground-truthed data such as the aforementioned indices of functional aspects to plants which traditional approaches can leverage.
+
+\clearpage
+
+\paragraph*{Models}  \hspace{.5cm}
+
+Some common modelling practices have emerged from contemporary remote sensing vegetation memory studies: 
 \begin{enumerate}
 \item \textbf{Intrinsic Memory} is usually identified as the relationship between vegetation properties at time step $t$ a prior time $t-1$ (usually at monthly intervals)\cite{DeKeersmaecker2015}. See figure \ref{fig:SchemaVegMem} for a visual representation.
 \item \textbf{Extrinsic Memory} is attributed to combinations of temperature, precipitation, and/or drought records\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015,Ogle2015}. See figure \ref{fig:SchemaVegMem} for a visual representation.
 \item \textbf{Model Selection} is used to determine the length of extrinsic memory effects by identifying the time window during which extrinsic forcing holds the most explanatory power of vegetation characteristics\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015}.
 \item \textbf{Anomalies} of both response and predictor variables are used as these are metrics which can be linked directly to perturbation events\cite{DeKeersmaecker2015}.
 \end{enumerate}
-
-\clearpage
 
 Vegetation memory models can thus usually be summarised as:
 
@@ -547,11 +692,12 @@ Y_t = \alpha * Y_{t-1} + \sum_{e = 1}^{E}(\beta_e * X_e)
 with $Y_t$ and $Y_{t-1}$ denoting anomalies of vegetation properties at times $t$ and $t-1$ respectively, $X_e$ indexing anomalies of the $e$'th extrinsic force (out of a total $E$ extrinsic drivers), and $\alpha$ and $\beta$ representing the **coeffcients** of **intrinsic** and **extrinsic** memory effects respectively. Rerunning such a model with independent, extrinsic inputs ($X_e$'s) at different time lags and subsequent model selection can then be employed to identify the length of the extrinsic vegetation memory related to the $e$'th extrinsic force.
 
 \begin{figure}[h!]
-\centering \includegraphics[width=.85\linewidth]{3 - Figures/Scheme_VegMem.jpg}
+\centering \includegraphics[width=1\linewidth]{3 - Figures/Scheme_VegMem.jpg}
 \caption[Components of Vegetation Memory]{\textbf{Components of Vegetation Memory - }Conceptual layout of how intrinsic and extrinsic vegetation memory components can be identified from the data. The concept recognises two important variables: (1) \textit{Response} - contemporary vegetation properties at time $t$, and (2) \textit{Extrinsic} - antecedent environmental data. Within this framework, vegetation memory - both intrinsic and extrinsic - is identified as the predictability of the response variable through a regression onto itself and extrinsic variables respectively. Regressions of data onto each other are visualised as dashed arrows, lag effects are identified by numbers. Some parts of this figure have been generated via \ref{rFigs}.}
 \label{fig:SchemaVegMem}
 \end{figure}
 
+\clearpage
 
 ## Plant Functional Traits
 Studies of biotic forcing usually fall into one of two categories which can be seen as research representative of the world views of Schimper (focus on functional diversity) and Hubbel (focus on species diversity)\cite{Westoby2006}. Whilst the latter represents traditional approaches to understanding the natural world, Schimpers framework has received increased attention over the past few years. 
@@ -564,18 +710,6 @@ Functional traits capture a multitude of characteristics without the necessity f
 Whilst \PFTs have been linked individually to evolution\cite{Ackerly2003} and community composition patterns\cite{Laughlin2014,Lavorel2002}, a change in their expression has been found to be correlated with climate change patterns\cite{Wright2005} thus suggesting a causal link between extrinsic vegetation memory and \PFT expressions. In order to classify the way in which \PFTs are related to community functions, Nock et al. present the concept of (1) \textbf{Effect Traits}, and (2) \textbf{Response Traits}\cite{Nock2016}. Classifying \PFTs according to this framework can profoundly aid the understanding of their influence on spatio-temporal patterns of vegetation performance\cite{Lavorel2002,Mori2013}.
 
 Recent studies suggest that vegetation community functions are governed by integrated phenotypes, which can be regarded as specific combinations of individual \PFT ranges, instead of single \PFTs\cite{Bonser2006, Nock2016} thus calling for a scientific approach focussed on \textbf{\FDR} which can be identified via an approach in which \PFT values of each individual are placed within a multidimensional system with each axis representing the range of values for one specific \PFT\cite{Ordonez2015}. Just as with species oriented studies, a measure of richness alone may be insufficient to capture necessary information to understanding biological systems. Therefore, one may also want to use a measure of evenness which, in a functional biology setting, can be referred to as \textbf{\FDD} which is representative of how evenly dispersed data records are in multidimensional space.  
-
-Recent studies in \PFT research have focussed heavily on methods of dimensionality reduction by identifying the \PFTs which capture a vast part of the global variation of plant function\cite{Laughlin2014,Diaz2015}. Díaz et al. identified:
-\begin{enumerate}
-\item \textit{Vegetative height} ($H$) an important criterion to accessing light resources
-\item \textit{Stem specific density} ($SSD$) reflecting a trade-off between growth potential and mortality risk
-\item \textit{Leaf area} ($LA$) vital consequences for leaf water balance
-\item \textit{Leaf mass per area} ($LMA$) a proxy for the trade-off between carbon gain and leaf longevity
-\item \textit{Leaf nitrogen content} ($Nmass$) reflects a trade-off between photosynthetic potential and acquiring nitrogen
-\item \textit{Diaspore mass} ($Dmass$) reflects a trade-off between seedling survival and colonization ability
-\end{enumerate}
-as the most important \PFTs to understanding the global spectrum of plant functioning\cite{Diaz2015}. A similar framework has been established by Westoby \& Wright in which three important \PFT dimensions are recognised: (1) the leaf economic spectrum, (2) the seed size/mass spectrum, and (3) the height of the canopy at maturity\cite{Westoby2006}.
-
 
 \renewcommand{\arraystretch}{1}
 \begin{table*}[h!]
@@ -594,7 +728,16 @@ as the most important \PFTs to understanding the global spectrum of plant functi
   \label{tab:PFTTerm}%
 \end{table*}
 
-\clearpage
+Recent studies in \PFT research have focussed heavily on methods of dimensionality reduction by identifying the \PFTs which capture a vast part of the global variation of plant function\cite{Laughlin2014,Diaz2015}. Díaz et al. identified:
+\begin{enumerate}
+\item \textit{Vegetative height} ($H$) an important criterion to accessing light resources
+\item \textit{Stem specific density} ($SSD$) reflecting a trade-off between growth potential and mortality risk
+\item \textit{Leaf area} ($LA$) vital consequences for leaf water balance
+\item \textit{Leaf mass per area} ($LMA$) a proxy for the trade-off between carbon gain and leaf longevity
+\item \textit{Leaf nitrogen content} ($Nmass$) reflects a trade-off between photosynthetic potential and acquiring nitrogen
+\item \textit{Diaspore mass} ($Dmass$) reflects a trade-off between seedling survival and colonization ability
+\end{enumerate}
+as the most important \PFTs to understanding the global spectrum of plant functioning\cite{Diaz2015}. A similar framework has been established by Westoby \& Wright in which three important \PFT dimensions are recognised: (1) the leaf economic spectrum, (2) the seed size/mass spectrum, and (3) the height of the canopy at maturity\cite{Westoby2006}.
 
 ### Ecological Relevance  
 The positive effect of biodiversity on ecological stability has long been recorded\cite{DeBoeck2017} and even led to the formulation of prominent concepts like Yacchi's insurance hypothesis which postulates that the loss of a subset of species can be compensated for by the presence of other species given a sufficient overlap in functional aspects of both thus leading to a stabilisation of ecosystem processes\cite{Yachi1999}. 
@@ -619,14 +762,11 @@ Thus, \PFTs make for \textit{highly informative} proxies of \textit{ecosystem fu
 \item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline} (see figure \ref{fig:BIEN4}).
 \end{itemize}
 
-\vspace{-.8cm}
-\begin{figure}[b!]
+\begin{figure}[h!]
 \resizebox{1\textwidth}{!}{\includegraphics[width=\linewidth]{3 - Figures/bien4.jpg}}
 \caption[BIEN PFT Coverage]{\textbf{\BIEN \PFT Coverage - }Geo-referenced records within version 4.1 of the \BIEN data base at logarithmic scale\cite{BIENOnline}.} 
 \label{fig:BIEN4}
 \end{figure}
-
-\clearpage
 
 \begin{itemize}
 \item The \textbf{\COMPADRE}\cite{Salguero-Gomez2015} contains \LHT, a subclass of \PFTs pertaining to life history characteristics (e.g. longevity, reproductive mode, etc.), driven matrix population models which produce important information about community processes through time based on records of different \LHTs\cite{Salguero-Gomez2016}. In its current release (version 4.0.1) it contains 7,024 matrix models\cite{COMPADREOnline}.
@@ -750,20 +890,20 @@ plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2
 #### European Centre for Medium-range Weather Forecasts ReAnalysis 5 (ERA5)
 \label{sEra}
 
-Indices of climate metrics are used for the calculation of extrinsic memory components as outlined in figure \ref{fig:SchemaVegMem}. Contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}. 
+<!-- Indices of climate metrics are used for the calculation of extrinsic memory components as outlined in figure \ref{fig:SchemaVegMem}. Contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}.  -->
 
-My study is using the \textbf{\era}\cite{Era5Online} data set which is a **reanalysis** data set. Reanalysis data sets are *self-consistent*, *gap-less* (in time and space) data sets and thus **superior** to many observational data sets. The superiority of \era over frequently used climate data sets is largely due to:
+<!-- My study is using the \textbf{\era}\cite{Era5Online} data set which is a **reanalysis** data set. Reanalysis data sets are *self-consistent*, *gap-less* (in time and space) data sets and thus **superior** to many observational data sets. The superiority of \era over frequently used climate data sets is largely due to: -->
 
-\begin{enumerate}
-\item The \textbf{volume of observational data} used to create the \era product with data types ranging from satellite data to weather station/independent institute data collection efforts, and station data from a wide variety of data providers\cite{ECMWF2018a}. Traditional, observational data sets are often characterised by their individual biases in sampling, and coverage representativeness. 
-\item Its \textbf{sophisticated nature} building upon data assimilation procedures\cite{ECMWF2018b}, and complex models\cite{ECMWF2018} to shed light on physical processes\cite{ECMWF2018c}. As such, \era is currently the \textit{state-of-the-art} climate reanalysis product in climate science and benefits from the developments in data assimilation methodology, understanding of physics of the climate system and their interactions, which have come about in recent decades.
-\end{enumerate}
+<!-- \begin{enumerate} -->
+<!-- \item The \textbf{volume of observational data} used to create the \era product with data types ranging from satellite data to weather station/independent institute data collection efforts, and station data from a wide variety of data providers\cite{ECMWF2018a}. Traditional, observational data sets are often characterised by their individual biases in sampling, and coverage representativeness.  -->
+<!-- \item Its \textbf{sophisticated nature} building upon data assimilation procedures\cite{ECMWF2018b}, and complex models\cite{ECMWF2018} to shed light on physical processes\cite{ECMWF2018c}. As such, \era is currently the \textit{state-of-the-art} climate reanalysis product in climate science and benefits from the developments in data assimilation methodology, understanding of physics of the climate system and their interactions, which have come about in recent decades. -->
+<!-- \end{enumerate} -->
 
-Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim\cite{Seddon2016}, or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
-\begin{enumerate}
-\item Superior \textit{Temporal Resolution} (superior resolving of climate extremes)
-\item Superior \textit{Spatial Resolution} (advanced resolving of local/topographical features)
-\end{enumerate}
+<!-- Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim\cite{Seddon2016}, or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers: -->
+<!-- \begin{enumerate} -->
+<!-- \item Superior \textit{Temporal Resolution} (superior resolving of climate extremes) -->
+<!-- \item Superior \textit{Spatial Resolution} (advanced resolving of local/topographical features) -->
+<!-- \end{enumerate} -->
 
 See table \ref{tab:ERA5Core} for an overview of core characteristics of the \era data set.
 
@@ -869,7 +1009,6 @@ Further abiotic data is needed for data preparation as outlined in section \ref{
     \bfseries Characteristic  & \bfseries Data\\
     \hline
     \textit{Resolution} & $3arc \times 3arc \sim 31m \times 31m$\\
-    \textit{Time Series} & Static \\
     \textit{Source} & \url{http://www.fao.org/soils-portal/soil-survey/soil-maps-and-databases/harmonized-world-soil-database-v12/en/} \\
     \hline
     \end{tabular}
