@@ -449,12 +449,14 @@ Ecosystems are subject to disturbance regimes which can undergo substantial alte
 
 Conceiving such strategies and evaluating their respective efficacies requires a thorough understanding of resilience theory and a robust set of tools to measure the resilience of ecosystems.  
 
-Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling et. al resilience thinking was envisaged to encompass two separate characteristics of ecosystems *stability* and *resilience*\cite{Holling1973}:
+Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling et al. resilience thinking was envisaged to encompass two separate characteristics of ecosystems\cite{Holling1973}:
 
 \begin{enumerate}
 \item \textit{Stability} was defined as the ability of a system to return to its original state after a temporary disturbance. The more stable a system, the less it fluctuates in its characteristics and the faster it returns to its initial conditions after a perturbation. Contemporary literature usually refers to this property as \textbf{engineering resilience}\cite{Liu2018,Mumby2015,Seidl2016b}. 
-\item \textit{Resilience}, on the other hand, was characterised as the property of a system that allowed it to withstand disturbances without collapsing. The more resilient a system, the higher its chances of persisting under changing conditions. Today this is mostly referred to as \textbf{ecological resilience}\cite{Scheffer2015,Standish2014,Gunderson2000}. Within this early context on resilience thinking, a system could be resilient whilst not being very stable and fluctuating in its properties a great deal\cite{Holling1973}.  
+\item \textit{Resilience}, on the other hand, was characterised as the property of a system that allowed it to withstand disturbances without collapsing. The more resilient a system, the higher its chances of persisting under changing conditions. Today this is mostly referred to as \textbf{ecological resilience}\cite{Scheffer2015,Standish2014,Gunderson2000}.  
 \end{enumerate}
+
+Within this early context on resilience thinking, a system could be resilient whilst not being very stable and fluctuating in its properties a great deal\cite{Holling1973}.
 
 Since then, the term 'resilience' itself has undergone a 'greenwash'\cite{Newton2016}, which has diminished its direct usefulness to researchers. This process has seen the term 'resilience' being introduced originally to ecological sciences but adapted by other branches of research (e.g. social sciences\cite{Carpenter2001}) and society (e.g. policy makers\cite{Newton2016}), modified for different purposes and re-introduced to ecological sciences with multiple altered definitions\cite{Brown2015} .  
 
@@ -489,11 +491,14 @@ Whilst the state of any given ecosystem can be assessed without entertaining the
   \label{tab:ResTerm}%
 \end{table*}
 
-However, simultaneous assessment of components of any given ecosystem is a difficult task that often defies completion\cite{Standish2014}. This poses a **major research challenge** of choosing a measure by which to assess resilience and ecosystem components reliably through time and space. Consequently, Recent studies have focussed on identifying and quantifying sub-components of ecosystem  resilience\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. Hodgson et. al tackled the problem of resilience measurements by building a framework for resilience assessments by first representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}. 
+Simultaneous assessment of components of any given ecosystem is a difficult task that often defies completion\cite{Standish2014}. This poses a **major research challenge** of choosing a measure by which to assess resilience and ecosystem components reliably through time and space. Consequently, recent studies have focussed on identifying and quantifying sub-components of ecosystem  resilience\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. Hodgson et al. tackled the problem of resilience measurements by building a framework for resilience assessments by first representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}. 
 
-Recovery rates have been used as proxies for resilience metrics in many study settings including (1) palaeoecologic research (e.g. by linking recovery rates of tropical ecosystems and disturbances categories\cite{Cole2014}), (2) observational studies (e.g. drought-impacts across different temporal and spatial scales\cite{Reyer2015}), or (3) experimental research (e.g. through applying small-scale disturbances and recording recovery rates\cite{VanBelzen2017a}).
+Recovery rates have been used as proxies for resilience metrics in many study settings including (1) palaeoecologic research (e.g. by linking recovery rates of tropical ecosystems and disturbances categories\cite{Cole2014}), (2) observational studies (e.g. drought-impacts across different temporal and spatial scales\cite{Reyer2015}), and (3) experimental research (e.g. through applying small-scale disturbances and recording recovery rates\cite{VanBelzen2017a}).
 
-Representing the *recovery* aspect of the Hodgson et al. framework to resilience is (amongst others) \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). Ecological memory has been used to assess resilience of various different ecosystems. Nyström \& Folke reported a direct link between spatial resilience and ecological memory of coral reefs\cite{Nystrom2001}. In forest ecosystems, a positive link between ecological memory and ecosystem resilience has been identified by Johnstone et al\cite{Johnstone2016}.
+Representing the *recovery* aspect of the Hodgson et al. framework to resilience is (amongst others) \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). Ecological memory has been used to assess resilience of various different ecosystems. 
+
+Nyström \& Folke reported a direct link between spatial resilience and ecological memory of coral reefs\cite{Nystrom2001}. In forest ecosystems, a positive link between ecological memory and ecosystem resilience has been identified by Johnstone et al\cite{Johnstone2016}.
+
 However, even quantifying ecological memory of an entire ecosystem is difficult as ecological memory is a compound metric unifying a multitude of sub-processes\cite{Walter2013}. For example, the aforementioned Nyström \& Folke recognised legacies, mobile links, and support areas as parts of ecological memory\cite{Nystrom2001} whilst Jonstone et al. propose information and material legacies as the key factors of ecological memory\cite{Johnstone2016}.
 
 
@@ -580,7 +585,7 @@ Due to limited sampling effort, such traditional studies are - although vitally 
 
 Remote sensing studies forego tedious field work data collection efforts and rely solely on easily available data. This data may either be obtained via remote sensing methods (i.e. satellite or drone imagery) or be pulled from published data sets from the field.
 
-Using these data sets, remote sensing studies of vegetation memory offer vast improvements in spatial and potentially temporal coverage when compared to traditional approaches. This, in turn, allows for landscape-scale patterns of vegetation memory characteristics to be identified. Unfortunately, to achieve these large spatial extents, one often has to sacrifice patial and temporal resolution. Especially climate data can be unreliable in some regions of the world.
+Using these data sets, remote sensing studies of vegetation memory offer vast improvements in spatial and potentially temporal coverage when compared to traditional approaches. This, in turn, allows for landscape-scale patterns of vegetation memory characteristics to be identified. Unfortunately, to achieve these large spatial extents, one often has to sacrifice patial and temporal resolution. Especially climate data can be unreliable in some regions of the world when field measurements are sparse.
 
 Recent remote sensing studies of vegetation memory have established a multitude of approaches to delineating vegetation memory from a variety of data sets. Examples include the use of:
 
@@ -599,7 +604,7 @@ Vicente-Serrano et al. used correlation coefficients to assess drought-related v
 
 \clearpage
 
-Liu et al. assessed vegetation memory in relation to water limitations on a global. To do so, they built models of measures of \ndvi as predicted through \spi records at different temporal lengths, temperature records, and irradiation data. \cite{Liu2018}. Memory length was subsequently assessed as the lag of the \spi effect with the highest correlation coefficient within the resulting models. Before model building commenced, Liu et al. applied data preparation steps which removed areas and time steps from the analysis which did not meet certain criteria (i.e. a 5\% threshold on missing vegetation data, monthly \ndvi data below $0.1$, and monthly temperature below $0$ degrees Celsius). Subsequently, data was detrended and standardised for all variables prior to model building. Results of this study are presented in figure \ref{fig:Liu}.
+Liu et al. assessed vegetation memory in relation to water limitations globally. To do so, they built models of measures of \ndvi as predicted through \spi records at different temporal lengths, temperature records, and irradiation data. \cite{Liu2018}. Memory length was subsequently assessed as the lag of the \spi effect with the highest correlation coefficient within the resulting models. Before model building commenced, Liu et al. applied data preparation steps which removed areas and time steps from the analysis which did not meet certain criteria (i.e. a 5\% threshold on missing vegetation data, monthly \ndvi data below $0.1$, and monthly temperature below $0$ degrees Celsius). Subsequently, data was detrended and standardised for all variables prior to model building. Results of this study are presented in figure \ref{fig:Liu}.
 
 \begin{figure}[h!]
 \centering \includegraphics[width=.6\linewidth]{3 - Figures/Liu.png}
@@ -612,7 +617,7 @@ Liu et al. assessed vegetation memory in relation to water limitations on a glob
 \item \textbf{Mixed effect models} of antecedent vegetation and climate characteristics and subsequent model selection.
 \end{enumerate}
 
-In their 2015 paper, De Keersmaecker et al. introduced a comprehensive vegetation memory modelling approach using \ndvi, temperature , and \spei data in a linear mixed effect model. Again, certain data preparation steps such as removal of low-quality data, calculation of maximum monthly composites of \ndvi and subsequent standardisation. Climate data which did not meet the same spatial resolution as the \ndvi data was resampled using the nearest neighbour method. Study results of the first autoregressive model (\ndvi data regressed via \ndvi data a previous time step, also referred to as *intrinsic memory*) are presented in figure \ref{fig:DeKeers}.
+In their 2015 paper, De Keersmaecker et al. introduced a comprehensive vegetation memory modelling approach using \ndvi, temperature , and \spei data in a linear mixed effect model. Again, certain data preparation steps such as removal of low-quality data, calculation of maximum monthly composites of \ndvi and subsequent standardisation were carried out. Climate data which did not meet the same spatial resolution as the \ndvi data was resampled using the nearest neighbour method. Study results of the first autoregressive model (\ndvi data regressed via \ndvi data a previous time step, also referred to as *intrinsic memory*) are presented in figure \ref{fig:DeKeers}.
 
 \begin{figure}[h!]
 \centering \includegraphics[width=.8\linewidth]{3 - Figures/DeKeers.png}
@@ -654,7 +659,7 @@ Furthermore, all of these regions are characterised by gradients in vegetation m
 
 Vegetation properties are usually assessed using \ndvi data. Additionally, indices of climate metrics are used for the calculation of extrinsic memory components. 
 
-Contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}.  contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}. 
+Contemporary studies of vegetation memory largely rely on *precipitation* or *drought* data obtained via the \spei drought index\cite{DeKeersmaecker2017,DeKeersmaecker2015}, and the \cru data set\cite{Liu2018}. These data sets are *observational* data sets as they are built from observational data often involving simple interpolation methods\cite{Trzaska2014}. Climate science has developed novel data sets which are more advanced than simple observational data sets. Thse are known as climate reanalysis products.
 
 **Climate reanalysis** data sets are *self-consistent*, *gap-less* (in time and space) and thus **superior** to many observational data sets. One such reanalysis data set is the \textbf{\era}\cite{Era5Online}. The superiority of \era over frequently used climate data sets is largely due to:
 
@@ -663,13 +668,15 @@ Contemporary studies of vegetation memory largely rely on *precipitation* or *dr
 \item Its \textbf{sophisticated nature} building upon data assimilation procedures\cite{ECMWF2018b}, and complex models\cite{ECMWF2018} to shed light on physical processes\cite{ECMWF2018c}. As such, \era is currently the \textit{state-of-the-art} climate reanalysis product in climate science and benefits from the developments in data assimilation methodology, understanding of physics of the climate system and their interactions, which have come about in recent decades.
 \end{enumerate}
 
-Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim\cite{Seddon2016}, or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
+Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim (used by Seddon et al.\cite{Seddon2016}), or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
 \begin{enumerate}
 \item Superior \textit{Temporal Resolution} (superior resolving of climate extremes)
 \item Superior \textit{Spatial Resolution} (advanced resolving of local/topographical features)
 \end{enumerate}
 
-Unfortunately, none of the contemporary vegetation memory studies on landscape-scales include biological ground-truthed data such as the aforementioned indices of functional aspects to plants which traditional approaches can leverage.
+Therefore, one can reasonably expect to improve on contemporary vegetation memory studies by substituting observational climate data sets with the highly advanced \era data set.
+
+In addition, none of the contemporary vegetation memory studies on landscape-scales include biological ground-truthed data such as the aforementioned indices of functional aspects to plants which traditional approaches can leverage through measures of **Plant Functional Traits** and thus aren't posed to identify biological causal pathways of vegetation memory
 
 \clearpage
 
@@ -680,7 +687,7 @@ Some common modelling practices have emerged from contemporary remote sensing ve
 \item \textbf{Intrinsic Memory} is usually identified as the relationship between vegetation properties at time step $t$ a prior time $t-1$ (usually at monthly intervals)\cite{DeKeersmaecker2015}. See figure \ref{fig:SchemaVegMem} for a visual representation.
 \item \textbf{Extrinsic Memory} is attributed to combinations of temperature, precipitation, and/or drought records\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015,Ogle2015}. See figure \ref{fig:SchemaVegMem} for a visual representation.
 \item \textbf{Model Selection} is used to determine the length of extrinsic memory effects by identifying the time window during which extrinsic forcing holds the most explanatory power of vegetation characteristics\cite{Liu2018,Vicente-Serrano2013,DeKeersmaecker2015}.
-\item \textbf{Anomalies} of both response and predictor variables are used as these are metrics which can be linked directly to perturbation events\cite{DeKeersmaecker2015}.
+\item \textbf{Anomalies} (i.e. standardised records) of both response and predictor variables are used as these are metrics which can be linked directly to perturbation events\cite{DeKeersmaecker2015}.
 \end{enumerate}
 
 Vegetation memory models can thus usually be summarised as:
@@ -699,17 +706,15 @@ with $Y_t$ and $Y_{t-1}$ denoting anomalies of vegetation properties at times $t
 
 \clearpage
 
-## Plant Functional Traits
-Studies of biotic forcing usually fall into one of two categories which can be seen as research representative of the world views of Schimper (focus on functional diversity) and Hubbel (focus on species diversity)\cite{Westoby2006}. Whilst the latter represents traditional approaches to understanding the natural world, Schimpers framework has received increased attention over the past few years. 
-<!-- This paradigm shift is due to the compelling evidence that a focus on functional aspects of biological systems may yield more refined understandings of the natural world than species-focused studies would\cite{DeBoeck2017}.   -->
+## Plant Function
+Studies of biotic forcing usually fall into one of two categories which can be seen as research representative of the world views of Schimper (focus on functional diversity) and Hubbel (focus on species diversity)\cite{Westoby2006}. Whilst the latter represents traditional approaches to understanding the natural world, Schimpers framework has received increased attention over the past few years. This paradigm shift is due to the compelling evidence that a focus on functional aspects of biological systems may yield refined understandings of the natural world than species-focused studies\cite{DeBoeck2017}.
+
 A functional approach to ecosystem processes can potentially explain what functional expressions allow said processes to be maintained in their structure despite perturbations\cite{DeBoeck2017,Truchy2015,Mace2014,Lavorel2002}. One of the most prominent tools of these 'Schimper' studies is the *functional trait frameworks*. The most important of these frameworks when understanding vegetation processes - such as vegetation memory - is that of **Plant Functional Traits (PFTs)**.  
 
 Functional traits capture a multitude of characteristics without the necessity for a focus on phylogenies of study organisms\cite{Nock2016} thus making landscape-scale studies required for identifying vegetation memory patterns far more feasible. The diverse range in which any given \textbf{\PFT} (see table \ref{tab:PFTTerm} for definitions of bold font terms relating to \PFT frameworks) can be expressed are representative of the diverse strategies for establishing, growing and reproducing of plants\cite{Laughlin2014}. Hence, understanding how plant functional traits enable plants to persist despite (a)biotic forcing is a promising first step to understanding ecosystem-scale responses to climate change.
 
 ### Terminology
-Whilst \PFTs have been linked individually to evolution\cite{Ackerly2003} and community composition patterns\cite{Laughlin2014,Lavorel2002}, a change in their expression has been found to be correlated with climate change patterns\cite{Wright2005} thus suggesting a causal link between extrinsic vegetation memory and \PFT expressions. In order to classify the way in which \PFTs are related to community functions, Nock et al. present the concept of (1) \textbf{Effect Traits}, and (2) \textbf{Response Traits}\cite{Nock2016}. Classifying \PFTs according to this framework can profoundly aid the understanding of their influence on spatio-temporal patterns of vegetation performance\cite{Lavorel2002,Mori2013}.
-
-Recent studies suggest that vegetation community functions are governed by integrated phenotypes, which can be regarded as specific combinations of individual \PFT ranges, instead of single \PFTs\cite{Bonser2006, Nock2016} thus calling for a scientific approach focussed on \textbf{\FDR} which can be identified via an approach in which \PFT values of each individual are placed within a multidimensional system with each axis representing the range of values for one specific \PFT\cite{Ordonez2015}. Just as with species oriented studies, a measure of richness alone may be insufficient to capture necessary information to understanding biological systems. Therefore, one may also want to use a measure of evenness which, in a functional biology setting, can be referred to as \textbf{\FDD} which is representative of how evenly dispersed data records are in multidimensional space.  
+Whilst \PFTs have been linked individually to evolution\cite{Ackerly2003} and community composition patterns\cite{Laughlin2014,Lavorel2002}, a change in their expression has been found to be correlated with climate change patterns\cite{Wright2005} thus theoretically suggesting a causal link between extrinsic vegetation memory and \PFT expressions. In order to classify the way in which \PFTs are related to community functions, Nock et al. present the concept of (1) \textbf{Effect Traits}, and (2) \textbf{Response Traits}\cite{Nock2016}. Classifying \PFTs according to this framework can profoundly aid the understanding of their influence on spatio-temporal patterns of vegetation performance\cite{Lavorel2002,Mori2013}. Effect traits determine how \PFTs alter ecosystem processes (predominantely driving post-disturbance recovery) whilst response traits largely affect how vegetation reacts to perturbations (thus signifiying resistance potential).
 
 \renewcommand{\arraystretch}{1}
 \begin{table*}[h!]
@@ -728,6 +733,8 @@ Recent studies suggest that vegetation community functions are governed by integ
   \label{tab:PFTTerm}%
 \end{table*}
 
+Recent studies suggest that vegetation community functions are governed by integrated phenotypes, which can be regarded as specific combinations of individual \PFT ranges, instead of single \PFTs\cite{Bonser2006, Nock2016} thus calling for a scientific approach focussed on \textbf{\FDR} which can be identified via an approach in which \PFT values of each individual are placed within a multidimensional system with each axis representing the range of values for one specific \PFT\cite{Ordonez2015}. Just as with species oriented studies, a measure of richness alone may be insufficient to capture necessary information to understanding biological systems. Therefore, one may also want to use a measure of evenness which, in a functional biology setting, can be referred to as \textbf{\FDD} which is representative of how evenly dispersed data records are in multidimensional space.  
+
 Recent studies in \PFT research have focussed heavily on methods of dimensionality reduction by identifying the \PFTs which capture a vast part of the global variation of plant function\cite{Laughlin2014,Diaz2015}. Díaz et al. identified:
 \begin{enumerate}
 \item \textit{Vegetative height} ($H$) an important criterion to accessing light resources
@@ -739,43 +746,76 @@ Recent studies in \PFT research have focussed heavily on methods of dimensionali
 \end{enumerate}
 as the most important \PFTs to understanding the global spectrum of plant functioning\cite{Diaz2015}. A similar framework has been established by Westoby \& Wright in which three important \PFT dimensions are recognised: (1) the leaf economic spectrum, (2) the seed size/mass spectrum, and (3) the height of the canopy at maturity\cite{Westoby2006}.
 
+\PFTs convey information as *snapshots* of reality as their data sets usually do not contain repeated measures of the same individuals over a period of time. Another set of metrics related to plant characteristics through time are \textbf{\LHTs} (see table \ref{tab:LHTTerm} for definitions of bold font terms relating to \LHT frameworks). Despite recording expressions of plant function, \LHTs capture different information than \PFTs and should thus be regarded as *complementary* to \PFTs. Prominent examples of \LHTs include measures relating to (1) **System Turnover**, (2) **Longevity**, (3) **Growth**, and (4) **Reproduction**.
+
+
+\renewcommand{\arraystretch}{1}
+\begin{table*}[h!]
+  \centering
+  \caption[Basic vocabulary of Life History Trait frameworks]{\textbf{Basic vocabulary of Life History Trait frameworks -} A few definitions that are key to the understanding of Life History Trait frameworks. Largely influenced by Salguero-Gómez et al\cite{Salguero-Gomez2016}.}
+    \begin{tabular}{|L{4cm}L{12.5cm}|}
+    \hline
+    \bfseries Term  & \bfseries Definition\\
+    \hline
+    \textbf{Life History Traits (LHTs)} & LHTs characterise life history processes of populations and thus identifying temporal aspects of their life cycles.\\ \hline  
+    \textbf{System Turnover} &  \\
+    \textit{Generation Time} & The time needed to fully replace a population by a new cohort. \\ \hdashline
+    \textbf{Longevity} & \\
+    \textit{Survivorship Curve} & Shape of age-specific survivorship curve type. \\ 
+    \textit{Age at Sexual Maturity} & Time it takes for an average individual of a population to become sexually reproductive. \\ \hdashline
+    \textbf{Growth} & \\ 
+    \textit{Progressive} & Mean probability to advance in life stages. \\ 
+    \textit{Retrogressive} & Mean probability to regress in life stages. \\ \hdashline
+    \textbf{Reproduction} & \\ 
+    \textit{Net Reproductive Rate} & Mean number of recruits produced by each individual in the population. \\
+    \textit{Degree of Iteroparity} & Spread of reproduction during the lifespan of an individual. \\ 
+    \textit{Mature Life Expectancy} & Time between age of sexual maturity and life expectancy. \\ \hline
+    \end{tabular}%
+  \label{tab:LHTTerm}%
+\end{table*}
+
+\clearpage
+
 ### Ecological Relevance  
 The positive effect of biodiversity on ecological stability has long been recorded\cite{DeBoeck2017} and even led to the formulation of prominent concepts like Yacchi's insurance hypothesis which postulates that the loss of a subset of species can be compensated for by the presence of other species given a sufficient overlap in functional aspects of both thus leading to a stabilisation of ecosystem processes\cite{Yachi1999}. 
 
 \begin{center}
-\textbf{\PFTs capture information about a variety of ecosystem processes.}\cite{Butler2017}
+\textbf{\PFTs and \LHTs capture information about a variety of ecosystem processes.}\cite{Butler2017}
 \end{center}
 
 Most studies to date have focussed on species diversity\cite{Vasilakopoulos2015,Cote2010,Brown2015}. Some made use of the concept of functional species\cite{Gunderson2000} which presents researchers with a species classification system that is vague at best due to loose definitions of where to draw the lines between functional species. Functional trait biology, which captures the functional diversity of biological systems, is often employed as an improvement to the functional species/type concept\cite{Munne-Bosch2013,Walter2013} as it eliminates the necessity of phylogenetic analyses\cite{Nock2016} and enables studies to capture intra-specific variation\cite{Violle2012,Dantas2013,Kattge2011}.
 
 \begin{center}
-\textbf{\PFTs can be captured irrespective of species relationships whilst presenting functional information at sub-species levels.}\cite{Violle2012,Dantas2013}
+\textbf{\PFTs and \LHTs can be captured irrespective of species relationships.}\cite{Dantas2013}
 \end{center}
 
-Thus, \PFTs make for \textit{highly informative} proxies of \textit{ecosystem functioning} which can be recorded across \textit{large spatial and temporal scales} since studies aren't constrained to a handful of species. Additionally, \PFTs represent an improved understanding of functional expressions of plant communities by \textit{expressing information at sub-species level}.
+Thus, \PFTs and \LHTs make for \textit{highly informative} proxies of \textit{ecosystem functioning} which can be recorded across \textit{large spatial and temporal scales} since studies aren't constrained to a handful of species. Additionally, \PFTs and represent an improved understanding of functional expressions of plant communities by \textit{expressing information at sub-species level}\cite{Violle2012}.
+
+Recent research based upon \LHT data, for example, has revealed robust trade-off axes in plant\cite{Salguero-Gomez2016,Salguero-Gomez2017} as well as animal life histories\cite{Capdevila2018,Healy2018}. These axes are usually referred to as the \textbf{\fsc}\cite{Salguero-Gomez2016,Healy2018,Salguero-Gomez2017,Paniw2018}. Information about \LHTs has been demonstrated to be of use in trying to understand biological responses to temporal phenomena\cite{Paniw2018} and should thus prove crucial in delineating causal, biological pathways to establishing vegetation memory. 
 
 
 ### Unifying Information on Plant Functional Traits
 \PFTs are usually recorded through individual trait campaigns or for single-study purposes. Combining \PFT information from these individual data sets can prove challenging due to different measurement practices and understandings of \PFTs. A comprehensive handbook on \PFT data collection practices by Pérez-Harguindeguy et al.\cite{Perez-Harguindeguy2013} presents an elegant solution to making \PFT data sets more comparable. Additionally, \PFT data sets have been aggregated into large data bases within online repositories such as:
 \begin{itemize}
 \item The \textbf{\TRY}\cite{Kattge2011} is data base of \PFT records connecting vegetation scientists across the globe and hosted by the \idiv. Within it's current release version (version 4) \TRY contains almost seven million \PFT records for 1,800 traits with about half of all records being geo-referenced\cite{TRYOnline}.
-\item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline} (see figure \ref{fig:BIEN4}).
+\item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline}.
 \end{itemize}
 
-\begin{figure}[h!]
-\resizebox{1\textwidth}{!}{\includegraphics[width=\linewidth]{3 - Figures/bien4.jpg}}
-\caption[BIEN PFT Coverage]{\textbf{\BIEN \PFT Coverage - }Geo-referenced records within version 4.1 of the \BIEN data base at logarithmic scale\cite{BIENOnline}.} 
-\label{fig:BIEN4}
-\end{figure}
+<!-- (see figure \ref{fig:BIEN4}) -->
+<!-- \begin{figure}[h!] -->
+<!-- \resizebox{1\textwidth}{!}{\includegraphics[width=\linewidth]{3 - Figures/bien4.jpg}} -->
+<!-- \caption[BIEN PFT Coverage]{\textbf{\BIEN \PFT Coverage - }Geo-referenced records within version 4.1 of the \BIEN data base at logarithmic scale\cite{BIENOnline}.}  -->
+<!-- \label{fig:BIEN4} -->
+<!-- \end{figure} -->
 
 \begin{itemize}
-\item The \textbf{\COMPADRE}\cite{Salguero-Gomez2015} contains \LHT, a subclass of \PFTs pertaining to life history characteristics (e.g. longevity, reproductive mode, etc.), driven matrix population models which produce important information about community processes through time based on records of different \LHTs\cite{Salguero-Gomez2016}. In its current release (version 4.0.1) it contains 7,024 matrix models\cite{COMPADREOnline}.
+\item The \textbf{\COMPADRE}\cite{Salguero-Gomez2015} contains \LHT, a subclass of \PFTs pertaining to life history characteristics (e.g. longevity, reproductive mode, etc.), driven matrix population models which produce important information about community processes through time based on records of different \LHTs\cite{Salguero-Gomez2016}. In its current release (version 5.0.0) it contains over 7,00 matrix models\cite{COMPADREOnline}.
 \end{itemize}
 
 Combining information from these data bases should result in a holistic view of global plant function as such an approach would unify \PFTs and \LHTs to further a spatio-temporal understanding of global plant function.
 
 ### Putting Plant Function on the Map
-Vegetation Memory patterns are inherently spatial phenomena\cite{DeKeersmaecker2015,Ogle2015,Vicente-Serrano2013,Liu2018}. So are patterns of plant functioning\cite{Ordonez2015}. Whilst the above mentioned data bases (\TRY, \BIEN, and \COMPADRE) contain vast amounts of geo-referenced \PFT and \LHT records, almost no comprehensive, gapless, and internally consistent global products of plant function are available\cite{Butler2017,Bruelheide2018}.  
+Vegetation memory patterns are inherently spatial phenomena\cite{DeKeersmaecker2015,Ogle2015,Vicente-Serrano2013,Liu2018}. So are patterns of plant functioning\cite{Ordonez2015}. Whilst the above mentioned data bases (\TRY, \BIEN, and \COMPADRE) contain vast amounts of geo-referenced \PFT and \LHT records, almost no comprehensive, gapless, and internally consistent global products of plant function are available\cite{Butler2017,Bruelheide2018}.  
 
 Currently, the most commonly used method for extrapolating \PFT records to local/global map products follows the methodology layed out by Ordonez \& Svenning\cite{Ordonez2015} which has species-specific \PFT means being combined with geo-referenced species occurrences (a conceptual depiction of this can be seen in figure \ref{fig:PFTCombining}).
 
@@ -789,7 +829,9 @@ Species occurrence data - referred to as **floral data** in the case of plant oc
 
 Unfortunately, this approach is heavily reliant on geo-referenced occurrence records which are subject to sampling bias\cite{Sandel2015} and renders intra-specific expressions of \PFTs virtually non-existent as species are expressed via single mean values for each \PFT. Zoological studies have resolved these issues by recording relative abundances of species in addition to occurrence records\cite{Newbold2012}.  
 
-Recent approaches in \PFT ecology have seen the development of mapping procedures of \PFTs according to abiotic conditions through linear models with spatial components\cite{Bruelheide2018} and complex Bayesian methods\cite{Butler2017}.
+Recent approaches in \PFT ecology have seen the development of mapping procedures of \PFTs according to abiotic conditions through linear models with spatial components\cite{Bruelheide2018} and complex Bayesian methods\cite{Butler2017}. No such method is available for extrapolating \LHT records to broader coverage as these come with an added dimension of time.
+
+Despite the obvious short-commings of this mapping method, including \PFT and \LHT data to remote sensing vegetation memory studies is a novel approach in itself. This is built around the notion of vegetation memory being driven not only by antecedent conditions but also by functional characteristics of the local vegetation. Making use of the above \PFT extrapolation method thus serves as an exploratory analyses of how well it performs when trying to extract causal pathways leading to vegetation memory.
 
 \clearpage 
 
@@ -802,8 +844,8 @@ Remote sensing analyses have been the key to identifying vegetation memory patte
 
 To do so, I am going to answer the following research questions:
 \begin{enumerate}
-\item \textit{Which variables (climate and biological) make up robust vegetation memory metrics?}
-\item \textit{How can we distinguish between intrinsic and extrinsic memory?}
+\item \textit{Using climate reanalysis data, which variables make up robust vegetation memory metrics?}
+\item \textit{How well can we distinguish between intrinsic and extrinsic memory?}
 \end{enumerate}
 \vspace{.1cm}
 
@@ -847,7 +889,7 @@ Whilst a vast arsenal of \vis are available to macroecologists (see Cammarano et
 #### Normalised Difference Vegetation Index (NDVI)
 The \ndvi has been selected as a proxy of vegetation characteristics in this study due to (1) its nature as an information criterion of biomass\cite{Fuller1996} and vegetation cover\cite{Cammarano2014} (indicators of vegetation performance and composition), (2) the availability of a long time series data with global coverage\cite{Pinzon2014}, and (3) its demonstrated utility in various ecosystem studies\cite{Garroutte2016} including assessments of vegetation sensitivity and memory\cite{Vicente-Serrano2013,Seddon2016,DeKeersmaecker2015}. See table \ref{tab:NDVICore} for an overview of the core characteristics of the \ndvi data set.
 
-Rouse et. al\cite{Rouse1974} first introduced the \ndvi in 1974 and initially coined it 'Vegetation Index'. The name was subsequently changed to \ndvi when other \vis were proposed in the ensuing years alongside the advent of remote sensing studies which relied on \vis\cite{Matsushita2007,Justice1985,Nioti2015}.  
+Rouse et al.\cite{Rouse1974} first introduced the \ndvi in 1974 and initially coined it 'Vegetation Index'. The name was subsequently changed to \ndvi when other \vis were proposed in the ensuing years alongside the advent of remote sensing studies which relied on \vis\cite{Matsushita2007,Justice1985,Nioti2015}.  
 
 The \ndvi is a composite \vi that factors in measurements in the near infra-red wave band (NIR, 0.58-0.68 $\mu$m) and the red wave band (RED, 0.75-1.10 $\mu$m). These bands belong to the spectrum of light that is absorbed by chlorophyll and thus provide information on green vegetation\cite{Hao2008}. The formula for \ndvi is as follows\cite{Evrendilek2008,Hao2008}:
 
@@ -855,7 +897,7 @@ The \ndvi is a composite \vi that factors in measurements in the near infra-red 
 NDVI = \frac{\rho\textsubscript{NIR} - \rho\textsubscript{RED}}{\rho\textsubscript{NIR} + \rho\textsubscript{RED}}
 \end{equation}
 
-with $\rho_{NIR}$ being the reflection in the NIR band and $\rho_{RED}$ being the reflection in the RED band. The \ndvi is bound between 0 and 1 with higher values representing denser vegetation. For a more detailed mathematical background on the calculation of \ndvi scores see Matsushita et. al\cite{Matsushita2007}.  
+with $\rho_{NIR}$ being the reflection in the NIR band and $\rho_{RED}$ being the reflection in the RED band. The \ndvi is bound between 0 and 1 with higher values representing denser vegetation. For a more detailed mathematical background on the calculation of \ndvi scores see Matsushita et al\cite{Matsushita2007}.  
 
 \ndvi data sets are readily available via the \gimms. For this study the GIMMS3g data set was used (available at \url{https://ecocast.arc.nasa.gov/data/pub/gimms/3g.v1/}), which provides \avhrr NDVI data as 15-day maximum-value composites from 1982 to 2015 at $0.083^\circ \times 0.083^\circ$ resolution\cite{Higgins2016}. See figure \ref{fig:NDVIOverview} for a representation of one such global monthly composite. The data was processed in `R`, downloaded and compiled into monthly composites using the raster\cite{R-Raster} and `gimms` package\cite{R-Gimms}. \ref{rGimms} contains the `R`-code used to process the data. 
 
@@ -1063,11 +1105,14 @@ plot(RawTry_ras[[2]], col = col.tair, add = TRUE, legend.width = 1.5, legend.shr
 ```
 
 #### COMPADRE
-\PFTs convey information as *snapshots* of reality as their data sets usually do not contain repeated measures of the same individuals over a period of time. Another set of metrics related to plant characteristics through time are \textbf{\LHTs}. As such \LHTs capture different information than \PFTs and should thus be regarded as *complementary* to \PFTs.
+<!-- \PFTs convey information as *snapshots* of reality as their data sets usually do not contain repeated measures of the same individuals over a period of time. Another set of metrics related to plant characteristics through time are \textbf{\LHTs}. As such \LHTs capture different information than \PFTs and should thus be regarded as *complementary* to \PFTs. -->
 
-\LHT information for plants and animals can be retrieved via \COMPADRE; an extensive data base of different species and plot-scale ecosystems at different locations around the Earth\cite{Salguero-Gomez2015}. \COMPADRE is built around observational data and matrix models\cite{COMPADREGuide} which can be used to extract valuable information about temporal processes in biological communities\cite{Jongejans,DeKroon2008}. Recent research based upon this data base has revealed robust trade-off axes in plant\cite{Salguero-Gomez2016,Salguero-Gomez2017} as well as animal life histories\cite{Capdevila2018,Healy2018}. These axes are usually referred to as the \textbf{\fsc}\cite{Salguero-Gomez2016,Healy2018,Salguero-Gomez2017,Paniw2018}. 
+<!-- \LHT information for plants and animals can be retrieved via \COMPADRE; an extensive data base of different species and plot-scale ecosystems at different locations around the Earth\cite{Salguero-Gomez2015}. \COMPADRE is built around observational data and matrix models\cite{COMPADREGuide} which can be used to extract valuable information about temporal processes in biological communities\cite{Jongejans,DeKroon2008}. Recent research based upon this data base has revealed robust trade-off axes in plant\cite{Salguero-Gomez2016,Salguero-Gomez2017} as well as animal life histories\cite{Capdevila2018,Healy2018}. These axes are usually referred to as the \textbf{\fsc}\cite{Salguero-Gomez2016,Healy2018,Salguero-Gomez2017,Paniw2018}.  -->
 
-Information about \LHTs has been demonstrated to be of use in trying to understand biological responses to temporal phenomena\cite{Paniw2018} and should thus prove crucial in delineating causal, biological pathways to establishing vegetation memory. The outputs of \COMPADRE matrix models are manifold\cite{Salguero-Gomez2017} offering access to a host of biologically relevant proxies of population processes. For this study, I have selected the following \COMPADRE outputs as the most likely to be related to vegetation memory characteristics:
+<!-- Information about \LHTs has been demonstrated to be of use in trying to understand biological responses to temporal phenomena\cite{Paniw2018} and should thus prove crucial in delineating causal, biological pathways to establishing vegetation memory. The outputs of \COMPADRE matrix models are manifold\cite{Salguero-Gomez2017} offering access to a host of biologically relevant proxies of population processes.  -->
+
+
+For this study, I have selected the following \COMPADRE outputs as the most likely to be related to vegetation memory characteristics:
 
 \begin{enumerate}
 \item The \textbf{Fast-Slow Continuum (FSC)} is a \pca-based approach whose two main axes capture over 60\% of the variation in plant life history strategies\cite{Salguero-Gomez2017}. I hypothesize that expressions of the \fsc will strongly interact with vegetation memory effects due to the holistic nature of the \fsc and the temporal nature of both \LHTs and vegetation memory effects. The two axes read as follows:
@@ -1385,7 +1430,7 @@ grid.draw(legend)
 
 \begin{figure}[t!]
 \centering \includegraphics[width=1\linewidth]{3 - Figures/PCAREG.jpg}
-\caption[PCA Regression Coefficients]{\textbf{PCA Regression Coefficients - } Theoretical back-calculation of regression coefficients from \pca regression coefficients as lined out by Zuur et. al\cite{Zuur2007}. The data presented here (\pca loadings, \pca model coefficients, and final variable coefficients) represents a single pixel in the Iberian dryland region (see figure \ref{fig:ExMod}).}
+\caption[PCA Regression Coefficients]{\textbf{PCA Regression Coefficients - } Theoretical back-calculation of regression coefficients from \pca regression coefficients as lined out by Zuur et al\cite{Zuur2007}. The data presented here (\pca loadings, \pca model coefficients, and final variable coefficients) represents a single pixel in the Iberian dryland region (see figure \ref{fig:ExMod}).}
 \label{fig:PCAREG}
 \end{figure}
 
