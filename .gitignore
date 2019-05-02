@@ -4,6 +4,7 @@
 # But not these files...
 !.gitignore
 !D0_Manuscript.pdf
+!D0_Manuscript_Scaled.pdf
 !D0_Manuscript.Rmd
 !y - Codes/*
 !y - Codes/*/*
