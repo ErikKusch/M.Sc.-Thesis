@@ -303,21 +303,89 @@ Tryres <- function(Region, SoilLayer, Variable){
   TryDis <- brick(paste(Dir.TRY, TryFiles[2], sep="/"))
   Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
   Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[LocVar]]
-  data <- data.frame(Height = c(values(TryRaw[[1]]), values(TryDis[[1]])), 
+  Memory_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
+  data_df <- data.frame(Height = c(values(TryRaw[[1]]), values(TryDis[[1]])), 
                      Nitrogen = c(values(TryRaw[[2]]), values(TryDis[[2]])),
                      Qsoil = c(values(Alter_ras), values(Alter_ras)),
+                     Memory = c(values(Memory_ras), values(Memory_ras)),
                      TRY = c(rep("Raw", length(values(Alter_ras))), rep("Mapped", length(values(Alter_ras)))))
-  data_df <- na.omit(data)
-  VarTitle <- c("NDVI [t-1] Coefficients", "Qsoil", "Air Tmperature Coefficients")[(LocVar-1)]
+
+  VarTitle <- c("NDVI [t-1] Coefficients", "Qsoil", "Air Temperature Coefficients")[(LocVar-1)]
   if(LocVar == 3){
     VarTitle <- c("Soil Moisture (0-7cm) Coefficients", "Soil Moisture (7-28cm) Coefficients", "Soil Moisture (28-100cm) Coefficients", "Soil Moisture (100-255cm) Coefficients")[SoilLayer]
+  }
+  if(Variable != "Qsoil"){
+   Output <- as.list(rep(NA, 16)) 
+  }else{
+   Output <- as.list(rep(NA, 32)) 
   }
 p1 <- ggplot(data_df, aes(x = Height, y = Qsoil, col = TRY)) +
   geom_point(shape = ".", alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab("Vegetative Height") + ylab(VarTitle) + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm") + scale_color_manual(values=c("lightgreen", "black"))
 print(p1)
+  Output[[1]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,1]
+  Output[[2]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,4]
+  Output[[3]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,1]
+  Output[[4]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,4]
+  Output[[5]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,1]
+  Output[[6]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,4]
+  Output[[7]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,1]
+  Output[[8]] <- summary(lm(Qsoil ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,4]
 p2 <- ggplot(data_df, aes(x = Nitrogen, y = Qsoil, col = TRY)) +
   geom_point(shape = ".", alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab("Leaf Nitrogen Content") + ylab(VarTitle) + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm") + scale_color_manual(values=c("orange", "black"))
 print(p2)
+  Output[[9]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,1]
+  Output[[10]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,4]
+  Output[[11]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,1]
+  Output[[12]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,4]
+  Output[[13]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,1]
+  Output[[14]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,4]
+  Output[[15]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,1]
+  Output[[16]] <- summary(lm(Qsoil ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,4]
+  if(Variable == "Qsoil"){
+    Output[[17]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,1]
+  Output[[18]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,4]
+  Output[[19]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,1]
+  Output[[20]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,4]
+  Output[[21]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,1]
+  Output[[22]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,4]
+  Output[[23]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,1]
+  Output[[24]] <- summary(lm(Memory ~ Height, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,4]
+  Output[[25]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,1]
+  Output[[26]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][1,4]
+  Output[[27]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,1]
+  Output[[28]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Raw"),]))[["coefficients"]][2,4]
+  Output[[29]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,1]
+  Output[[30]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][1,4]
+  Output[[31]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,1]
+  Output[[32]] <- summary(lm(Memory ~ Nitrogen, data = data_df[which(data_df$TRY == "Mapped"),]))[["coefficients"]][2,4]
+  }
+  return(Output)
+}
+```
+
+```{r TRYresTab, echo = FALSE}
+TryTab <- function(ModelCoeffs, SoilLayer, Region){
+  ModelCoeffs <- unlist(ModelCoeffs)
+tabout <- data.frame(Column = ModelCoeffs[1:4])
+starts <- seq(1,length(ModelCoeffs), by = 4)
+for(i in 2:(length(ModelCoeffs)/4)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
+}
+colnames(tabout) <- rep(c("R", "M"), 4)
+rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
+Short <- paste("PFTs and Qsoil", SoilLayer, " Memory (", Region, ")", sep="")
+Long <- paste("Coefficients of linear regressions of Qsoil", SoilLayer, " memory coefficients against PFT data (vegetative height H, and leaf nitrogen mass Nmass) both as raw geo-referenced data (R), and extended maps of species-specific trait means (M).", sep="")
+kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+kab <- add_header_above(kable_input = kab, header = c(" " = 1, "H" = 2, "Nmass" = 2,
+                                                      "H" = 2, "Nmass" = 2), italic = FALSE, align = 'c')
+kab <- add_header_above(kable_input = kab, header = c(" " = 1, "Qsoil" = 4, "Memory" = 4), bold = TRUE, align = 'c')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
+print(kab)
 }
 ```
 
@@ -375,10 +443,17 @@ Comres <- function(Region, Variable){
   )
   Variable <- VarHold
   plot_df <- na.omit(plot_df)
-  leg <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c("purple4", "purple2", "violetred2", "violet", "blue4", "blue2", "cyan4", "cyan2", "forestgreen", "red")) + guides(colour = guide_legend(ncol = 3, override.aes = list(size=20))) + labs(col='Memory Characteristics')
-  plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c("purple4", "purple2", "violetred2", "violet", "blue4", "blue2", "cyan4", "cyan2", "forestgreen", "red")) + theme(legend.position = "none")
+  Output <- as.list(rep(NA,10))
+  plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c("purple4", "purple2", "violetred2", "violet", "blue4", "blue2", "cyan4", "cyan2", "forestgreen", "red"))
   print(plot)
-  return(leg)
+  Idents <- c("t-1", "Tair", paste("Qsoil", 1:4, sep=""), paste("LagSoil", 1:4, sep=""))
+  for(i in 0:(length(Idents)-1)){
+    Output[[(4*i+1)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][1,1]
+    Output[[(4*i+2)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][1,4]
+    Output[[(4*i+3)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][2,1]
+    Output[[(4*i+4)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][2,4]
+  }
+  return(list(leg,Output))
 }
 ```
 
@@ -392,6 +467,7 @@ Medians <- as.vector(Medians[1,c(2:4)])
 Utab <- Utab[,-1] 
 colnames(Utab) <- c("NDVI [t-1]", paste("Qsoil", SoilLayer, sep=""), "Tair")
 rownames(Utab)  <- c(round(Medians,2))
+Utab <- round(Utab, 2)
 Short <- paste("Mann-Whitney U-Test (", Region, ", Qsoil", SoilLayer, " Model)", sep="")
 Long <- paste("Rownames represent median values of vegetation memory coefficients contained in column names. U-Test statistics of vegetation memory coefficient values are contained within the upper-righthand cells. $p$-values belonging to these $U$-values are represented in the lower-lefthand block of cells.")
 kab <- kable(Utab, 
@@ -400,6 +476,7 @@ kab <- kable(Utab,
             caption.short = Short,
             escape = FALSE,
             format = 'latex')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
 print(kab)
 }
 ```
@@ -413,6 +490,7 @@ Medians <- read.xlsx(file = paste(Dir.Reg, Files, sep="/"), sheetName = "Variabl
 Utab <- Utab[,-1] 
 colnames(Utab) <- paste("Qsoil", c(1:4), sep="")
 rownames(Utab)  <- c(round(Medians,4))
+Utab <- round(Utab, 2)
 Short <- paste("Mann-Whitney U-Test (", Region, ", Qsoil Layers)", sep="")
 Long <- paste("Rownames represent median values of Qsoil vegetation memory coefficients contained in column names. U-Test statistics of vegetation memory coefficient values are contained within the upper-righthand cells. $p$-values belonging to these $U$-values are represented in the lower-lefthand block of cells.")
 kab <- kable(Utab, 
@@ -421,6 +499,31 @@ kab <- kable(Utab,
             caption.short = Short,
             escape = FALSE,
             format = 'latex')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
+print(kab)
+}
+```
+
+```{r COMPADTab, echo = FALSE}
+CompadTab <- function(Region, ModelCoeffs, Variable){
+  tabout <- data.frame(Column = ModelCoeffs[1:4])
+starts <- seq(1,length(ModelCoeffs), by = 4)
+for(i in 2:(length(ModelCoeffs)/4)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
+}
+rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
+tabout <- round(tabout,2)
+colnames(tabout) <- c("t-1", "Tair", 1:4, 1:4)
+Short <- paste("COMPADRE ", Variable, " and Vegetation Memory (", Region, ")", sep="")
+Long <- paste("Linear regression coefficients of COMPADRE data and vegetation memory coefficients.", sep="")
+kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+kab <- add_header_above(kable_input = kab, header = c(" " = 3, "Qsoil" = 4, "Memory Length" = 4), bold = TRUE, align = 'c')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
 print(kab)
 }
 ```
@@ -1570,50 +1673,53 @@ Like with \PFTs, I use regression models to assess causal links between \LHTs ex
 \label{sResults}
 
 ## Iberian Region
+
 ### Vegetation Memory
+
 #### Memory Models
 
 \paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 
-Description
+table \ref{tab:IBRU1}
+figure \ref{fig:IBRVegMem1}
+figure \ref{fig:IBRVarPar1}
 
 \clearpage
 
-```{r IBRVegMem1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 't-1', 'Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Redion; Qsoil1) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. \\label{fig:IBRVegMem1}", fig.scap="Vegetation Memory Coefficients (Iberian Redion; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 1)
 ```
 
-\clearpage
 ```{r IBRU1, echo = FALSE, results = 'asis'}
 Ures(Region = "Iberian Region", SoilLayer = 1)
 ```
 
-\ref{tab:IBRU1}
+\clearpage
 
-```{r IBRVarPar1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVarPar1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Redion; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. \\label{fig:IBRVarPar1}", fig.scap="Variance Partitioning (Iberian Redion; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Iberian Region", SoilLayer = 1)
 ```
-
-
 
 \clearpage
 
 \paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
 
-Description
+table \ref{tab:IBRU2}
+figure \ref{fig:IBRVegMem2}
+figure \ref{fig:IBRVarPar2}
 
-```{r IBRVegMem2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Redion; Qsoil2) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. \\label{fig:IBRVegMem2}", fig.scap="Vegetation Memory Coefficients (Iberian Redion; Qsoil2)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 2)
 ```
 
-\clearpage
 ```{r IBRU2, echo = FALSE, results = 'asis'}
 Ures(Region = "Iberian Region", SoilLayer = 2)
 ```
 
-\ref{tab:IBRU2}
 
-```{r IBRVarPar2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+\clearpage
+
+```{r IBRVarPar2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Redion; Qsoil2) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. \\label{fig:IBRVarPar2}", fig.scap="Variance Partitioning (Iberian Redion; Qsoil2)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Iberian Region", SoilLayer = 2)
 ```
 
@@ -1622,20 +1728,21 @@ VarParRes(Region = "Iberian Region", SoilLayer = 2)
 
 \paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
 
-Description
+table \ref{tab:IBRU3}
+figure \ref{fig:IBRVegMem3}
+figure \ref{fig:IBRVarPar3}
 
-```{r IBRVegMem3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Redion; Qsoil3) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. \\label{fig:IBRVegMem3}", fig.scap="Vegetation Memory Coefficients (Iberian Redion; Qsoil3)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 3)
 ```
 
-\clearpage
 ```{r IBRU3, echo = FALSE, results = 'asis'}
 Ures(Region = "Iberian Region", SoilLayer = 3)
 ```
 
-\ref{tab:IBRU3}
+\clearpage
 
-```{r IBRVarPar3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVarPar3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Redion; Qsoil3) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. \\label{fig:IBRVarPar3}", fig.scap="Variance Partitioning (Iberian Redion; Qsoil3)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Iberian Region", SoilLayer = 3)
 ```
 
@@ -1644,20 +1751,21 @@ VarParRes(Region = "Iberian Region", SoilLayer = 3)
 
 \paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
 
-Description
+table \ref{tab:IBRU4}
+figure \ref{fig:IBRVegMem4}
+figure \ref{fig:IBRVarPar4}
 
-```{r IBRVegMem4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVegMem4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Redion; Qsoil4) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. \\label{fig:IBRVegMem4}", fig.scap="Vegetation Memory Coefficients (Iberian Redion; Qsoil4)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 4)
 ```
 
-\clearpage
 ```{r IBRU4, echo = FALSE, results = 'asis'}
 Ures(Region = "Iberian Region", SoilLayer = 4)
 ```
 
-\ref{tab:IBRU4}
+\clearpage
 
-```{r IBRVarPar4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBRVarPar4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Redion; Qsoil4) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. \\label{fig:IBRVarPar4}", fig.scap="Variance Partitioning (Iberian Redion; Qsoil4)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Iberian Region", SoilLayer = 4)
 ```
 
@@ -1666,49 +1774,110 @@ VarParRes(Region = "Iberian Region", SoilLayer = 4)
 
 #### Memory Coefficients
 
-```{r IBLayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+table \ref{tab:IBRQsoilU}
+figure \ref{fig:IBLayers}
+
+```{r IBLayers, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Region, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:IBRVegMem1}, \\ref{fig:IBRVegMem2}, \\ref{fig:IBRVegMem3}, and \\ref{fig:IBRVegMem4} and have been scaled to be represented on the same colour axis for comparability. \\label{fig:IBLayers}", fig.scap="Vegetation Memory Coefficients (Iberian Region, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 SoilLayersRes(Region = "Iberian Region")
 ```
-
-\clearpage
 
 ```{r IBRQsoilU, echo = FALSE, results = 'asis'}
 UQsoilres(Region = "Iberian Region")
 ```
 
-\ref{tab:IBRQsoilU}
-
 \clearpage
 
 #### Vegetation Memory Sensitivity
 
-Coefficients vs mean of qsoil 1-4, tair, and ndvi + lags vs means?
+\paragraph*{Intrisic Memory and Air Temperature}  \hspace{.5cm}
 
+figure \ref{fig:IBPatCausRes}
 
-```{r IBPatCausRes, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Lag', 't-1'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Output <- PatcausRes(Region = "Iberian Region", SoilLayer = 1, SoilOnly = FALSE)
+```{r IBPatCausRes, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('NDVI t-1', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (NDVI t-1 and Tair, Iberian Region) -} Vegetation memory coefficients of figure \\ref{fig:IBRVegMem1} plotted against mean intrinsic and extrinsic drivers (see figure \\ref{fig:IBPDataOverview}). \\label{fig:IBPatCausRes}", fig.scap="Vegetation Memory Sensitivity (NDVI t-1 and Tair, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPatCauseRes <- PatcausRes(Region = "Iberian Region", SoilLayer = 1, SoilOnly = FALSE)
 ```
 
-\ndvi - $Intercept = `r Output[[1]]`$ ($p = `r Output[[2]]`$); $r = `r Output[[3]]`$ ($p = `r Output[[4]]`$)
+\ndvi - $Intercept = `r IBPatCauseRes[[1]]`$ ($p = `r IBPatCauseRes[[2]]`$); $r = `r IBPatCauseRes[[3]]`$ ($p = `r IBPatCauseRes[[4]]`$)
+
+\tair - $Intercept = `r IBPatCauseRes[[5]]`$ ($p = `r IBPatCauseRes[[6]]`$); $r = `r IBPatCauseRes[[7]]`$ ($p = `r IBPatCauseRes[[8]]`$)
+
+\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPatCausRes1}
+
+```{r IBPatCausRes1, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('Memory Length', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil1, Iberian Region) -} \\qsoila vegetation memory coefficients and \\qsoila memory length of figure \\ref{fig:IBRVegMem1} plotted against mean \\qsoila records (see figure \\ref{fig:IBPDataOverview}). \\label{fig:IBPatCausRes1}", fig.scap="Vegetation Memory Sensitivity (Qsoil1, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPatCauseRes1 <- PatcausRes(Region = "Iberian Region", SoilLayer = 1, SoilOnly = TRUE)
+```
+
+Memory Length - $Intercept = `r IBPatCauseRes1[[1]]`$ ($p = `r IBPatCauseRes1[[2]]`$); $r = `r IBPatCauseRes1[[3]]`$ ($p = `r IBPatCauseRes1[[4]]`$)
+
+\qsoila - $Intercept = `r IBPatCauseRes1[[5]]`$ ($p = `r IBPatCauseRes1[[6]]`$); $r = `r IBPatCauseRes1[[7]]`$ ($p = `r IBPatCauseRes1[[8]]`$)
 
 \clearpage
-```{r IBPatCausRes1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Output <- PatcausRes(Region = "Iberian Region", SoilLayer = 1, SoilOnly = TRUE)
+
+\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPatCausRes2}
+
+```{r IBPatCausRes2, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('Memory Length', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil2, Iberian Region) -} \\qsoilb vegetation memory coefficients and \\qsoilb memory length of figure \\ref{fig:IBRVegMem2} plotted against mean \\qsoilb records (see figure \\ref{fig:IBPDataOverview}). \\label{fig:IBPatCausRes2}", fig.scap="Vegetation Memory Sensitivity (Qsoil2, Iberian Region)", ache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPatCauseRes2 <- PatcausRes(Region = "Iberian Region", SoilLayer = 2, SoilOnly = TRUE)
 ```
 
-Memory Length - $Intercept = `r Output[[1]]`$ ($p = `r Output[[2]]`$); $r = `r Output[[3]]`$ ($p = `r Output[[4]]`$)
+Memory Length - $Intercept = `r IBPatCauseRes2[[1]]`$ ($p = `r IBPatCauseRes2[[2]]`$); $r = `r IBPatCauseRes2[[3]]`$ ($p = `r IBPatCauseRes2[[4]]`$)
 
-```{r IBPatCausRes2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Output <- PatcausRes(Region = "Iberian Region", SoilLayer = 2, SoilOnly = TRUE)
+\qsoilb - $Intercept = `r IBPatCauseRes2[[5]]`$ ($p = `r IBPatCauseRes2[[6]]`$); $r = `r IBPatCauseRes2[[7]]`$ ($p = `r IBPatCauseRes2[[8]]`$)
+
+\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPatCausRes3}
+
+```{r IBPatCausRes3, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('Memory Length', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil3, Iberian Region) -} \\qsoilc vegetation memory coefficients and \\qsoilc memory length of figure \\ref{fig:IBRVegMem3} plotted against mean \\qsoilc records (see figure \\ref{fig:IBPDataOverview}). \\label{fig:IBPatCausRes3}", fig.scap="Vegetation Memory Sensitivity (Qsoil3, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPatCauseRes3 <- PatcausRes(Region = "Iberian Region", SoilLayer = 3, SoilOnly = TRUE)
 ```
+
+Memory Length - $Intercept = `r IBPatCauseRes3[[1]]`$ ($p = `r IBPatCauseRes3[[2]]`$); $r = `r IBPatCauseRes3[[3]]`$ ($p = `r IBPatCauseRes3[[4]]`$)
+
+\qsoilc - $Intercept = `r IBPatCauseRes3[[5]]`$ ($p = `r IBPatCauseRes3[[6]]`$); $r = `r IBPatCauseRes3[[7]]`$ ($p = `r IBPatCauseRes3[[8]]`$)
 
 \clearpage
-```{r IBPatCausRes3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Output <- PatcausRes(Region = "Iberian Region", SoilLayer = 3, SoilOnly = TRUE)
+
+\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPatCausRes4}
+
+```{r IBPatCausRes4, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('Memory Length', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil4, Iberian Region) -} \\qsoild vegetation memory coefficients and \\qsoild memory length of figure \\ref{fig:IBRVegMem4} plotted against mean \\qsoila records (see figure \\ref{fig:IBPDataOverview}). \\label{fig:IBPatCausRes4}", fig.scap="Vegetation Memory Sensitivity (Qsoil4, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPatCauseRes4 <- PatcausRes(Region = "Iberian Region", SoilLayer = 4, SoilOnly = TRUE)
 ```
 
-```{r IBPatCausRes4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Output <- PatcausRes(Region = "Iberian Region", SoilLayer = 4, SoilOnly = TRUE)
+Memory Length - $Intercept = `r IBPatCauseRes4[[1]]`$ ($p = `r IBPatCauseRes4[[2]]`$); $r = `r IBPatCauseRes4[[3]]`$ ($p = `r IBPatCauseRes4[[4]]`$)
+
+\qsoild - $Intercept = `r IBPatCauseRes4[[5]]`$ ($p = `r IBPatCauseRes4[[6]]`$); $r = `r IBPatCauseRes4[[7]]`$ ($p = `r IBPatCauseRes4[[8]]`$)
+
+\paragraph*{Summary}  \hspace{.5cm}
+
+table \ref{tab:IBPatCauseTab}
+
+```{r IBPatCauseTab, results = 'asis', echo = FALSE}
+ModelCoeffs <- c(IBPatCauseRes, IBPatCauseRes1, IBPatCauseRes2, IBPatCauseRes3, IBPatCauseRes4)
+ModelCoeffs <- unlist(ModelCoeffs)
+tabout <- data.frame(Column = ModelCoeffs[1:4])
+starts <- seq(1,length(ModelCoeffs), by = 4)
+for(i in 2:(length(ModelCoeffs)/4)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
+}
+colnames(tabout) <- c("t-1", "Tair", "1", "2", "3", "4", "1", "2", "3", "4")
+rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
+Short <- paste("Vegetation Memory Sensitivity (Iberian Region)", sep="")
+Long <- paste("Coefficients of linear regressions of vegetation sensitivity across the Iberian Region.", sep="")
+kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+kab <- add_header_above(kable_input = kab, header = c(" " = 3, "Qsoil" = 4, "Memory" = 4), bold = TRUE, align = 'c')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
+print(kab)
 ```
 
 \clearpage
@@ -1717,50 +1886,269 @@ Output <- PatcausRes(Region = "Iberian Region", SoilLayer = 4, SoilOnly = TRUE)
 
 #### Plant Functional Traits
 
-```{r IBPFT1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "t-1")
+\paragraph*{Intrinsic Memory}  \hspace{.5cm}
+
+figure \ref{fig:IBPFT1}
+
+```{r IBPFT1, echo = FALSE, fig.width = 17, fig.height = 6, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Intrinsic Memory (Iberian Region) -} Intrinsic Memory (NDVI t-1, figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). \\label{fig:IBPFT1}", fig.scap="PFTs and Intrinsic Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPFT1 <- Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "t-1")
 ```
 
-```{r IBPFT2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Tair")
+\vh (raw) - $Intercept = `r IBPFT1[[1]]`$ ($p = `r IBPFT1[[2]]`$); $r = `r IBPFT1[[3]]`$ ($p = `r IBPFT1[[4]]`$)
+
+\vh (mapped) - $Intercept = `r IBPFT1[[5]]`$ ($p = `r IBPFT1[[6]]`$); $r = `r IBPFT1[[7]]`$ ($p = `r IBPFT1[[8]]`$)
+
+\nmass (raw) - $Intercept = `r IBPFT1[[9]]`$ ($p = `r IBPFT1[[10]]`$); $r = `r IBPFT1[[11]]`$ ($p = `r IBPFT1[[12]]`$)
+
+\nmass (mapped) - $Intercept = `r IBPFT1[[13]]`$ ($p = `r IBPFT1[[14]]`$); $r = `r IBPFT1[[15]]`$ ($p = `r IBPFT1[[16]]`$)
+
+\clearpage
+
+\paragraph*{Air Temperature}  \hspace{.5cm}
+
+figure \ref{fig:IBPFT2}
+
+```{r IBPFT2, echo = FALSE, fig.width = 17, fig.height = 6, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Tair Memory (Iberian Region) -} Tair Memory (figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). \\label{fig:IBPFT2}", fig.scap="PFTs and Tair Memory (Iberian Region)",  cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPFT2 <- Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Tair")
+```
+
+\vh (raw) - $Intercept = `r IBPFT2[[1]]`$ ($p = `r IBPFT2[[2]]`$); $r = `r IBPFT2[[3]]`$ ($p = `r IBPFT2[[4]]`$)
+
+\vh (mapped) - $Intercept = `r IBPFT2[[5]]`$ ($p = `r IBPFT2[[6]]`$); $r = `r IBPFT2[[7]]`$ ($p = `r IBPFT2[[8]]`$)
+
+\nmass (raw) - $Intercept = `r IBPFT2[[9]]`$ ($p = `r IBPFT2[[10]]`$); $r = `r IBPFT2[[11]]`$ ($p = `r IBPFT2[[12]]`$)
+
+\nmass (mapped) - $Intercept = `r IBPFT2[[13]]`$ ($p = `r IBPFT2[[14]]`$); $r = `r IBPFT2[[15]]`$ ($p = `r IBPFT2[[16]]`$)
+
+\clearpage
+
+\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPFT3}
+table \ref{tab:IBPFTTab3}
+
+```{r IBPFT3, echo = FALSE, fig.width = 17, fig.height = 10, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil1 Memory (Iberian Region) -} \\qsoila Memory (figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). \\label{fig:IBPFT3}", fig.scap="PFTs and Qsoil1 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPFT3 <- Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Qsoil")
+```
+
+\vh (raw) - $Intercept = `r IBPFT3[[1]]`$ ($p = `r IBPFT3[[2]]`$); $r = `r IBPFT3[[3]]`$ ($p = `r IBPFT3[[4]]`$)
+
+\vh (mapped) - $Intercept = `r IBPFT3[[5]]`$ ($p = `r IBPFT3[[6]]`$); $r = `r IBPFT3[[7]]`$ ($p = `r IBPFT3[[8]]`$)
+
+\nmass (raw) - $Intercept = `r IBPFT3[[9]]`$ ($p = `r IBPFT3[[10]]`$); $r = `r IBPFT3[[11]]`$ ($p = `r IBPFT3[[12]]`$)
+
+\nmass (mapped) - $Intercept = `r IBPFT3[[13]]`$ ($p = `r IBPFT3[[14]]`$); $r = `r IBPFT3[[15]]`$ ($p = `r IBPFT3[[16]]`$)
+
+```{r IBPFTTab3, results = 'asis', echo = FALSE}
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT3, SoilLayer = 1)
 ```
 
 \clearpage
 
-```{r IBPFT3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Qsoil")
+\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPFT4}
+table \ref{tab:IBPFTTab4}
+
+```{r IBPFT4, echo = FALSE, fig.width = 17, fig.height = 10, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil2 Memory (Iberian Region) -} \\qsoilb Memory (figure \\ref{fig:IBRVegMem2}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). \\label{fig:IBPFT4}", fig.scap="PFTs and Qsoil2 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPFT4 <- Tryres(Region = "Iberian Region", SoilLayer = 2, Variable = "Qsoil")
 ```
 
-```{r IBPFT4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Tryres(Region = "Iberian Region", SoilLayer = 2, Variable = "Qsoil")
+\vh (raw) - $Intercept = `r IBPFT4[[1]]`$ ($p = `r IBPFT4[[2]]`$); $r = `r IBPFT4[[3]]`$ ($p = `r IBPFT4[[4]]`$)
+
+\vh (mapped) - $Intercept = `r IBPFT4[[5]]`$ ($p = `r IBPFT4[[6]]`$); $r = `r IBPFT4[[7]]`$ ($p = `r IBPFT4[[8]]`$)
+
+\nmass (raw) - $Intercept = `r IBPFT4[[9]]`$ ($p = `r IBPFT4[[10]]`$); $r = `r IBPFT4[[11]]`$ ($p = `r IBPFT4[[12]]`$)
+
+\nmass (mapped) - $Intercept = `r IBPFT4[[13]]`$ ($p = `r IBPFT4[[14]]`$); $r = `r IBPFT4[[15]]`$ ($p = `r IBPFT4[[16]]`$)
+
+```{r IBPFTTab4, results = 'asis', echo = FALSE}
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT4, SoilLayer = 2)
 ```
 
 \clearpage
 
-```{r IBPFT5, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Tryres(Region = "Iberian Region", SoilLayer = 3, Variable = "Qsoil")
+\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPFT5}
+table \ref{tab:IBPFTTab5}
+
+```{r IBPFT5, echo = FALSE, fig.width = 17, fig.height = 10, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil3 Memory (Iberian Region) -} \\qsoilc Memory (figure \\ref{fig:IBRVegMem3}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). \\label{fig:IBPFT5}", fig.scap="PFTs and Qsoil3 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPFT5 <- Tryres(Region = "Iberian Region", SoilLayer = 3, Variable = "Qsoil")
 ```
 
-```{r IBPFT6, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-Tryres(Region = "Iberian Region", SoilLayer = 4, Variable = "Qsoil")
+\vh (raw) - $Intercept = `r IBPFT5[[1]]`$ ($p = `r IBPFT5[[2]]`$); $r = `r IBPFT5[[3]]`$ ($p = `r IBPFT5[[4]]`$)
+
+\vh (mapped) - $Intercept = `r IBPFT5[[5]]`$ ($p = `r IBPFT5[[6]]`$); $r = `r IBPFT5[[7]]`$ ($p = `r IBPFT5[[8]]`$)
+
+\nmass (raw) - $Intercept = `r IBPFT5[[9]]`$ ($p = `r IBPFT5[[10]]`$); $r = `r IBPFT5[[11]]`$ ($p = `r IBPFT5[[12]]`$)
+
+\nmass (mapped) - $Intercept = `r IBPFT5[[13]]`$ ($p = `r IBPFT5[[14]]`$); $r = `r IBPFT5[[15]]`$ ($p = `r IBPFT5[[16]]`$)
+
+```{r IBPFTTab5, results = 'asis', echo = FALSE}
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT5, SoilLayer = 3)
+```
+
+\clearpage
+
+\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
+
+figure \ref{fig:IBPFT6}
+table \ref{tab:IBPFTTab6}
+
+```{r IBPFT6, echo = FALSE, fig.width = 17, fig.height = 10, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil4 Memory (Iberian Region) -} \\qsoild Memory (figure \\ref{fig:IBRVegMem4}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). \\label{fig:IBPFT6}", fig.scap="PFTs and Qsoil4 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+IBPFT6 <- Tryres(Region = "Iberian Region", SoilLayer = 4, Variable = "Qsoil")
+```
+
+\vh (raw) - $Intercept = `r IBPFT6[[1]]`$ ($p = `r IBPFT6[[2]]`$); $r = `r IBPFT6[[3]]`$ ($p = `r IBPFT6[[4]]`$)
+
+\vh (mapped) - $Intercept = `r IBPFT6[[5]]`$ ($p = `r IBPFT6[[6]]`$); $r = `r IBPFT6[[7]]`$ ($p = `r IBPFT6[[8]]`$)
+
+\nmass (raw) - $Intercept = `r IBPFT6[[9]]`$ ($p = `r IBPFT6[[10]]`$); $r = `r IBPFT6[[11]]`$ ($p = `r IBPFT6[[12]]`$)
+
+\nmass (mapped) - $Intercept = `r IBPFT6[[13]]`$ ($p = `r IBPFT6[[14]]`$); $r = `r IBPFT6[[15]]`$ ($p = `r IBPFT6[[16]]`$)
+
+```{r IBPFTTab6, results = 'asis', echo = FALSE}
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT6, SoilLayer = 4)
+```
+
+\clearpage
+
+\paragraph*{Summary}  \hspace{.5cm}
+
+```{r IBPFTTabRaw, results = 'asis', echo = FALSE}
+ModelCoeffs <- c(unlist(IBPFT1)[c(1:4, 9:12)], unlist(IBPFT2)[c(1:4, 9:12)], 
+                 unlist(IBPFT3)[c(1:4, 9:12)], unlist(IBPFT4)[c(1:4, 9:12)], 
+                 unlist(IBPFT5)[c(1:4, 9:12)], unlist(IBPFT6)[c(1:4, 9:12)])
+tabout <- data.frame(Column = ModelCoeffs[1:4])
+starts <- seq(1,length(ModelCoeffs), by = 4)
+for(i in 2:(length(ModelCoeffs)/4)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
+}
+colnames(tabout) <- rep(c("H", "$N_{mass}$"), 6)
+rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
+Short <- paste("Geo-referenced PFTs and Vegetation Memory", sep="")
+Long <- paste("Linear regression coefficients of vegetative height (H) and leaf nitrogen mass (Nmass) against vegetation memory coefficients.", sep="")
+kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+kab <- add_header_above(kable_input = kab, header = c(" " = 1, "t-1" = 2, "Tair" = 2, 
+                                                      "1" = 2, "2" = 2, "3" = 2, "4" = 2), italic = TRUE, align = 'c')
+kab <- add_header_above(kable_input = kab, header = c(" " = 5, "Qsoil" = 8), bold = TRUE, align = 'c')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
+print(kab)
+```
+
+```{r IBPFTTabMapped, results = 'asis', echo = FALSE}
+ModelCoeffs <- c(unlist(IBPFT1)[c(5:8, 13:16)], unlist(IBPFT2)[c(5:8, 13:16)], 
+                 unlist(IBPFT3)[c(5:8, 13:16)], unlist(IBPFT4)[c(5:8, 13:16)], 
+                 unlist(IBPFT5)[c(5:8, 13:16)], unlist(IBPFT6)[c(5:8, 13:16)])
+tabout <- data.frame(Column = ModelCoeffs[1:4])
+starts <- seq(1,length(ModelCoeffs), by = 4)
+for(i in 2:(length(ModelCoeffs)/4)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
+}
+colnames(tabout) <- rep(c("H", "$N_{mass}$"), 6)
+rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
+Short <- paste("Mapped species-secific PFT means and Vegetation Memory", sep="")
+Long <- paste("Linear regression coefficients of vegetative height (H) and leaf nitrogen mass (Nmass) against vegetation memory coefficients.", sep="")
+kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+kab <- add_header_above(kable_input = kab, header = c(" " = 1, "t-1" = 2, "Tair" = 2, 
+                                                      "1" = 2, "2" = 2, "3" = 2, "4" = 2), italic = TRUE, align = 'c')
+kab <- add_header_above(kable_input = kab, header = c(" " = 5, "Qsoil" = 8), bold = TRUE, align = 'c')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
+print(kab)
 ```
 
 \clearpage
 
 #### Life History Traits
 
-```{r IBCOMPAD, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('FSC-1', 'FSC-2', 'Pi', 'Rho', 'Reactivity', 'Plotting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Long. \\label{fig:Dummy}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-leg <- Comres(Region = "Iberian Region", Variable = "FSC-1")
-leg <- Comres(Region = "Iberian Region", Variable = "FSC-2")
-leg <- Comres(Region = "Iberian Region", Variable = "Pi")
-leg <- Comres(Region = "Iberian Region", Variable = "Rho")
-leg <- Comres(Region = "Iberian Region", Variable = "Reactivity")
-legend <- cowplot::get_legend(leg)
-grid.newpage()
-grid.draw(legend)
+\paragraph*{Fast-Slow Continuum}  \hspace{.5cm}
+
+figure \ref{fig:IBCOMPAD1}
+table \ref{tab:IBCOMPADTab1}
+
+figure \ref{fig:IBCOMPAD2}
+table \ref{tab:IBCOMPADTab2}
+
+```{r IBCOMPAD1, echo = FALSE, fig.width = 17, fig.height = 8, fig.cap="\\textbf{COMPADRE FSC-1 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-1 and vegetation memory coefficients. \\label{fig:IBCOMPAD1}", fig.scap="COMPADRE FSC-1 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+leg1 <- Comres(Region = "Iberian Region", Variable = "FSC-1")
 ```
 
 
+```{r IBCOMPADTab1, results = 'asis', echo = FALSE}
+CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg1[[2]])), Variable = "FSC-1")
+```
+
+\clearpage
+
+```{r IBCOMPAD2, echo = FALSE, fig.width = 17, fig.height = 8, fig.cap="\\textbf{COMPADRE FSC-2 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-2 and vegetation memory coefficients. \\label{fig:IBCOMPAD2}", fig.scap="COMPADRE FSC-2 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+leg2 <- Comres(Region = "Iberian Region", Variable = "FSC-2")
+```
+
+
+```{r IBCOMPADTab2, results = 'asis', echo = FALSE}
+CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg2[[2]])), Variable = "FSC-2")
+```
+
+\clearpage
+
+\paragraph*{Period of Oscillation}  \hspace{.5cm}
+
+figure \ref{fig:IBCOMPAD3}
+table \ref{tab:IBCOMPADTab3}
+
+```{r IBCOMPAD3, echo = FALSE, fig.width = 17, fig.height = 8, fig.cap="\\textbf{COMPADRE Period of Oscillation and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE Period of Oscillation and vegetation memory coefficients. \\label{fig:IBCOMPAD3}", fig.scap="COMPADRE Period of Oscillation and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+leg3 <- Comres(Region = "Iberian Region", Variable = "Pi")
+```
+
+
+```{r IBCOMPADTab3, results = 'asis', echo = FALSE}
+CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg3[[2]])), Variable = "Pi")
+```
+
+\clearpage
+
+\paragraph*{Damping Ratio}  \hspace{.5cm}
+
+figure \ref{fig:IBCOMPAD4}
+table \ref{tab:IBCOMPADTab4}
+
+```{r IBCOMPAD4, echo = FALSE, fig.width = 17, fig.height = 8, fig.cap="\\textbf{COMPADRE Damping Ratio and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE Damping Ratio and vegetation memory coefficients. \\label{fig:IBCOMPAD4}", fig.scap="COMPADRE Damping Ratio and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+leg4 <- Comres(Region = "Iberian Region", Variable = "Rho")
+```
+
+
+```{r IBCOMPADTab4, results = 'asis', echo = FALSE}
+CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg4[[2]])), Variable = "Rho")
+```
+
+\clearpage
+
+\paragraph*{Reactivity}  \hspace{.5cm}
+
+figure \ref{fig:IBCOMPAD5}
+table \ref{tab:IBCOMPADTab5}
+
+```{r IBCOMPAD5, echo = FALSE, fig.width = 17, fig.height = 8, fig.cap="\\textbf{COMPADRE Reactivity and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE Reactivity and vegetation memory coefficients. \\label{fig:IBCOMPAD5}", fig.scap="COMPADRE Reactivity and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+leg5 <- Comres(Region = "Iberian Region", Variable = "Reactivity")
+```
+
+
+```{r IBCOMPADTab5, results = 'asis', echo = FALSE}
+CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg5[[2]])), Variable = "Reactivity")
+```
+
+\paragraph*{Summary}  \hspace{.5cm}
 
 \clearpage
 
