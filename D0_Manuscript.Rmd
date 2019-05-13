@@ -706,13 +706,15 @@ print(kab)
 \blankpage
 
 \begin{abstract}
-\Blindtext
 
 \end{abstract}
 
 \chapter*{Acknowledgements}
-\blindtext
+First and foremost I would like to express my utmost gratitude to my two supervisors - Dr. Alistair Seddon, and Dr. Richard Davy - for supervising my thesis. Thank you for your valuable input and many lessons on research practices as well as your keeping up with my frequent emailing of revised manuscripts. I'd also like to thank Roberto Salguero-Gómez for supplying me with the data for the COMPADRE data base.
 
+I never could've done the work presented in the following without the support of friends and family whom I owe massive thanks to. My family, for your unrelenting support in the form of goodie parcels shipped from Germany. Peter, for the many hikes and drinks we shared; our heart-to-heart conversations never fail to make me feel understood and supported. Rachel, for being a great friend, hosting me in your guest bed room and helping me bake awesome cake. Jenny, for calming the seas of life telling me to navigate them myself as best I can but never abandoning ship; it's great to have you on deck. Deborah, for genueinely outstanding advice on life, the universe, and everything; also for introducing me to two prime specimen of Felis Devilis.
+
+From the bottom of my heart - Thank all of you! I'd be delighted to have you around for the next big project.
 
 \pagenumbering{roman} 
 \setcounter{tocdepth}{3}
