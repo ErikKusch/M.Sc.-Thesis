@@ -1188,7 +1188,7 @@ The spatial extent of study sites for assessing vegetation memory effects was li
 
 ### Iberian Region
 
-The Iberian region - encompassing Portugal, Spain, Andorra and France within this study - has been selected as a study region due to a clear gradient in ombrotypes (see figure \ref{fig:OmbroEU}), its high density of \TRY \PFT and \COMPADRE \LHT data availability, and previously reportedly clear patterns of vegetation memory effects\cite{DeKeersmaecker2015} and vegetation sensitivity\cite{Seddon2016}. See figures \ref{fig:IBPDataOverview} and \ref{fig:IBPTRY} for an overview of \gimms \ndvi, \era data, and \TRY \PFT data (both raw and extrapolated) across the Iberian region.
+The Iberian region - encompassing Portugal, Spain, Andorra and France within this study - has been selected as a study region due to a clear gradient in ombrotypes (see figure \ref{fig:OmbroEU}), its high density of \TRY \PFT and \COMPADRE \LHT data availability, and previously reported clear patterns of vegetation memory effects\cite{DeKeersmaecker2015} and vegetation sensitivity\cite{Seddon2016}. See figures \ref{fig:IBPDataOverview} and \ref{fig:IBPTRY} for an overview of \gimms \ndvi, \era data, and \TRY \PFT data (both raw and extrapolated) across the Iberian region.
 
 \begin{figure}[h!]
 \centering \includegraphics[width=.85\linewidth]{3 - Figures/Ombro_EU.png}
@@ -1231,9 +1231,9 @@ See figures \ref{fig:AUDataOverview} and \ref{fig:AUTRY} for an overview of \gim
 
 ### Data
 #### Vegetation Indices
-Patterns of vegetation characteristics - both in time and space - can be assessed readily using remote sensing approaches\cite{Seddon2016,Nioti2015,Prince1995,Garroutte2016,DeKeersmaecker2017,Cammarano2014,Friedl2002}.  A \vi is a remote sensing proxy for different vegetation characteristics depending on the choice of \vi. \vis have seen various applications in remote sensing including deriving vegetation dynamics on the scale of countries\cite{Evrendilek2008,Colditz2012,Prasad2007} or regions\cite{Cammarano2014,Stow2004}, and analysing resilience of vegetation assemblages to short-term climate anomalies\cite{DeKeersmaecker2015}. Biome classifications have undoubtedly been one of the most prominent usages of the \vis\cite{Chen2007,Friedl2002, Lieng2002,Friedl2010} as have applications in agriculture\cite{Devadas2009,Ares2001}.
+Patterns of vegetation characteristics - both in time and space - can be readily assessed using remote sensing approaches\cite{Seddon2016,Nioti2015,Prince1995,Garroutte2016,DeKeersmaecker2017,Cammarano2014,Friedl2002}.  A \vi is a remote sensing proxy for different vegetation characteristics depending on the choice of \vi. \vis have seen various applications in remote sensing including deriving vegetation dynamics on the scale of countries\cite{Evrendilek2008,Colditz2012,Prasad2007} or regions\cite{Cammarano2014,Stow2004}, and analysing resilience of vegetation assemblages to short-term climate anomalies\cite{DeKeersmaecker2015}. Biome classifications have undoubtedly been one of the most prominent usages of the \vis\cite{Chen2007,Friedl2002, Lieng2002,Friedl2010} as have applications in agriculture\cite{Devadas2009,Ares2001}.
 
-Whilst a vast arsenal of \vis are available to macroecologists (see Cammarano et al. for an overview\cite{Cammarano2014}), one of the main considerations in  choosing an appropriate \vi is that of **spatial resolution versus length of time series**. As satellite-born sensors receive hardware updates or other improvements - e.g. \avhrr versus \modis sensors - spatial resolution capabilities of \vis increase. However, we can't enhance the resolution of older records of \vis and are thus limited to lower resolution \vis if longer time series are desired. Since vegetation memory is a temporal phenomenon first and foremost, I have prioritised **time series length** over spatial resolution. Within the confines of my thesis, \vis represent the intrinsic characteristics of vegetation systems which will both be used as response and explanatory variables as outlined in figure \ref{fig:SchemaVegMem}.
+Whilst a vast arsenal of \vis are available to macroecologists (see Cammarano et al. for an overview\cite{Cammarano2014}), one of the main considerations in  choosing an appropriate \vi is that of **spatial resolution versus length of time series**. As satellite-born sensors receive hardware updates or other improvements - e.g. \avhrr versus \modis sensors - spatial resolution capabilities of \vis increase. However, we can't enhance the resolution of older records of \vis and are thus limited to lower resolution \vis if longer time series are desired. Since vegetation memory is a temporal phenomenon first and foremost, I have prioritised **time series length** over spatial resolution. Within the confines of my thesis, \vis represent the intrinsic characteristics of vegetation systems which will be used both as response and explanatory variables as outlined in figure \ref{fig:SchemaVegMem}.
 
 \paragraph*{Normalised Difference Vegetation Index (NDVI)}  \hspace{.5cm}
 
@@ -1281,7 +1281,7 @@ plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2
 #### European Centre for Medium-range Weather Forecasts ReAnalysis 5 (ERA5)
 \label{sEra}
 
-Extrinsic memory effects have largely been understood through processes of drought and water limitation\cite{Rudgers2018,Munne-Bosch2013,Gazol2018,Walter2013,Liu2018}. Hence a large number of contemporary studies of vegetation memory have included some form of water availability proxy, through precipitation records\cite{Papagiannopoulou2017a,Seddon2016}, or drought indices\cite{Liu2018,DeKeersmaecker2017,DeKeersmaecker2015}. Additionally, temperature has been found to be a major driver of drought severity, plant morphology, and vegetation memory effects\cite{Esper2015,Papagiannopoulou2017a,Seddon2016}. \era data is implemented into my analyses of vegetation memory using two environmental characteristics: (1) Soil Moisture (in four layers), and (2) Air Temperature (as observable at a height of 2m above the ground). See table \ref{tab:ERA5Core} for an overview of core characteristics of the \era data set. See \ref{ObtainEra5}, \ref{ProcessEra5}, and \ref{RegridEra5} for the codes used to download \era data from the \ecmwf servers, aggregate data to full time series and fix gridding mismatches to be comparable to \gimms data.
+Extrinsic memory effects have largely been understood through processes of drought and water limitation\cite{Rudgers2018,Munne-Bosch2013,Gazol2018,Walter2013,Liu2018}. Hence a large number of contemporary studies of vegetation memory have included some form of water availability proxy, through precipitation records\cite{Papagiannopoulou2017a,Seddon2016}, or drought indices\cite{Liu2018,DeKeersmaecker2017,DeKeersmaecker2015}. Additionally, temperature has been found to be a major driver of drought severity, plant morphology, and vegetation memory effects\cite{Esper2015,Papagiannopoulou2017a,Seddon2016}. \era data is implemented into my analyses of vegetation memory using two environmental characteristics: (1) Soil Moisture (in four layers), and (2) Air Temperature (at a height of 2m above the ground). See table \ref{tab:ERA5Core} for an overview of core characteristics of the \era data set. See \ref{ObtainEra5}, \ref{ProcessEra5}, and \ref{RegridEra5} for the codes used to download \era data from the \ecmwf servers, aggregate data to full time series and fix gridding mismatches to be comparable to \gimms data.
 
 \renewcommand{\arraystretch}{1}
 \begin{table*}[h!]
@@ -1301,9 +1301,9 @@ Extrinsic memory effects have largely been understood through processes of droug
 
 \paragraph*{Air Temperature recorded in $K$}  \hspace{.5cm}
 
-Temperature indices have been linked successfully to vegetation sensitivity\cite{Seddon2016}, tree-ring growth\cite{Esper2015,Pagotto2015}, global primary production\cite{Prince1995}, as well as severe drought events with possibly devastating consequences to local vegetation\cite{Allen2010}. \era recognises several temperature variables (e.g. soil, snow and air temperature)\cite{ECMWF2018c}. Within this study, I  use \tair as contained within the \era data set, due to the demonstrated impact of \tair on different aspects of plant physiology and plant morphology which may manifest in vegetation memory effects. See figure \ref{fig:ATOverview} for an overview of the \era \tair data.
+Temperature indices have been linked successfully to vegetation sensitivity\cite{Seddon2016}, tree-ring growth\cite{Esper2015,Pagotto2015}, global primary production\cite{Prince1995}, as well as severe drought events with possibly devastating consequences to local vegetation\cite{Allen2010}. \era incudes several temperature variables (e.g. soil, snow and air temperature)\cite{ECMWF2018c}. Within this study, I  use \tair as contained within the \era data set, due to the demonstrated impact of \tair on different aspects of plant physiology and plant morphology which may manifest in vegetation memory effects. See figure \ref{fig:ATOverview} for an overview of the \era \tair data.
 
-```{r ATPlot, echo = FALSE, fig.width = 17, fig.height = 9, fig.cap="\\textbf{Overview of air temperature data -} Air temperature data presented in as obtainable via the ERA5 reanalysis product (\\tair). Figure established via \\ref{rATOverview}. \\label{fig:ATOverview}", fig.scap="Overview of air temperature data", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+```{r ATPlot, echo = FALSE, fig.width = 17, fig.height = 9, fig.cap="\\textbf{Overview of air temperature data -} Air temperature data presented as obtainable via the ERA5 reanalysis product (\\tair). Figure established via \\ref{rATOverview}. \\label{fig:ATOverview}", fig.scap="Overview of air temperature data", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
 Variable <- c("Tair")
 colour = col.tair
 setwd(Dir.ERA)
@@ -1316,11 +1316,11 @@ plot(Era5ras, colNA = "black", main = paste("Mean", SR_Titles[2], "1980 - 2015")
 
 \clearpage
 
-\paragraph*{Soil Moisture recorded in $\frac{m^3_{H_2O}}{m_{soil}^3}$}  \hspace{.5cm}
+\paragraph*{Soil Moisture (Qsoil) recorded in $\frac{m^3_{H_2O}}{m_{soil}^3}$}  \hspace{.5cm}
 
 \vspace{.2cm}
 
-My study uses \textit{\qsoil} as a proxy of local water regimes. Precipitation events are subject to further soil processes such as pore connectivity for precipitation water to be available to plants\cite{Smith2017}. Soil moisture should thus serve as a much more direct proxy of local water regimes. Additionally, \era includes four distinct layers in the soil for the calculation of \qsoil indices (see figure \ref{fig:QsoilOverview} for an overview): (1) \qsoila, (2) \qsoilb, (3) \qsoilc, and (4) \qsoild. Typical drought indices (i.e. \spei) do not allow for this additional distinction.
+My study uses \textit{\qsoil} as a proxy of local water regimes. I suggest that water-dependent vegetation memory largely relies on water availabilit to root systems. Precipitation events are subject to further soil processes such as pore connectivity for precipitation water to be available to plant roots\cite{Smith2017}. Soil moisture should thus serve as a much more direct proxy of local water regimes. Additionally, \era includes four distinct layers in the soil for the calculation of \qsoil indices (see figure \ref{fig:QsoilOverview} for an overview): (1) \qsoila, (2) \qsoilb, (3) \qsoilc, and (4) \qsoild. Typical drought indices (i.e. \spei) do not allow for this additional distinction.
 
 Within \era, unfrozen ground water ($\theta$) across all four soil layers ($k$) is defined as:
 
@@ -1394,28 +1394,29 @@ After retrieving \gimms \ndvi 3g data using the `gimms` package in `R`, bi-weekl
 \paragraph*{Downscaling} \hspace{.5cm}
 In order to calculate vegetation memory effects (**first research goal**), vegetation data and abiotic data should be represented at the same spatial and temporal resolution. Whilst both \ndvi and \era data are available at monthly intervals (after pre-processing as already described), their spatial resolutions differ (e.g. $\sim 9.27km \times \sim 9.27km$, vs. $30km \times 30km$, respectively; see tables \ref{tab:NDVICore} and \ref{tab:ERA5Core}).  
 
-There are two ways of remedying this spatial mismatch: (1) aggregating \gimms data to coarser resolution of \era data, or (2) downscaling of \era data to \gimms resolution. Whilst aggregating data to coarser resolutions is much easier and less computationally expensive, I have opted to apply **downscaling** to the \era data used within my study so as to retain valuable information within the \gimms \ndvi 3g data set. This will allow more precise vegetation memory identification and result in more biologically relevant patterns of vegetation memory characteristics.  
+There are two ways of remedying this spatial mismatch: (1) aggregating \gimms data to the coarser resolution of \era data, or (2) downscaling of \era data to \gimms resolution. Whilst aggregating data to coarser resolutions is much easier and less computationally expensive, I have opted to apply **downscaling** to the \era data used within my study so as to retain valuable information within the \gimms \ndvi 3g data set. This will allow more precise vegetation memory identification and result in more biologically relevant patterns of vegetation memory characteristics.  
 
-A large host of downscaling methods is available and before choosing any method one has to settle on whether to perform *statistical* or *dynamic* downscaling\cite{Trzaska2014,Onyutha2016}:
+A large host of downscaling methods are available and before choosing any method one has to settle on whether to perform *statistical* or *dynamic* downscaling\cite{Trzaska2014,Onyutha2016}:
 
 \begin{enumerate}
-\item \textit{Statistical Downscaling} is centred around statistical links between global and local climate patterns\cite{Maraun2010}, comparatively computationally cheap and easily transferable to different study regions but suffers from a strong dependency on the choice of predictors/co-variates\cite{Fowler2007}.
-\item \textit{Dynamic Downscaling} is built around regional climate models being implemented into global climate models\cite{Maraun2010}, produces results based on physically consistent processes but computationally expensive\cite{Fowler2007}.
+\item \textit{Statistical Downscaling} makes use of statistical links between global and local climate patterns\cite{Maraun2010}, comparatively computationally cheap and easily transferable to different study regions, but suffers from a strong dependency on the choice of predictors/co-variates\cite{Fowler2007}.
+\item \textit{Dynamic Downscaling} is built around regional climate models being implemented into global climate models\cite{Maraun2010} (in this case, dynamical models with boundary conitions obtained via \era), produces results based on physically consistent processes but computationally expensive\cite{Fowler2007}.
 \end{enumerate}
 
-This study is focussed on three study regions (i.e. the Iberian Region, the Caatinga, and Australia) and five \era variables (\tair, \qsoila, \qsoilb, \qsoilc, and \qsoild) in monthly intervals from 1981 to 2015. \era data from 1981 is being downscaled to match \gimms resolution to calculate cumulative lags of memory effect drivers (see section \ref{sMemMods}). With this, downscaling needs to be performed three times (study regions), for five variables, each with 420 individual time steps (twelve months per year times 35 years). In total, the downscaling process is thus required to be run 6,300 times. Using a computationally expensive method belonging to the group of dynamical downscaling approaches is thus undesireable and I have elected to employ a **statistical downscaling** method to match \era data with \gimms resolution.  
+This study is focussed on three study regions (i.e. the Iberian Region, the Caatinga, and Australia) and five \era variables (\tair, \qsoila, \qsoilb, \qsoilc, and \qsoild) in monthly intervals from 1981 to 2015. \era data from 1981 is being downscaled to match \gimms resolution to calculate cumulative lags of memory effect drivers (see section \ref{sMemMods}). With this, downscaling needs to be performed three times (study regions), for five variables, each with 420 individual time steps (twelve months per year times 35 years). In total, the downscaling process is thus required to be run 6,300 times. Using a computationally expensive method such as dynamical downscaling is thus undesireable and I have elected to employ a **statistical downscaling** method to match \era data with \gimms resolution.  
 
-More specifically, I am using **Kriging** - a method that is well-understood and has long been used in non-biological sciences for geostatistical interpolation purposes\cite{Hengl2011}. Kriging is a two-step process. First, one establishes statistical relationships between data which is to be kriged at its native resolution with covariate data at the same resolution. The second step sees the extrapolation of these relationships using target resolution covariate data. The way in which Kriging improves over other statistical downscaling methods centred around these two steps lies in the fact that the Kriging methodology not only *extrapolates* relationships but *residuals* as well (see figure \ref{fig:Krig} for a visual representation).
+More specifically, I am using **Kriging** - a method that is well-understood and has long been used in non-biological sciences for geostatistical interpolation purposes\cite{Hengl2011}. Kriging is a two-step process. First, one establishes statistical relationships between data which is to be kriged at its native resolution with covariate data at the same resolution. The second step sees the extrapolation of these relationships using  covariate data at the  target resolution. The way in which Kriging marks an improvement over other statistical downscaling methods centred around these two steps lies in the fact that the Kriging methodology not only *extrapolates* relationships but *residuals* as well (see figure \ref{fig:Krig} for a visual representation).
 
 \clearpage
 
 Therefore, Kriging within my analyses requires three inputs: (1) \era data at native resolution, (2) \hwsd covariates (see table \ref{tab:HWSDOverview}) at \era resolution, and (3) \hwsd covariates (see table \ref{tab:HWSDOverview}) at \gimms resolution to produce sets of \era data at \gimms resolution. Kriging operations are built around formulae which establish response and predictor relationships. My kriging approaches are specified as follows:
 
 \begin{equation}
+\label{eKrig}
 Var_{ERA5} = \alpha + \sum_{i = 1}^{14}(\beta_i * Cov_{HWSD;i})
 \end{equation}
 
-with $Var_{ERA5}$ identifying any of the five \era variables \tair, \qsoila, \qsoilb, \qsoilc, or \qsoild at any given monthly interval between January 1981 and December 2015. $Cov_{HWSD;i}$ indexes the $i^{th}$ \hwsd covariate ranging from elevation and slope aspects to slope incline levels. Due to computational expense the kriging procedure only considers interaction effects between slope incline levels and slope aspects (see \ref{rEra5}).
+with $Var_{ERA5}$ identifying any of the five \era variables \tair, \qsoila, \qsoilb, \qsoilc, or \qsoild at any given monthly interval between January 1981 and December 2015. $Cov_{HWSD;i}$ indexes the $i^{th}$ \hwsd covariate ranging from elevation and slope aspects to slope incline levels. Due to computational expense the kriging procedure only considers interaction effects between slope incline levels and slope aspects (not shown in equation \ref{eKrig}, see \ref{rEra5}).
 
 \begin{figure}[h!]
 \centering \includegraphics[width=1\linewidth]{3 - Figures/Kriging.jpg}
@@ -1479,27 +1480,27 @@ Additionally, $\mathbf{\beta_{t-1}}$ is indicative of *intrinsic vegetation memo
 The coefficients of the above drivers of vegetation memory (see table \ref{tab:CoeffsOverview} and formula \ref{eqMemMod}) are identified for each data pixel in the data rasters of the three study regions in four separate models (one for each \qsoil layer). A visual representation of the automated modelling approach used within this study can be seen in figure \ref{fig:ModScheme}. This approach is carried out for each pixel as follows using the code contained within \ref{rVegMem}:
 
 \begin{enumerate}
-\item Data for each variable (\ndvi, \tair, \qsoil) is \textbf{extracted and detrended} to avoid effects of changing abiotic conditions over long time-series\cite{DeKeersmaecker2015} using linear detrending with the pracma package in R.
+\item Data for each variable (\ndvi, \tair, \qsoil) is \textbf{extracted and detrended} using linear detrending with the pracma package in `R` to avoid effects of changing abiotic conditions over long time-series\cite{DeKeersmaecker2015}.
 \item Detrended data is \textbf{standardised to Z-Scores} to obtain deviations of monthly means/monthly anomalies for each variable\cite{DeKeersmaecker2015}:
 \begin{equation}
 Anomaly_{i} = \frac{Detrended_{i} - \overline{Detrended_{month}}}{SD_{Detrended, month}}
 \end{equation}
-with $i$ indexing individual, detrended data records. In the case of \ndvi, one additionally calculates monthly means of untreated \ndvi data across the entire data range. See figure \ref{fig:NDVIMemMod} for an examplatory overview of \ndvi data treatment.
+with $i$ indexing individual, detrended data records. In the case of \ndvi, one additionally calculates monthly means of untreated \ndvi data across the entire data range. See figure \ref{fig:NDVIMemMod} for an examplary overview of \ndvi data treatment.
 \item Calculation of \textbf{lagged effects}:
 \begin{enumerate}
   \item \ndvil is calculated from Z-Score \ndvi data.
-  \item Cumulative lags of \qsoil data are established for lags ranging from 0 (instantaneous effects) to annual effects (aggregated over twelve months of detrended \qsoil records) in steps on one month at a time. These lagged effects are subsequently standardised to Z-Scores. See figure \ref{fig:QsoilMemMod} for an examplatory overview of \qsoil data treatment.
+  \item Cumulative lags of \qsoil data are established for lags ranging from 0 (instantaneous effects) to annual effects (aggregated over twelve months of detrended \qsoil records) in steps on one month at a time. These lagged effects are subsequently standardised to Z-Scores. See figure \ref{fig:QsoilMemMod} for an examplary overview of \qsoil data treatment.
   \item \tair data is implemented as instantaneous effects and so no lagged effects have to be calculated. 
   \end{enumerate}
-\item Variables in nature are often collinear\cite{Butler2017,Goldsmith2018}. Failing to address this issue results in masking of information which might influence our understanding of processes in nature significantly\cite{Zuur2007}. One method of circumventing this issue lies with \textit{\pca}. More specifically, if regression modelling is the target, one may wish to employ \textbf{\pca regression} as a three-step process\cite{Zuur2007} for each of the cumulative \qsoil lags across all four \qsoil layers effectively adding the necessity for a model selection step:
+\item Variables in nature are often collinear\cite{Butler2017,Goldsmith2018}. Failing to address this issue results in masking of information which might influence our understanding of processes in nature significantly\cite{Zuur2007}. One method of circumventing this issue lies with \textit{\pca}. More specifically, if regression modelling is the target, one may wish to employ \textbf{\pca regression} as a three-step process\cite{Zuur2007} for each of the cumulative \qsoil lags across all four \qsoil layers, effectively adding the necessity for a model selection step:
   \begin{enumerate}
-  \item Z-Score data for \ndvi, \tair, and \qsoil are fed to \pca via the vegan package in R. See figure \ref{fig:ExMod} for an examplatory overview of data and a \pca result.
+  \item Z-Score data for \ndvi, \tair, and \qsoil are fed to \pca via the vegan package in R. See figure \ref{fig:ExMod} for an examplary overview of data and a \pca result.
   \item Regression is performed as follows:
   \begin{equation}
   NDVI_t = \beta_1 * PC_1 + \beta_2 * PC2 + \beta_3 * PC3
   \end{equation}
   with $NDVI_t$ representing NDVI anomalies which have been set to NA (skipped in models) in months for which $Thresholds_{i} < 0.1$ with $Thresholds_{i} = \overline{Raw_{NDVI, month}}$\cite{Liu2018}. $PC_1$ through $PC_3$ and $\beta_1$ through $\beta_3$ indicate principal components 1 through 3 and coefficients of their effects in the model respectively.
-  \item Model selection is performed to identify the cumulative soil lag which presents the most explanatory power through comparison of model \aic values. The model with the \aic closest to 0 is said to be performing the best\cite{Cailleret2016}. This results in a proxy of \qsoil memory length of local vegetation.
+  \item Model selection is performed to identify the cumulative soil lag which presents the most explanatory power through comparison of model \aic values. The model with the \aic closest to 0 is determined to be performing the best\cite{Cailleret2016}. This results in a proxy of \qsoil memory length of local vegetation.
   \item The regression coefficients $\beta_1$ through $\beta_3$ can be back-transformed to represent \pca input variable effects (see formula \ref{eqMemMod}) using \pca loadings and \pca model coefficients (see figure \ref{fig:PCAREG}).
   \end{enumerate}
 \end{enumerate}
@@ -1588,7 +1589,7 @@ grid.draw(legend)
 
 \begin{figure}[h!]
 \centering \includegraphics[width=.9\linewidth]{3 - Figures/ExMod.jpg}
-\caption[Examplatory Vegetation Memory PCA]{\textbf{Examplatory Vegetation Memory PCA - } Overview of Z-Score data for \ndvil, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}). Some parts of this figure have been generated via \ref{rFigs}.}
+\caption[examplary Vegetation Memory PCA]{\textbf{examplary Vegetation Memory PCA - } Overview of Z-Score data for \ndvil, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}). Some parts of this figure have been generated via \ref{rFigs}.}
 \label{fig:ExMod}
 \end{figure}
 
@@ -1754,7 +1755,7 @@ Additionally, these two \PFTs correspond to two of the three \PFT domains (i.e. 
 
 #### Floral Data
 
-Extrapolating \PFT records from species-referenced records to spatial products using species-specific \PFT means and species occurence records as layed out by Ordonoez \& Svenning\cite{Ordonez2015} (see figure \ref{fig:PFTCombining}) may prove to overcome the data limitations of \TRY \PFT data (see figures \ref{fig:HOverview} and \ref{fig:NOverview}).
+Extrapolating \PFT records from species-referenced records to spatial products using species-specific \PFT means and species occurence records as layed out by Ordonoez \& Svenning\cite{Ordonez2015} (see figure \ref{fig:PFTCombining}) may prove to overcome the data limitations of \TRY \PFT data.
 
 Plant species occurence records can be obtained via floral data repositories such as \GBIF (see figure \ref{fig:GBIFOverview} for a representation of \GBIF plant occurence data). Data in \GBIF are stored as geo-referenced records of species presence. Generating maps from geo-referenced data points can be achieved by aggregating data points to rasters of a desired extent and resolution (i.e. \gimms resolution).
 
@@ -1823,7 +1824,7 @@ Like with \LHTs, I use regression models to assess causal links between \PFT exp
 
 #### Iberian Region
 
-I am only presenting \qsoila results here as I have identified \qsoila to be most informative \qsoil layer (see figure \ref{fig:IBLayers} and table \ref{tab:IBRQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:IBRVegMem2}, \ref{fig:IBRVegMem3}, and \ref{fig:IBRVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported on in figure \ref{fig:IBRVegMem1}.
+I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:IBLayers} and table \ref{tab:IBRQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:IBRVegMem2}, \ref{fig:IBRVegMem3}, and \ref{fig:IBRVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:IBRVegMem1}.
 
 \paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across the Iberian region are represented in figure \ref{fig:IBRVegMem1}. Additionally, figure \ref{fig:IBRVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
@@ -1864,7 +1865,7 @@ UQsoilres(Region = "Iberian Region")
 
 \paragraph*{Variance Partitioning}  \hspace{.5cm}
 
-Variance partitioning of \ndvil and \qsoil has been accessed for all \qsoil layers. These results are presented in figure \ref{fig:IBRVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
+Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:IBRVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
 
 Spatial patterns of explained variance (see figure \ref{fig:IBRVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the southern dryland regions of Spain and Portugal.
 
@@ -1878,7 +1879,7 @@ VarParRes(Region = "Iberian Region", SoilLayer = 4, Plot = 1)
 \clearpage
 
 #### Caatinga
-I am only presenting \qsoila results here as I have identified \qsoila to be most informative \qsoil layer (see figure \ref{fig:CALayers} and table \ref{tab:CAQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:CAVegMem2}, \ref{fig:CAVegMem3}, and \ref{fig:CAVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported on in figure \ref{fig:CAVegMem1}.
+I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:CALayers} and table \ref{tab:CAQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:CAVegMem2}, \ref{fig:CAVegMem3}, and \ref{fig:CAVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:CAVegMem1}.
 
 \paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across the Caatinga are represented in figure \ref{fig:CAVegMem1}. Additionally, figure \ref{fig:CAVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
@@ -1919,7 +1920,7 @@ UQsoilres(Region = "Caatinga")
 \clearpage
 
 \paragraph*{Variance Partitioning}  \hspace{.5cm}
-Variance partitioning of \ndvil and \qsoil has been accessed for all \qsoil layers. These results are presented in figure \ref{fig:CAVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
+Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:CAVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
 
 Spatial patterns of explained variance (see figure \ref{fig:CAVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the north-eastern dryland region.
 
@@ -1935,7 +1936,7 @@ VarParRes(Region = "Caatinga", SoilLayer = 4, Plot = 1)
 
 #### Australia
 \paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
-I am only presenting \qsoila results here as I have identified \qsoila to be most informative \qsoil layer (see figure \ref{fig:AULayers} and table \ref{tab:AUQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:AUVegMem2}, \ref{fig:AUVegMem3}, and \ref{fig:AUVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported on in figure \ref{fig:AUVegMem1}.
+I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:AULayers} and table \ref{tab:AUQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:AUVegMem2}, \ref{fig:AUVegMem3}, and \ref{fig:AUVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:AUVegMem1}.
 
 \paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across Australia are represented in figure \ref{fig:AUVegMem1}. Additionally, figure \ref{fig:AUVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
@@ -1976,7 +1977,7 @@ UQsoilres(Region = "Australia")
 \clearpage
 
 \paragraph*{Variance Partitioning}  \hspace{.5cm}
-Variance partitioning of \ndvil and \qsoil has been accessed for all \qsoil layers. These results are presented in figure \ref{fig:AUVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
+Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:AUVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
 
 Spatial patterns of explained variance (see figure \ref{fig:AUVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the Outback with patchy distributions.
 
