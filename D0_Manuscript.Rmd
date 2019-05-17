@@ -712,7 +712,7 @@ print(kab)
 \chapter*{Acknowledgements}
 First and foremost I would like to express my utmost gratitude to my two supervisors - Dr. Alistair Seddon, and Dr. Richard Davy - for supervising my thesis. Thank you for your valuable input and many lessons on research practices as well as your keeping up with my frequent emailing of revised manuscripts. I'd also like to thank Roberto Salguero-Gómez for supplying me with the data for the COMPADRE data base.
 
-I never could've done the work presented in the following without the support of friends and family whom I owe massive thanks to. My family, for your unrelenting support in the form of goodie parcels shipped from Germany. Peter, for the many hikes and drinks we shared; our heart-to-heart conversations never fail to make me feel understood and supported. Rachel, for being a great friend, hosting me in your guest bed room and helping me bake awesome cake. Jenny, for calming the seas of life telling me to navigate them myself as best I can but never abandoning ship; it's great to have you on deck. Deborah, for genueinely outstanding advice on life, the universe, and everything; also for introducing me to two prime specimen of Felis Devilis.
+I never could've done the work presented in the following without the support of friends and family whom I owe massive thanks to. My family, for your unrelenting support in the form of goodie parcels shipped from Germany. Peter, for the many hikes and drinks we shared; our heart-to-heart conversations never fail to make me feel understood and supported. Rachel, for being a great friend, hosting me in your guest bed room and helping me bake awesome cake. Jenny, for calming the seas of life telling me to navigate them myself as best I can but never abandoning ship; it's great to have you on deck. Deborah, for genueinely outstanding advice on life, the universe, and everything; also for introducing me to two prime specimen of \textit{Felis Devilis}.
 
 From the bottom of my heart - Thank all of you! I'd be delighted to have you around for the next big project.
 
@@ -741,10 +741,10 @@ From the bottom of my heart - Thank all of you! I'd be delighted to have you aro
 \clearpage
 
 # Introduction
-Ecosystems are subject to disturbance regimes which can undergo substantial alterations, especially due to climate change\cite{Johnstone2016}. Widespread bioclimatic impacts which can be attributed to these changes include\cite{CoreWritingTeam2014}: (1) increased frequency and intensity of climate extremes\cite{Santiago2016}, (2) increasing temperatures and levels of aridity in dryland regions\cite{Allen2010}, and (3) shifts in environemntal and ecosystem processes\cite{Kefi2016,Johnstone2016,Seidl2016b}. This has raised growing concern that future disturbance dynamics will exceed tipping points and cause non-linear shifts in ecosystem state in relation to **attractors**\cite{Senf2017} (see table \ref{tab:ResTerm} for definitions of bold font terms relating to the resilience debate). Such a **regime shift**\cite{Scheffer2010,Xu2015,Vasilakopoulos2015} can have a tremendous impact on local as well as global welfare of mankind\cite{Cote2010,Scheffer2001,Genkai-Kato2007}. Therefore, policy makers have made it their mission statement to enforce actions which serve to maintain or boost **resilience**; a biological property which can safeguard against regime shifts. The Aichi biodiversity targets, for example, include the following statement: \textit{"By 2020, ecosystem resilience [...] has been enhanced, [...] thereby contributing to climate change mitigation and adaptation and to combating desertification"} as target 15\cite{CBD2013}. Whilst the Aichi targets are set to encompass global action, national policy makers, such as the Australian Government, are recongising the importance of achieving climate resilience as well in stating: \textit{"We achieve climate resilience when short, medium and long-term decision making considers current climate risks and a changing climate"}\cite{GovernmentDepartmentoftheEnvironment2015}. 
+Ecosystems are subject to disturbance regimes which can undergo substantial alterations, especially due to climate change\cite{Johnstone2016}. Widespread bioclimatic impacts which can be attributed to these climatic changes include\cite{CoreWritingTeam2014}: (1) increased frequency and intensity of climate extremes\cite{Santiago2016}, (2) increasing temperatures and levels of aridity in dryland regions\cite{Allen2010}, and (3) shifts in environemntal and ecosystem processes\cite{Kefi2016,Johnstone2016,Seidl2016b}. This has raised growing concern that future disturbance dynamics will exceed tipping points and cause non-linear shifts in ecosystem state in relation to **attractors**\cite{Senf2017} (see table \ref{tab:ResTerm} for definitions of bold font terms relating to the resilience debate). Such a **regime shift**\cite{Scheffer2010,Xu2015,Vasilakopoulos2015} can have major impacts on local as well as global welfare of mankind\cite{Cote2010,Scheffer2001,Genkai-Kato2007}. Therefore, policy makers have made it their mission statement to enforce actions which serve to maintain or boost **resilience**; a biological property which can safeguard against regime shifts. The Aichi biodiversity targets, for example, include the following statement: \textit{"By 2020, ecosystem resilience [...] has been enhanced, [...] thereby contributing to climate change mitigation and adaptation and to combating desertification"} as target 15\cite{CBD2013}. Whilst the Aichi targets are set to encompass global action, national policy makers, such as the Australian Government, are also recognising the importance of achieving climate resilience: \textit{"We achieve climate resilience when short, medium and long-term decision making considers current climate risks and a changing climate"}\cite{GovernmentDepartmentoftheEnvironment2015}. 
 Conceiving such strategies and evaluating their respective efficacies requires a thorough understanding of resilience theory and a robust set of tools to measure the resilience of ecosystems.  
 
-Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling et al. resilience thinking encompassed two separate characteristics of ecosystems\cite{Holling1973}:
+Generally, resilience can be understood as the capacity of a system to absorb **disturbances** and respond to changing conditions so as to still retain the same function, structure, identity and feedbacks\cite{Vasilakopoulos2015,Holling1973}. First introduced to biological sciences in 1973 by Holling resilience thinking encompassed two separate characteristics of ecosystems\cite{Holling1973}:
 
 \begin{enumerate}
 \item \textit{Stability} was defined as the ability of a system to return to its original state after a temporary disturbance. The more stable a system, the less it fluctuates in its characteristics and the faster it returns to its initial conditions after a perturbation. Contemporary literature usually refers to this property as \textbf{engineering resilience}\cite{Liu2018,Mumby2015,Seidl2016b}. 
@@ -755,9 +755,9 @@ Within this early context on resilience thinking, a system could be resilient wh
 
 <!-- It has been argued that, since then, the term 'resilience' itself has undergone a 'greenwash'\cite{Newton2016}, which has diminished its direct usefulness to researchers. This process has seen the term 'resilience' being introduced originally to ecological sciences but adapted by other branches of research (e.g. social sciences\cite{Carpenter2001}) and society (e.g. policy makers\cite{Newton2016}), modified for different purposes and re-introduced to ecological sciences with multiple altered definitions\cite{Brown2015}. For example, \textit{coerced resilience} is created and maintained through anthropogenic action\cite{Rist2014}. Novel remote sensing assessments of resilience, however, establish resilience theory largely though mathematical understandings\cite{Papagiannopoulou2017}. -->
 
-Assumptions on ecosystem functioning that are made without including resilience thinking may result in particularly dire consequences if the systems in question (also referred to as focal systems\cite{Rist2014,Allen2016}) are production ecosystems\cite{Rist2014,Brown2015} (ecosystems which are used by humans for resource allocation).
+<!-- Assumptions on ecosystem functioning that are made without including resilience thinking may result in particularly dire consequences if the systems in question (also referred to as focal systems\cite{Rist2014,Allen2016}) are production ecosystems\cite{Rist2014,Brown2015} (ecosystems which are used by humans for resource allocation). -->
 
-Simultaneous assessment of components of any given ecosystem is a difficult task that often defies completion\cite{Standish2014}. This poses a **major research challenge** of choosing a measure by which to assess resilience and ecosystem components reliably through time and space. Consequently, recent studies have focussed on identifying and quantifying sub-components of ecosystem  resilience\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. This is especially the case in remote sensing research where data availability is largely determined through what data repositories are available.
+Given the importance of assessing resistance in ecosystems with respect to global sustainability goals, baseline metrics on which to assess and compare resilience in different ecosystems are required\cite{Standish2014}. This poses a **major research challenge** of choosing a measure by which to assess resilience and ecosystem components reliably through time and space. Consequently, recent studies have focussed on identifying and quantifying sub-components of ecosystem  resilience\cite{Seddon2016,Redmond2017,Papagiannopoulou2017,Gazol2017}. This is especially the case in remote sensing research where data availability is largely determined through what data repositories are available.
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table*}[h!]
@@ -786,11 +786,11 @@ Simultaneous assessment of components of any given ecosystem is a difficult task
   \label{tab:ResTerm}%
 \end{table*}
 
-Hodgson et al. tackled the problem of resilience compartmentalisation by building a framework for resilience assessments representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}. 
+One solution to establishing comparable metrics of resilience across ecosystems is to break down ecological resilience into different components. Hodgson et al. propose representing resilience as two separate entities: (1) *Resistance* to perturbation and (2) *Recovery* from perturbation\cite{Hodgson2015}. 
 
-Recovery rates have been used as proxies for resilience metrics in many study settings including (1) palaeoecological research (e.g. by linking recovery rates of tropical ecosystems and disturbances categories\cite{Cole2014}), (2) observational studies (e.g. drought-impacts across different temporal and spatial scales\cite{Reyer2015}), and (3) experimental research (e.g. through applying small-scale disturbances and recording recovery rates\cite{VanBelzen2017a}).
+Ecosystem resistance capacities are of vital importance to ecosystem integrity, particularly in agricultural landscapes, and are usually studied in terms of linear regression models\cite{Ares2001}. Recovery rates have been used as proxies for resilience metrics in many study settings including (1) palaeoecological research (e.g. by linking recovery rates of tropical ecosystems and disturbances categories\cite{Cole2014}), (2) observational studies (e.g. drought-impacts across different temporal and spatial scales\cite{Reyer2015}), and (3) experimental research (e.g. through applying small-scale disturbances and recording recovery rates\cite{VanBelzen2017a}). Contemporary research often identifies recovery rates in terms on a fixed point of equilibrium, a perturbation event, and a measure  of time to recover to the euilibrium. Another option is to use autoregressive models, effectively tracking how ecosystem properties drive themselves through time thus enabling ecosystem recovery\cite{DeKeersmaecker2015}.
 
-The *resistance* and *recovery* aspects of the Hodgson et al. framework to resilience can be represented through \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). Whilst ecological memory is often understood to be simultaneous with **adaptation to disturbances** resulting in increased biological fitness int eh face of repeated stress events\cite{Walter2013}, other studies employ **ecological memory as a proxy for recovery rates**\cite{DeKeersmaecker2015}.
+The *resistance* and *recovery* aspects of the Hodgson et al. framework to resilience can be represented through \textbf{ecological stress memory} (also know as 'ecological memory', see table \ref{tab:MemTerm} for definitions of bold font terms relating to the ecological memory framework). Ecological memory is a compound metric and whilst it is often understood to be synonymous with **adaptation to disturbances** resulting in increased biological fitness in the face of repeated stress events\cite{Walter2013}, other studies employ **ecological memory as a proxy for recovery rates**\cite{DeKeersmaecker2015}.
 
 Nyström \& Folke reported a direct link between spatial resilience and ecological memory of coral reefs\cite{Nystrom2001}. In forest ecosystems, a positive link between ecological memory and ecosystem resilience has been identified by Johnstone et al\cite{Johnstone2016}. Additional support for this argument stems from remote sensing studies such as De Keersmaecker et al.\cite{DeKeersmaecker2015} and Seddon et al.\cite{Seddon2016} who identified autoregressive coefficients of vegetation properties as proxies of engineering resilience (i.e. recovery rates).
 
@@ -800,7 +800,7 @@ However, even quantifying ecological memory of an entire ecosystem is difficult 
 
 ## Vegetation Memory
 
-Ecological memory (hence also vegetation memory) effects can be understood as the influence of antecedent conditions on ecosystem properties given contemporary disturbance regimes\cite{Liu2018,Ogle2015}. The existence of such temporal effects emphasize the necessity of considering time in ecological frameworks by providing a link between antecedent environmental conditions and plant performance\cite{Seddon2016,Munne-Bosch2013,Papagiannopoulou2017a,Walter2013}. In fact, there is empirical evidence that past conditions inform contemporary vegetation morphology\cite{Walter2013}, phenology\cite{Liu2018}, primary productivity\cite{Ogle2015,Rudgers2018}, species composition\cite{Esper2015,Walter2013}, and carbon cycles\cite{Papagiannopoulou2017a,Liu2018}. Studying vegetation memory sheds light on an important set of ecosystem processes which contain an outstanding potential to make ecosystems resilient in the face of climate change\cite{Walter2013}.
+Ecological memory (hence also vegetation memory) effects can be understood as the influence of antecedent conditions on ecosystem properties given contemporary disturbance regimes\cite{Liu2018,Ogle2015}. The existence of such temporal effects emphasize the necessity of considering time in ecological frameworks by providing a link between antecedent environmental conditions and plant performance\cite{Seddon2016,Munne-Bosch2013,Papagiannopoulou2017a,Walter2013}. In fact, there is empirical evidence that past conditions inform contemporary vegetation morphology\cite{Walter2013}, phenology\cite{Liu2018}, primary productivity\cite{Ogle2015,Rudgers2018}, species composition\cite{Esper2015,Walter2013}, and carbon cycles\cite{Papagiannopoulou2017a,Liu2018}. Studying vegetation memory sheds light on an important set of ecosystem processes which contain an outstanding potential to make ecosystems resilient in the face of climate change\cite{Walter2013} and enhance our capabilities of accurately predicting cosystem responses to a host of bioclimatic stressors.
 
 ### Terminology
 Vegetation memory can - in the broadest of terms - be understood as:
@@ -867,7 +867,7 @@ Due to limited sampling effort, such traditional studies are - although vitally 
 
 Remote sensing studies forego tedious field work data collection efforts and rely solely on easily available data. This data may either be obtained via remote sensing methods (i.e. satellite or drone imagery) or be pulled from published data sets from the field.
 
-Using these data sets, remote sensing studies of vegetation memory offer vast improvements in spatial and potentially temporal coverage when compared to traditional approaches. This, in turn, allows for landscape-scale patterns of vegetation memory characteristics to be identified. Unfortunately, to achieve these large spatial extents, one often has to sacrifice patial and temporal resolution. Especially climate data can be unreliable in some regions of the world when field measurements are sparse.
+Using these data sets, remote sensing studies of vegetation memory offer vast improvements in spatial and potentially temporal coverage when compared to traditional approaches. This, in turn, allows for landscape-scale patterns of vegetation memory characteristics to be identified. Unfortunately, to achieve these large spatial extents, one often has to sacrifice spatial and temporal resolution. Especially climate data can be unreliable in some regions of the world when field measurements are sparse.
 
 Recent remote sensing studies of vegetation memory have established a multitude of approaches to delineating vegetation memory from a variety of data sets. Examples include the use of:
 
@@ -974,7 +974,7 @@ Contemporary studies of vegetation memory largely rely on *precipitation* or *dr
 \item Its \textbf{sophisticated nature} building upon data assimilation procedures\cite{ECMWF2018b}, and complex models\cite{ECMWF2018} to shed light on physical processes\cite{ECMWF2018c}. As such, \era is currently the \textit{state-of-the-art} climate reanalysis product in climate science and benefits from the developments in data assimilation methodology, understanding of physics of the climate system and their interactions, which have come about in recent decades.
 \end{enumerate}
 
-Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim (used by Seddon et al.\cite{Seddon2016}), or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
+Finally, \era improves on other prominent climate data sets in ecological studies like the aforementioned \cru and \spei, WorldClim (used by Garris et al.\cite{Garris2015}), or the \chelsa data set\cite{Bruelheide2018} in a multitude of ways since it offers:
 \begin{enumerate}
 \item Superior \textit{Temporal Resolution} (superior resolving of climate extremes)
 \item Superior \textit{Spatial Resolution} (advanced resolving of local/topographical features)
@@ -987,7 +987,7 @@ In addition, none of the contemporary vegetation memory studies on landscape-sca
 \clearpage
 
 ## Functional Aspects of Vegetation Memory
-Contemporary studies identify patterns of vegetation memory but largely forego questions of causal processes to further our understanding of what enables vegetation memory capacities when doing so could enable more refined \dss. Since vegetation memory acts as a proxy for ecosystem process functioning, I hypothesise that expressions of vegetation memory can be explained through the lens of **functional ecology** since a functional approach to ecosystem processes can potentially explain what functional expressions allow said processes to persist despite perturbations\cite{DeBoeck2017,Truchy2015,Mace2014,Lavorel2002}. One of the most prominent tools of such studies is the *functional trait framework*. Arguabely, the most important of these frameworks when understanding vegetation processes - such as vegetation memory - is that of \textbf{\LHT} and \textbf{\PFT} frameworks.  
+Contemporary studies identify patterns of vegetation memory but largely forego questions of causal processes to further our understanding of what enables vegetation memory capacities. Doing so could enable more refined \dss. Since vegetation memory acts as a proxy for ecosystem process functioning, I hypothesise that expressions of vegetation memory can be explained through the lens of **functional ecology**. A functional approach to ecosystem processes can potentially explain what functional expressions allow said processes to persist despite perturbations\cite{DeBoeck2017,Truchy2015,Mace2014,Lavorel2002} thus informing resilience metrics such as vegetation memory. One of the most prominent tools of such studies is the *functional trait framework*. Arguabely, the most important of these frameworks when understanding vegetation processes - such as vegetation memory - is that of \textbf{\LHT} and \textbf{\PFT} frameworks.  
 
 ### Terminology
 
@@ -996,6 +996,19 @@ Contemporary studies identify patterns of vegetation memory but largely forego q
 #### Life History Traits
 
 \textbf{\LHT} frameworks (see table \ref{tab:LHTTerm} for definitions of bold font terms relating to \LHTs) assess plant/population characteristics through time thus mirroring the temporal aspect of vegetation memory leading up to, during, and following perutrbations. Since expressions of \LHTs explain temporal community processes and may thus be major drivers of ocal vegetation memory expressions. Prominent examples of \LHTs include measures relating to (1) **System Turnover**, (2) **Longevity**, (3) **Growth**, and (4) **Reproduction** all of which retain information of how individual biological proceses shape vegetation communities and have been found to explain a majority of variance in plant life history strategies\cite{Salguero-Gomez2015}.
+
+Specifically, I hypothesise for vegetation memory effects to be at least partially driven by:
+
+\begin{enumerate}
+\item The \textbf{Fast-Slow Continuum (FSC)} is a \pca-based approach whose two main axes capture over 60\% of the variation in plant life history strategies\cite{Salguero-Gomez2017} and are largely made up by the \LHTs contained in table \ref{tab:LHTTerm}\cite{Salguero-Gomez2015}. I hypothesize that expressions of the \fsc will strongly interact with vegetation memory effects due to the holistic nature of the \fsc and the temporal nature of both \LHTs and vegetation memory effects. The two axes read as follows:
+  \begin{enumerate}
+  \item \textit{\fsca} explains around 35\% of global \LHT variation and contrasts species of low generation times, early maturity, and fast growth with species of high generation times, delayed maturity, and slow growth\cite{Salguero-Gomez2017}. Fast species rank low on this axis\cite{Salguero-Gomez2016} and possess an innate potential to recover fast from perturbations through re-population thus strengthening engineering resilience and lowering vegetation memory.
+  \item \textit{\fscb} captures approximately 25\% of global \LHT variation and contrasts species low reproductive output with species that reproduce much, often, and for a long time\cite{Salguero-Gomez2017}. Species of low reproductive output rank low on this axis\cite{Salguero-Gomez2016} and are expected to struggle to return to a pre-disturbance state thus intensifying vegetation memory effects.
+  \end{enumerate}
+\item \textbf{Reactivity} is a \textit{first time-step} information criterion and a proxy for instantaneous biological responses\cite{Stott2011} and may thus be an important criterion in areas of high vegetation memory and thus low engineering resilience as high reactivity enables fast responses thus strngthening engineering resilience.
+\item The \textbf{\crho} can be regarded as a measure of intrinsic resilience as it indicates how fast transient dynamics of a perturbation event decay; the larger \crho, the faster the population will converge\cite{Stott2011} and the higher the engineering resilience of the focal population.
+\item The \textbf{\cpi} is a measure of population life cycles in periodic environments with more rapidly growing populations usually being classified by higher \cpi values\cite{Caswell2001} and theoretically higher engineering resilience.
+\end{enumerate}
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table*}[h!]
@@ -1022,27 +1035,14 @@ Contemporary studies identify patterns of vegetation memory but largely forego q
   \label{tab:LHTTerm}%
 \end{table*}
 
-Specifically, I hypothesise for vegetation memory effects to be at least partially driven by:
-
-\begin{enumerate}
-\item The \textbf{Fast-Slow Continuum (FSC)} is a \pca-based approach whose two main axes capture over 60\% of the variation in plant life history strategies\cite{Salguero-Gomez2017} and are largely made up by the \LHTs contained in table \ref{tab:LHTTerm}\cite{Salguero-Gomez2015}. I hypothesize that expressions of the \fsc will strongly interact with vegetation memory effects due to the holistic nature of the \fsc and the temporal nature of both \LHTs and vegetation memory effects. The two axes read as follows:
-  \begin{enumerate}
-  \item \textit{\fsca} explains around 35\% of global \LHT variation and contrasts species of low generation times, early maturity, and fast growth with species of high generation times, delayed maturity, and slow growth\cite{Salguero-Gomez2017}. Fast species rank low on this axis\cite{Salguero-Gomez2016}.
-  \item \textit{\fscb} captures approximately 25\% of global \LHT variation and contrasts species low reproductive output with species that reproduce much, often, and for a long time\cite{Salguero-Gomez2017}. Species of low reproductive output rank low on this axis\cite{Salguero-Gomez2016}.
-  \end{enumerate}
-\item \textbf{Reactivity} is a \textit{first time-step} information criterion and a proxy for instantaneous biological responses\cite{Stott2011} and may thus be an important criterion in areas of high vegetation memory and thus low engineering resilience.
-\item The \textbf{\crho} can be regarded as a measure of intrinsic resilience as it indicates how fast transient dynamics of a perturbation event decay; the larger \crho, the faster the population will converge\cite{Stott2011}.
-\item The \textbf{\cpi} is a measure of population life cycles in periodic environments with more rapidly growing populations usually being classified by higher \cpi values\cite{Caswell2001}.
-\end{enumerate}
-
 #### Plant Functional Traits
-\PFT frameworks (see table \ref{tab:PFTTerm} for definitions of bold font terms relating to \PFTs) convey information as *snapshots* of reality as their data sets usually do not contain repeated measures of the same individuals over a period of time. These data sets have been linked to evolution\cite{Ackerly2003} and community composition patterns\cite{Laughlin2014,Lavorel2002}. A change in their expression has been found to be correlated with climate change patterns\cite{Wright2005} potentially suggesting a causal link between extrinsic vegetation memory and \PFT expressions. To classify the way in which \PFTs are related to community functions, Nock et al. present the concept of (1) \textbf{Effect Traits}, and (2) \textbf{Response Traits}\cite{Nock2016}. Classifying \PFTs according to this framework can profoundly aid the understanding of their influence on spatio-temporal patterns of vegetation performance\cite{Lavorel2002,Mori2013}. Effect traits determine how \PFTs alter ecosystem processes (predominantely driving post-disturbance recovery) whilst response traits affect how vegetation reacts to perturbations (signifiying resistance potential).
+\PFT frameworks (see table \ref{tab:PFTTerm} for definitions of bold font terms relating to \PFTs) convey information as *snapshots* of reality as their data sets usually do not contain repeated measures of the same individuals over a period of time. These data sets have been linked to evolution\cite{Ackerly2003} and community composition patterns\cite{Laughlin2014,Lavorel2002}. A change in their expression has been found to be correlated with climate change patterns\cite{Wright2005} potentially suggesting a causal link between extrinsic vegetation memory and \PFT expressions. To classify the way in which \PFTs are related to community functions, Nock et al. present the concept of (1) \textbf{Effect Traits}, and (2) \textbf{Response Traits}\cite{Nock2016}. Classifying \PFTs according to this framework can profoundly aid the understanding of their influence on spatio-temporal patterns of vegetation performance\cite{Lavorel2002,Mori2013}. Effect traits determine how \PFTs alter ecosystem processes. Response traits affect how vegetation reacts to perturbations. Whilst effect traits predominantely drive post-disturbance recovery, response traits signify potential resistance or recovery along a continuum of individual \PFT-driven responses either influencing resitance or recovery.
 
 Recent studies suggest that vegetation community functions are governed by integrated phenotypes, which can be regarded as combinations of \PFT ranges\cite{Bonser2006, Nock2016} thus calling for a scientific approach focussed on \textbf{\FDR} which can be identified via an approach in which \PFT values of each individual are placed within a multidimensional system with each axis representing the range of values for one specific \PFT\cite{Ordonez2015}. Additonally, one may also want to use a measure of evenness which, in a functional biology setting, can be referred to as \textbf{\FDD} which is representative of how evenly dispersed data records are in multidimensional space.
 
 Identifying \FDR and \FDD requires a lot of indivudal \PFT data and so contemporary studies in \PFT research have focussed heavily on methods of dimensionality reduction by identifying the \PFTs which capture a vast part of the global variation of plant function\cite{Laughlin2014,Diaz2015}. One such framework has been established in theory by Westoby \& Wright in which three important \PFT dimensions are recognised: (1) the leaf economic spectrum, (2) the seed size/mass spectrum, and (3) the height of the canopy at maturity\cite{Westoby2006}. 
 
-\clearpage
+<!-- \clearpage -->
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table*}[h!]
@@ -1075,46 +1075,46 @@ as the most important \PFTs to understanding the global spectrum of plant functi
 <!-- \clearpage -->
 
 ### Ecological Relevance  
-The diverse range in which measures of plant function can be expressed are representative of the diverse strategies for establishing, growing and reproducing of plants\cite{Laughlin2014}. Hence, understanding how plant functioning enables plants to persist despite (a)biotic forcing (i.e. vegetation memory) is a promising first step to understanding ecosystem-scale responses to climate change. THis is due to the positive effect of biodiversity on ecological stability which has long been recorded\cite{DeBoeck2017} and even led to the formulation of prominent concepts like Yacchi's insurance hypothesis which postulates that the loss of a subset of species can be compensated for by the presence of other species given a sufficient overlap in functional aspects of both thus leading to a stabilisation of ecosystem processes\cite{Yachi1999}. 
+The diverse range in which measures of plant function can be expressed are representative of the diverse strategies for establishing, growing and reproducing of plants\cite{Laughlin2014}. Hence, understanding how plant functioning enables plants to persist despite (a)biotic forcing (i.e. vegetation memory) is a promising first step to understanding ecosystem-scale responses to climate change. This is due to the positive effect of biodiversity on ecological stability which has long been recorded\cite{DeBoeck2017} and even led to the formulation of prominent concepts like Yacchi's insurance hypothesis which postulates that the loss of a subset of species can be compensated for by the presence of other species given a sufficient overlap in functional aspects of both thus leading to a stabilisation of ecosystem processes\cite{Yachi1999}. 
 
 \begin{center}
 \textbf{\PFTs and \LHTs capture information about a variety of ecosystem processes.}\cite{Butler2017}
 \end{center}
 
-Most studies to date have focussed on species diversity\cite{Vasilakopoulos2015,Cote2010,Brown2015}. Some made use of the concept of functional species\cite{Gunderson2000} which presents researchers with a species classification system that is vague at best due to loose definitions of where to draw the lines between functional species. Functional trait biology, which captures the functional diversity of biological systems, is often employed as an improvement to the functional species/type concept\cite{Munne-Bosch2013,Walter2013} as it eliminates the necessity of phylogenetic analyses\cite{Nock2016} and enables studies to capture intra-specific variation\cite{Violle2012,Dantas2013,Kattge2011} thus making landscape-scale studies (such as remote sensing approaches) of vegetation memory patterns possible. 
+Most studies to date have focussed on species diversity\cite{Vasilakopoulos2015,Cote2010,Brown2015}. Some made use of the concept of functional species\cite{Gunderson2000} which presents researchers with a species classification system that is vague at best due to loose definitions of where to draw the lines between functional species. Functional trait biology, which captures the functional diversity of biological systems, is often employed as an improvement to the functional species/type concept\cite{Munne-Bosch2013,Walter2013} as it eliminates the necessity of phylogenetic analyses\cite{Nock2016} and enables studies to capture intra-specific variation\cite{Violle2012,Dantas2013,Kattge2011} thus making landscape-scale studies (such as remote sensing approaches) of vegetation memory patterns and their links to functional diversity possible. 
 
 \begin{center}
 \textbf{\PFTs and \LHTs can be captured irrespective of species relationships.}\cite{Dantas2013}
 \end{center}
 
-Thus, \PFTs and \LHTs make for \textit{highly informative} proxies of \textit{ecosystem functioning} which can be recorded across \textit{large spatial and temporal scales} since studies aren't constrained to a handful of species. Additionally, \PFTs and represent an improved understanding of functional expressions of plant communities by \textit{expressing information at sub-species level}\cite{Violle2012}. Recent research based upon \LHT data, for example, has revealed robust trade-off axes in plant\cite{Salguero-Gomez2016,Salguero-Gomez2017} as well as animal life histories\cite{Capdevila2018,Healy2018}. Information about \LHTs has been demonstrated to be of use in trying to understand biological responses to temporal phenomena\cite{Paniw2018} and should thus prove crucial in delineating causal, biological pathways to establishing vegetation memory. 
+Thus, \PFTs and \LHTs could make for \textit{highly informative} proxies of \textit{ecosystem functioning} which can be recorded across \textit{large spatial and temporal scales} since studies aren't constrained to a handful of species. Additionally, \PFTs and represent an improved understanding of functional expressions of plant communities by \textit{expressing information at sub-species level}\cite{Violle2012}. Recent research based upon \LHT data, for example, has revealed robust trade-off axes in plant\cite{Salguero-Gomez2016,Salguero-Gomez2017} as well as animal life histories\cite{Capdevila2018,Healy2018}. Information about \LHTs has been demonstrated to be of use in trying to understand biological responses to temporal phenomena\cite{Paniw2018} and should thus prove crucial in delineating causal, biological pathways to establishing vegetation memory. 
 
 
 <!-- \clearpage -->
 
 ### Unifying Information on Plant Functional Traits
 \PFTs are usually recorded through individual trait campaigns or for single-study purposes. Combining \PFT information from these individual data sets can prove challenging due to different measurement practices and understandings of \PFTs. A comprehensive handbook on \PFT data collection practices by Pérez-Harguindeguy et al.\cite{Perez-Harguindeguy2013} presents an elegant solution to making \PFT data sets more comparable. Additionally, \PFT data sets have been aggregated into large data bases within online repositories such as:
+\begin{itemize}
+\item The \textbf{\TRY}\cite{Kattge2011} is data base of \PFT records connecting vegetation scientists across the globe and hosted by the \idiv. Within it's current release version (version 4) \TRY contains almost seven million \PFT records for 1,800 traits with about half of all records being geo-referenced\cite{TRYOnline}.
+\item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline}.
+\end{itemize}
+
+<!-- \begin{minipage}[t]{.5\linewidth} -->
 <!-- \begin{itemize} -->
-<!-- \item The \textbf{\TRY}\cite{Kattge2011} is data base of \PFT records connecting vegetation scientists across the globe and hosted by the \idiv. Within it's current release version (version 4) \TRY contains almost seven million \PFT records for 1,800 traits with about half of all records being geo-referenced\cite{TRYOnline}. -->
-<!-- \item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline}. -->
+<!-- \item The \textbf{\TRY}\cite{Kattge2011} is data base of \PFT records hosted by the \idiv. Its current release (version 4) \TRY contains almost seven million \PFT records for 1,800 traits with about half of all records being geo-referenced\cite{TRYOnline}. -->
 <!-- \end{itemize} -->
+<!-- \end{minipage} -->
+<!-- \begin{minipage}[t]{.5\linewidth} -->
+<!-- \begin{itemize} -->
+<!-- \item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline}. See figure \ref{fig:BIEN4} for an overview of \TRY and \BIEN data availability. -->
+<!-- \end{itemize} -->
+<!-- \end{minipage} -->
 
-\begin{minipage}[t]{.5\linewidth}
-\begin{itemize}
-\item The \textbf{\TRY}\cite{Kattge2011} is data base of \PFT records hosted by the \idiv. Its current release (version 4) \TRY contains almost seven million \PFT records for 1,800 traits with about half of all records being geo-referenced\cite{TRYOnline}.
-\end{itemize}
-\end{minipage}
-\begin{minipage}[t]{.5\linewidth}
-\begin{itemize}
-\item The \textbf{\BIEN}\cite{Enquist2009} is a repository of global plant diversity, function, and distribution. Its current release (version 4.1) contains over 200 million records at global coverage\cite{BIENOnline}. See figure \ref{fig:BIEN4} for an overview of \TRY and \BIEN data availability.
-\end{itemize}
-\end{minipage}
-
-\begin{figure}[h!]
-\resizebox{.9\textwidth}{!}{\includegraphics[width=\linewidth]{3 - Figures/bien4.jpg}}
-\caption[BIEN PFT Coverage]{\textbf{\BIEN \PFT Coverage - }Geo-referenced records within version 4.1 of the \BIEN data base at logarithmic scale\cite{BIENOnline}.}
-\label{fig:BIEN4}
-\end{figure}
+<!-- \begin{figure}[h!] -->
+<!-- \resizebox{.9\textwidth}{!}{\includegraphics[width=\linewidth]{3 - Figures/bien4.jpg}} -->
+<!-- \caption[BIEN PFT Coverage]{\textbf{\BIEN \PFT Coverage - }Geo-referenced records within version 4.1 of the \BIEN data base at logarithmic scale\cite{BIENOnline}.} -->
+<!-- \label{fig:BIEN4} -->
+<!-- \end{figure} -->
 
 \begin{itemize}
 \item The \textbf{\COMPADRE}\cite{Salguero-Gomez2015} contains \LHT, a subclass of \PFTs pertaining to life history characteristics (e.g. longevity, reproductive mode, etc.), driven matrix population models which produce important information about community processes through time based on records of different \LHTs\cite{Salguero-Gomez2016}. In its current release (version 5.0.0) it contains over 7,00 matrix models\cite{COMPADREOnline}.
@@ -1191,8 +1191,8 @@ The spatial extent of study sites for assessing vegetation memory effects was li
 The Iberian region - encompassing Portugal, Spain, Andorra and France within this study - has been selected as a study region due to a clear gradient in ombrotypes (see figure \ref{fig:OmbroEU}), its high density of \TRY \PFT and \COMPADRE \LHT data availability, and previously reported clear patterns of vegetation memory effects\cite{DeKeersmaecker2015} and vegetation sensitivity\cite{Seddon2016}. See figures \ref{fig:IBPDataOverview} and \ref{fig:IBPTRY} for an overview of \gimms \ndvi, \era data, and \TRY \PFT data (both raw and extrapolated) across the Iberian region.
 
 \begin{figure}[h!]
-\centering \includegraphics[width=.85\linewidth]{3 - Figures/Ombro_EU.png}
-\caption[European Ombrotpyes]{\textbf{European Ombrotpyes - }Regions of mean precipitation rates of biological relevance across Europe according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroEU}.}
+\centering \includegraphics[width=.82\linewidth]{3 - Figures/Ombro_EU.png}
+\caption[European Ombrotpyes]{\textbf{European Ombrotpyes - }Regions of mean precipitation rates of biological relevance across Europe according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroEU}. The Iberian Region is marked with a red rectangle.}
 \label{fig:OmbroEU}
 \end{figure}
 
@@ -1204,7 +1204,7 @@ The Caatinga in Brazil - a dryland region located within northeastern Brazil - h
 
 \begin{figure}[h!]
 \centering \includegraphics[width=1\linewidth]{3 - Figures/Ombro_SA.png}
-\caption[South-American Ombrotpyes]{\textbf{South-American Ombrotpyes - }Regions of mean precipitation rates of biological relevance across South-America according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroSA}.}
+\caption[South-American Ombrotpyes]{\textbf{South-American Ombrotpyes - }Regions of mean precipitation rates of biological relevance across South-America according to Rivas-Martínez et al.\cite{Rivas-Martinez2011} and retrieved via the Worldwide Bioclimatic Classification System\cite{OmbroSA}. The Caatinga is marked with a red rectangle.}
 \label{fig:OmbroSA}
 \end{figure}
 
@@ -1214,7 +1214,7 @@ See figures \ref{fig:CaatDataOverview} and \ref{fig:CaatTRY} for an overview of 
 
 ### Australia
 
-Australia has been selected as a study region due to a predominance in dry and even arid ombrotypes as well as gradients of ombrotypes on its eastern coast  (see figure \ref{fig:OmbroAU}). Previous studies have identified clear patterns of vegetation memory across\cite{DeKeersmaecker2017,DeKeersmaecker2015}, vegetation sensitivity\cite{Seddon2016}, and water memory length and strength\cite{Gazol2017}.
+Australia has been selected as a study region due to a predominance in dry and even arid ombrotypes as well as gradients of ombrotypes on its eastern coast  (see figure \ref{fig:OmbroAU}). Previous studies have identified clear patterns of vegetation memory (overall strong memory with the strongest vegetation memory throughout the outback\cite{DeKeersmaecker2017,DeKeersmaecker2015}), vegetation sensitivity (highest autoregressive coefficients in western Australia, and strongest vegetation-water sensitivity in western Australia\cite{Seddon2016}), and water memory length and strength (strongest water memory in northern Australia, shortest memory in eastern Australia\cite{Vicente-Serrano2013}) across Australia.
 
 \begin{figure}[h!]
 \centering \includegraphics[width=1\linewidth]{3 - Figures/Ombro_AU.png}
@@ -1490,7 +1490,7 @@ with $i$ indexing individual, detrended data records. In the case of \ndvi, one 
 \begin{enumerate}
   \item \ndvil is calculated from Z-Score \ndvi data.
   \item Cumulative lags of \qsoil data are established for lags ranging from 0 (instantaneous effects) to annual effects (aggregated over twelve months of detrended \qsoil records) in steps on one month at a time. These lagged effects are subsequently standardised to Z-Scores. See figure \ref{fig:QsoilMemMod} for an examplary overview of \qsoil data treatment.
-  \item \tair data is implemented as instantaneous effects and so no lagged effects have to be calculated. 
+  \item \tair data is implemented as instantaneous effects and so no lagged effects have to be calculated. Technically, this means that \tair-driven vegetation responses aren't memory effects in the sense of antecedent conditions influencing present ones. I will refer to these effects as memory effects nonetheless for the sake of brevity. 
   \end{enumerate}
 \item Variables in nature are often collinear\cite{Butler2017,Goldsmith2018}. Failing to address this issue results in masking of information which might influence our understanding of processes in nature significantly\cite{Zuur2007}. One method of circumventing this issue lies with \textit{\pca}. More specifically, if regression modelling is the target, one may wish to employ \textbf{\pca regression} as a three-step process\cite{Zuur2007} for each of the cumulative \qsoil lags across all four \qsoil layers, effectively adding the necessity for a model selection step:
   \begin{enumerate}
@@ -1824,7 +1824,7 @@ Like with \LHTs, I use regression models to assess causal links between \PFT exp
 
 #### Iberian Region
 
-I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:IBLayers} and table \ref{tab:IBRQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:IBRVegMem2}, \ref{fig:IBRVegMem3}, and \ref{fig:IBRVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:IBRVegMem1}.
+I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:IBLayers} and table \ref{tab:IBRQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:IBRVegMem2}, \ref{fig:IBRVegMem3}, and \ref{fig:IBRVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change (quantitatively or qualitatively) between different soil layer models and are thus reported only in figure \ref{fig:IBRVegMem1}.
 
 \paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across the Iberian region are represented in figure \ref{fig:IBRVegMem1}. Additionally, figure \ref{fig:IBRVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
@@ -1869,7 +1869,7 @@ Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil laye
 
 Spatial patterns of explained variance (see figure \ref{fig:IBRVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the southern dryland regions of Spain and Portugal.
 
-```{r IBVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('t-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Region; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:IBRVarPar1}", fig.scap="Variance Partitioning (Iberian Region; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r IBVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Region; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:IBRVarPar1}", fig.scap="Variance Partitioning (Iberian Region; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1)
 VarParRes(Region = "Iberian Region", SoilLayer = 2, Plot = 1)
 VarParRes(Region = "Iberian Region", SoilLayer = 3, Plot = 1)
@@ -1925,7 +1925,7 @@ Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil laye
 Spatial patterns of explained variance (see figure \ref{fig:CAVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the north-eastern dryland region.
 
 
-```{r CAVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('t-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Caatinga; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:CAVarPar1}", fig.scap="Variance Partitioning (Caatinga; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r CAVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Caatinga; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:CAVarPar1}", fig.scap="Variance Partitioning (Caatinga; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Caatinga", SoilLayer = 1, Plot = 1)
 VarParRes(Region = "Caatinga", SoilLayer = 2, Plot = 1)
 VarParRes(Region = "Caatinga", SoilLayer = 3, Plot = 1)
@@ -1981,7 +1981,7 @@ Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil laye
 
 Spatial patterns of explained variance (see figure \ref{fig:AUVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the Outback with patchy distributions.
 
-```{r AUVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('t-1', 'Shared', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Australia; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:AUVarPar1}", fig.scap="Variance Partitioning (Australia; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+```{r AUVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Australia; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:AUVarPar1}", fig.scap="Variance Partitioning (Australia; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Australia", SoilLayer = 1, Plot = 1)
 VarParRes(Region = "Australia", SoilLayer = 2, Plot = 1)
 VarParRes(Region = "Australia", SoilLayer = 3, Plot = 1)
@@ -2208,11 +2208,13 @@ Some persistent vegetation memory patterns have emerged across all three study r
 \begin{enumerate}
 \item \textbf{\qsoila memory length} (identified as cumulative lags according to \aic values) exhibits \textbf{shorter} values \textbf{in drylands} when compared to adjacent non-dryland regions.
 \item \textbf{\ndvil memory} follows the same pattern as identified in previous studies\cite{DeKeersmaecker2015,Seddon2016} with \textbf{strong and positive} memory effects \textbf{across dryland regions}.
-\item \textbf{\qsoila memory} effects are \textbf{strong and positive across dryland regions}.
+\item \textbf{\qsoila memory} effects are \textbf{strong and positive across dryland regions}, largely coinciding with \ndvil effects.
 \item \textbf{\tair memory} patterns are usually \textbf{strong and negative in dryland regions}.
 \end{enumerate}
 
-Additionally, model coefficient comparison via Mann-Whitney U-Tests revealed that \ndvil is a larger memory component than \qsoil coefficients which, in turn, are larger components that \tair.
+Across the Iberian Region, \qsoila memory length is shortes for regions of negative \qsoila memory effect impacts whilst short \qsoila memory overlaps with regions of high positive \qsoila memory effects across the Caatinga. Across Australia, no such overlap of patterns can be found.
+
+Additionally, model coefficient comparison via Mann-Whitney U-Tests revealed that \ndvil is a larger memory component than \qsoil coefficients which, in turn, are larger components than \tair.
 
 Variance partitioning of \ndvil and \qsoil identified a \textbf{subsiding effect of \qsoil effects through soil layers}. Overall, \textbf{\ndvil explains more variance in \ndvi z-scores than \qsoil data} or variance shared by \ndvil or \qsoil data.
 
@@ -2239,9 +2241,9 @@ With the exception of \qsoild across Australia, \textbf{\qsoil vegetation memory
 #### Iberian Region
 \paragraph*{Fast-Slow Continuum}  \hspace{.5cm}
 
-Relationships of vegetation memory coefficients and \fsca records across the Iberian region are represented in figure \ref{fig:IBCOMPAD1}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab1}.
+Relationships of vegetation memory coefficients and \fsca (life history speed) records across the Iberian region are represented in figure \ref{fig:IBCOMPAD1} (I am showing the vegetation memory characteristics for each geo-referenced \fsca record across the Iberian Region). These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab1}.
 
-```{r IBCOMPAD1, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-1 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-1 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD1}", fig.scap="COMPADRE FSC-1 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+```{r IBCOMPAD1, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{COMPADRE FSC-1 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-1 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD1}", fig.scap="COMPADRE FSC-1 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
 leg1 <- Comres(Region = "Iberian Region", Variable = "FSC-1")
 ```
 
@@ -2253,7 +2255,7 @@ CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg1[[2]])), Variabl
 
 \clearpage
 
-Relationships of vegetation memory coefficients and \fscb records across the Iberian region are represented in figure \ref{fig:IBCOMPAD2}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab2}.
+Relationships of vegetation memory coefficients and \fscb (reproductive strategy) records across the Iberian region are represented in figure \ref{fig:IBCOMPAD2}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab2}.
 
 ```{r IBCOMPAD2, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-2 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-2 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD2}", fig.scap="COMPADRE FSC-2 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
 leg2 <- Comres(Region = "Iberian Region", Variable = "FSC-2")
@@ -2774,13 +2776,110 @@ Overall, \textbf{\PFTs cannot be linked to vegetation memory characteristics in 
 
 # Discussion
 ## Vegetation Memory
-## Life History Traits
-## Plant Functional Traits
+\begin{itemize}
+\item Memory effects sizes are ranked as follows: \ndvil $>$ \qsoil (\qsoila $>$ \qsoilb $>$ \qsoilc $>$ \qsoild) $>$ \tair \hfill \newline
+$\rightarrow$ Intrinsic memory drives systems more than extrinsic memory \hfill \newline
+$\rightarrow$ Research Question 1.1: Intrinsic metric is \ndvil, and extrinsic metric is \qsoil. However, this depends on the study region (we have only assessed dryland regions)
+\item The higher the environmental mean of a certain vegetation memory driver, the lower/the more negative the vegetation memory effect \hfill \newline
+$\rightarrow$ depicting plant niches/adaptive capabilites of vegetation
+\item Overlap in patterns of \ndvil and \qsoila memory effects \hfill \newline
+$\rightarrow$ suggesting that intrinsic memory might be a masked extrinsic memory effect \hfill \newline
+$\rightarrow$ Variance partitioning shows that such a clear distinction is impossible with \ndvil variance being much bigger than \qsoil variance (especially in deeper soil layers) \hfill \newline
+$\rightarrow$ Research Question 1.2: Due to the high portion of shared variance, I argue that it is diffuclt to distinguish intrinsic and extrinsic in certainr egions memory
+\end{itemize}
+
+### Intrinsic Memory
+\begin{itemize}
+\item Positive effects in dryland regions \hfill \newline
+$\rightarrow$ Weaker engineering resilience across dryland regions
+\item Negative correlation to effects of mean \ndvi records \hfill \newline
+$\rightarrow$ high memory/low resilience linked to regions of low biomass (material legacies)
+\end{itemize}
+
+### Extrinsic Memory
+#### Soil Moisture
+\paragraph*{Soil Moisture Effects}  \hspace{.5cm}
+\begin{itemize}
+\item strong/positive in drylands \hfill \newline
+$\rightarrow$ dryland vegetation reacts positively to positive anomalies in soil moisture depicting the \textbf{water limitation} of drylands
+\item \qsoila is the most informative \qsoil layer \newline
+$\rightarrow$ vegetation on the three study regionspredimeninantly receives ater from the upper 7cm of the soil. \hfill \newline
+$\rightarrow$ vegetation in the three study regions has adapted to quickly respond to precipitation events thus making it so that water is mostly taken up from the first soil layer befor it sinks to lower soil layers
+\item Negative correlation of effects to mean \qsoil records \hfill \newline
+$\rightarrow$ climate niche of plants (low resistance at upper and lower moisture spectrum, and high resistance to water anomalies at intermediate moisture levels)
+\item Soil moisture vegetation memory sensitivity decreasing through layers \hfill \newline
+$\rightarrow$ plants adapt the most to the soil moisture conditions of the upper 7cm of soil
+\end{itemize}
+
+\paragraph*{Soil Moisture Memory Length}  \hspace{.5cm}
+\begin{itemize}
+\item Shortest memory in regions of strong (positive or negative) memory effects \hfill \newline
+$\rightarrow$ low resistance (memory strength) systems react fast (memory length) to perturbations
+\item shorter memory in dryland regions overall \hfill \newline
+$\rightarrow$ drylands react fast to \qsoil anomalies signifying the adaptation of plants to leverage soil moisture as quickly as possible
+\item In regions of strong \qsoil memory, memory length is shortest in the Caatinga, intermediate across Australia and longest across the Iberian Region \hfill \newline
+$\rightarrow$ impacts of \qsoil manifest on different timescales given geographical location and local factors which I haven't assessed here (further research?)
+\item Negative correlation of memory length to mean \qsoil records \hfill \newline
+$\rightarrow$ dry regions react fast (and positive) to \qsoil anomalies \hfill \newline
+$\rightarrow$ wet regions react slow (and negative) to \qsoil anomalies
+\item Soil moisture vegetation memory length sensitivity decreasing through layers \hfill \newline
+$\rightarrow$ speed of vegetation response to \qsoil anomalies becomes decoupled from mean \qsoil conditions deeper in the soil identifying less adaptation of vegetation to the conditions in these layers
+\item Soil moisture vegetation memory length sensitivity changing correlation sign through layers across the Iberian Region \hfill \newline
+$\rightarrow$ Speed of vegetation response to \qsoil anomalies in dependence on mean \qsoil conditions turns around between \qsoilb and \qsoilc \hfill \newline
+$\rightarrow$ This points to different root systems of different plants favouring different adaptations to \qsoil conditions
+\end{itemize}
+
+#### Air Temperature
+\begin{itemize}
+\item Negative in drylands \hfill \newline
+$\rightarrow$ dryland vegetation reacts negatively to positive anomalies in \tair (instanteneous) depicting negative effects of increased evaporation and levels of aridity that are \tair-driven
+\item Positive in northern regions and high altitudes \hfill \newline
+$\rightarrow$ vegetation in cold/wet regions reacts positively to positive anomalies in \tair (instanteneous) depicting positive effects of increased solar radiation (coupled with higher \tair records) and increased speeds of biological processes in higher temperatures
+\item Negative correlation of effects to mean \tair records \hfill \newline
+$\rightarrow$ climate niche of plants (low resistance at upper and lower \tair spectrum, and high resistance to water anomalies at intermediate \tair levels)
+\end{itemize}
+
+## Functional Aspects of Vegetation Memory
+\begin{itemize}
+\item Research Question 2.1: \COMPADRE reactivity is related to vegetation memory \hfill \newline
+$\rightarrow$ due to the direct link of irst-time-step response to recovery rates and resistance potential
+\item research Question 2.2: \COMPADRE Reactivity is the only \PFT/\LHT I can link to vegetation memory and captures information of both intrsinsic as well as extrinsic memory effects \hfill \newline
+$\rightarrow$ Reactivity strongest linked to \qsoil and \tair effects \hfill \newline
+$\rightarrow$ Reactivity almost as strongly linked to \ndvil effects \hfill \newline
+$\rightarrow$ Assigning intrinsic/extrinsic memory effects to separate aspects of plant function/life histories is diffuclt and needs further research
+\end{itemize}
+
+### Life History Traits
+\begin{itemize}
+\item \COMPADRE data largely difficult to linkt o vegetation memory \hfill \newline
+$\rightarrow$ because of data availability and coverage (especially across Australia and Caatinga)
+\item \COMPADRE Reactivity can be linked to vegetation memory 
+  \begin{itemize}
+  \item Negative correlation of Reactivity and \ndvil and \qsoil memory effects \hfill \newline
+$\rightarrow$ \ndvil: stronger first-time-step biological response (reactivity) decreases intrinsic vegetation memory and thus enhances recovery \hfill \newline
+$\rightarrow$ \qsoil: stronger first-time-step biological response (reactivity) decreases \qsoil vegetation memory and thus ehances \qsoil anomaly resistance
+\item Positive correlation of Reactivity and \tair memory effects \hfill \newline
+$\rightarrow$ Increased reactivity at the cost of \tair resistance?  \hfill \newline
+$\rightarrow$ Instanteneous response can't be captured by first-time-step response (reactivity) \hfill \newline
+$\rightarrow$ More research needed?
+  \end{itemize}
+\end{itemize}
+
+### Plant Functional Traits
+\begin{itemize}
+\item \PFTs can't be linked to vegetation memory in this study (this is morrored to an extent by Lauglin et al.\cite{Laughlin2018}) \hfill \newline
+$\rightarrow$ because of data availability and coverage? \hfill \newline
+$\rightarrow$ Due to changes in \PFT composition over time not being taken into account?
+\item Mismatch in identified (non-significant) links of \PFTs and vegetation memory \hfill \newline
+$\rightarrow$ suggest that the \PFT mapping approach needs further developing or data quality is subpar (probably a combination of the two)
+\end{itemize}
 
 # Conclusion
 
+Repeat research questions and highlight significance
+
 **Outlook**  
-1. Soil moisture-driven drought indices\cite{Sohrabi2015}?  
+1. Soil moisture-driven drought indices\cite{Sohrabi2015}  
 2. Use \BIEN data
 
 
