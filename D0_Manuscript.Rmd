@@ -156,7 +156,7 @@ smallplotxneg <- c(0.05,.5,.03,.065) # where to put colour scales
 ```
 
 ```{r VarParRes, echo = FALSE}
-VarParRes <- function(Region, SoilLayer, Plot = 1){
+VarParRes <- function(Region, SoilLayer, Plot = 1, Legend = TRUE){
   col.varpar1 <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "wildfire")
 col.varpar2 <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "targaryen")
 col.varpar3 <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "jon_snow")
@@ -167,23 +167,27 @@ col.list <- list(col.varpar1, col.varpar2, col.varpar3)
   Alter_ras[2] <- 0
   values(Alter_ras)[which(values(Alter_ras) < 0)] <- 0
   cells <- order(values(Alter_ras[[1]]))
-  plot_df <- data.frame(Variance =NA, 
+  plot_df <- data.frame(Data =NA, 
                         Cell =NA,
-                        Source =NA)
+                        Variance =NA)
   Idents <- c(NA, "t-1", "Shared", "Qsoil")
   for(i in 1:4){
     Alter_ras[[i]][which(values(Alter_ras[[i]])>quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE))] <- quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)
     if(i > 1){
-      plot_df1 <- data.frame(Variance = values(Alter_ras[[i]])[cells],
+      plot_df1 <- data.frame(Data = values(Alter_ras[[i]])[cells],
                              Cell = 1:length(cells), 
-                             Source = rep(Idents[i], length(cells)))
+                             Variance = rep(Idents[i], length(cells)))
       plot_df <- rbind(plot_df, plot_df1)
     }
   }
   plot_df <- na.omit(plot_df)
-  p <- ggplot(data = plot_df, aes(y = Variance, x = Cell, fill = Source)) + geom_bar(stat = "identity") + ylim(0, quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)) + theme_bw(base_size= 20) + xlab("Raster Cells") + scale_fill_manual(values=c(col.list[[3]][1], col.list[[2]][50], col.list[[1]][30]))
+  if(Legend == TRUE){
+   p <- ggplot(data = plot_df, aes(y = Data, x = Cell, fill = Variance)) + geom_bar(stat = "identity") + ylim(0, quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)) + theme_bw(base_size= 20) + xlab("Raster Cells") + ylab("Variance") + scale_fill_manual(values=c(col.list[[3]][1], col.list[[2]][50], col.list[[1]][30])) 
+  }else{
+   p <- ggplot(data = plot_df, aes(y = Data, x = Cell, fill = Variance)) + geom_bar(stat = "identity") + ylim(0, quantile(values(Alter_ras[[1]]),.95, na.rm=TRUE)) + theme_bw(base_size= 20) + xlab("Raster Cells") + ylab("Variance") + scale_fill_manual(values=c(col.list[[3]][1], col.list[[2]][50], col.list[[1]][30])) + theme(legend.position = "none")
+  }
   if(Plot == 1){
-    print(p)
+    return(p)
   }else{
    for(i in 2:4){
     col.varpar <- col.list[[i-1]]
@@ -223,72 +227,103 @@ smallplotxneg <- c(0.05,.5,.03,.065) # where to put colour scales
 ```
 
 ```{r PatCausRes, echo = FALSE}
-PatcausRes <- function(Region, SoilLayer, SoilOnly){
-  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
-  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
-  Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))
-  Files <- list.files(Dir.ERA.Monthly)[grep(list.files(Dir.ERA.Monthly), pattern = Region)]
-  Files <- Files[grep(Files, pattern = ".nc")]
-  EQsoil <- Files[grep(Files, pattern = "Qsoil")]
-  EQsoil <- brick(paste(Dir.ERA.Monthly, EQsoil[SoilLayer], sep="/"))
-  EQsoil <- values(mean(EQsoil))
-  ETair <- Files[grep(Files, pattern = "Tair")]
-  ETair <- brick(paste(Dir.ERA.Monthly, ETair, sep="/"))
-  ETair <- values(mean(ETair))
-  ENDVI <- list.files(Dir.Gimms.Monthly)[grep(list.files(Dir.Gimms.Monthly), pattern =Region)]
-  ENDVI <- brick(paste(Dir.Gimms.Monthly, ENDVI, sep="/"))
-  ENDVI <- values(mean(ENDVI))
-  plot_df <- data.frame(Memory = values(Alter_ras[[1]]),
-                        NDVI = values(Alter_ras[[2]]),
-                        Qsoil = values(Alter_ras[[3]]),
-                        Tair = values(Alter_ras[[4]]),
-                        ENDVI = ENDVI,
-                        EQsoil = EQsoil,
-                        ETair = ETair)
-  plot_df <- na.omit(plot_df)
+PatcausRes <- function(SoilLayer = 1, X, Y){
+  Regions <- c("Iberian Region", "Caatinga", "Australia")
+  Idents <- c("NDVI", "ENDVI", "Qsoil", "EQsoil", "Tair", "ETair", "Memory")
+  Labs <- c("NDVI [t-1] Coefficients", "Mean NDVI ", paste("Qsoil", SoilLayer, " Coefficients", sep=""), paste("Mean  Qsoil", SoilLayer, sep=""), "Tair Coefficients", "Mean Tair", paste("Qsoil", SoilLayer, " Memory Lags", sep=""))
+  # data
+  plot_df <- data.frame(X = NA, Y = NA, Region = NA)
+  for(i in 1:length(Regions)){
+    Region <- Regions[i]
+    Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+    Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+    Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))
+    Files <- list.files(Dir.ERA.Monthly)[grep(list.files(Dir.ERA.Monthly),
+                                              pattern = Region)]
+    Files <- Files[grep(Files, pattern = ".nc")]
+    EQsoil <- Files[grep(Files, pattern = "Qsoil")]
+    EQsoil <- brick(paste(Dir.ERA.Monthly, EQsoil[SoilLayer], sep="/"))
+    EQsoil <- values(mean(EQsoil))
+    ETair <- Files[grep(Files, pattern = "Tair")]
+    ETair <- brick(paste(Dir.ERA.Monthly, ETair, sep="/"))
+    ETair <- values(mean(ETair))
+    ENDVI <- list.files(Dir.Gimms.Monthly)[grep(list.files(Dir.Gimms.Monthly),
+                                                pattern =Region)]
+    ENDVI <- brick(paste(Dir.Gimms.Monthly, ENDVI, sep="/"))
+    ENDVI <- values(mean(ENDVI))
+    values <- list(values(Alter_ras[[2]]), ENDVI,
+                   values(Alter_ras[[3]]), EQsoil,
+                   values(Alter_ras[[4]]), ETair,
+                   values(Alter_ras[[1]])
+                   )
+    plot_df1 <- data.frame(X = values[[which(Idents == X)]],
+                          Y = values[[which(Idents == Y)]],
+                          Region = rep(Region, length(values[[which(Idents == X)]])))
+    plot_df1 <- na.omit(plot_df1)
+    plot_df <- rbind(plot_df, plot_df1)
   QsoilTitle <- c("(0-7cm)", "(7-28cm)", "(28-100cm)", "(100-255cm)")
-  Output <- as.list(rep(NA, 8))
-  if(SoilOnly == TRUE){
-    plotm <- ggplot(plot_df, aes(x = as.factor(Memory), y = EQsoil)) +
-  geom_boxplot() + theme_bw(base_size = 35) + ylab(paste("Mean Soil Moisture", QsoilTitle[SoilLayer])) + xlab(paste("Soil Moisture", QsoilTitle[SoilLayer], "Lag")) + coord_flip()
-print(plotm)
-  Output[[1]] <- summary(lm(Memory ~ EQsoil, data = plot_df))[["coefficients"]][1,1]
-  Output[[2]] <- summary(lm(Memory ~ EQsoil, data = plot_df))[["coefficients"]][1,4]
-  Output[[3]] <- summary(lm(Memory ~ EQsoil, data = plot_df))[["coefficients"]][2,1]
-  Output[[4]] <- summary(lm(Memory ~ EQsoil, data = plot_df))[["coefficients"]][2,4]
-plotq <- ggplot(plot_df, aes(x = EQsoil, y = Qsoil)) +
-  geom_point(shape = ".", alpha = 0.5, col = "blue", size = 3.5) + 
-  theme_bw(base_size = 35) + xlab(paste("Mean Soil Moisture", QsoilTitle[SoilLayer])) + ylab(paste("Soil Moisture", QsoilTitle[SoilLayer], "Coefficients")) + 
-  stat_smooth(method = "lm",col ="black",level = 0.95)+
-  geom_hline(yintercept = 0, linetype="dotted")
-print(plotq)
-  Output[[5]] <- summary(lm(Qsoil ~ EQsoil, data = plot_df))[["coefficients"]][1,1]
-  Output[[6]] <- summary(lm(Qsoil ~ EQsoil, data = plot_df))[["coefficients"]][1,4]
-  Output[[7]] <- summary(lm(Qsoil ~ EQsoil, data = plot_df))[["coefficients"]][2,1]
-  Output[[8]] <- summary(lm(Qsoil ~ EQsoil, data = plot_df))[["coefficients"]][2,4]
-  }else{
-    plotN <- ggplot(plot_df, aes(x = ENDVI, y = NDVI)) +
-  geom_point(shape = ".", alpha = 0.5, col = "forestgreen", size = 3.5) + 
-  theme_bw(base_size = 35) + xlab("Mean NDVI") + ylab("NDVI [t-1] Coefficients") + 
-  stat_smooth(method = "lm",col ="black",level = 0.95)+
-  geom_hline(yintercept = 0, linetype="dotted")
-print(plotN)
-  Output[[1]] <- summary(lm(NDVI ~ ENDVI, data = plot_df))[["coefficients"]][1,1]
-  Output[[2]] <- summary(lm(NDVI ~ ENDVI, data = plot_df))[["coefficients"]][1,4]
-  Output[[3]] <- summary(lm(NDVI ~ ENDVI, data = plot_df))[["coefficients"]][2,1]
-  Output[[4]] <- summary(lm(NDVI ~ ENDVI, data = plot_df))[["coefficients"]][2,4]
-plotT <- ggplot(plot_df, aes(x = ETair, y = Tair)) +
-  geom_point(shape = ".", alpha = 0.5, col = "red", size = 3.5) + 
-  theme_bw(base_size = 35) + xlab("Mean Air Temperature") + ylab("Air Temperature Coefficients") + 
-  stat_smooth(method = "lm",col ="black",level = 0.95)+
-  geom_hline(yintercept = 0, linetype="dotted")
-print(plotT)
-  Output[[5]] <- summary(lm(Tair ~ ETair, data = plot_df))[["coefficients"]][1,1]
-  Output[[6]] <- summary(lm(Tair ~ ETair, data = plot_df))[["coefficients"]][1,4]
-  Output[[7]] <- summary(lm(Tair ~ ETair, data = plot_df))[["coefficients"]][2,1]
-  Output[[8]] <- summary(lm(Tair ~ ETair, data = plot_df))[["coefficients"]][2,4]
+  }
+  plot_df <- na.omit(plot_df)
+  # plotting
+  p <- ggplot(plot_df, aes(x = X, y = Y, col = Region)) + 
+    geom_point(shape = ".", alpha = 0.4, size = 0.5) + 
+  theme_bw(base_size = 35) + ylab(Labs[which(Idents == Y)]) + xlab(Labs[which(Idents == X)]) +
+  stat_smooth(method = "lm",level = 0.95)+
+  geom_hline(yintercept = 0, linetype="dotted") + 
+    scale_color_manual(values=got(n = length(Regions), alpha = 1, direction = -1, option = "margaery"))
+  if(X == "Memory"){
+   p <- ggplot(plot_df, aes(x = as.factor(X), y = Y, col = Region)) + geom_boxplot() + theme_bw(base_size = 35) + ylab(Labs[which(Idents == Y)]) + xlab(Labs[which(Idents == X)]) + 
+  geom_hline(yintercept = 0, linetype="dotted") + 
+    scale_color_manual(values=got(n = length(Regions), alpha = 1, direction = -1, option = "margaery"))
+  }
+  if(Y == "Memory"){
+   p <- ggplot(plot_df, aes(x = as.factor(Y), y = X, col = Region)) + geom_boxplot() + theme_bw(base_size = 35) + xlab(Labs[which(Idents == Y)]) + ylab(Labs[which(Idents == X)]) + coord_flip() +
+  geom_hline(yintercept = 0, linetype="dotted") + 
+    scale_color_manual(values=got(n = length(Regions), alpha = 1, direction = -1, option = "margaery"))
+  }
+  print(p)
+  # Regressions
+  Output <- as.list(rep(NA, 4*length(Regions)))
+  pos <- 1
+  for(i in 1:length(Regions)){
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][1,1]
+    pos <- pos+1
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][1,4]
+    pos <- pos+1
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][2,1]
+    pos <- pos+1
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][2,4]
+    pos <- pos+1
   }
   return(Output)
+}
+```
+
+```{r Patcaustab, echo = FALSE}
+PatCauseTab <- function(ModelCoeffs, SoilLayer = 1, X, Y){ # using Outputs of PatcauseRes for ModelCoeffs argument
+  tabout <- data.frame(Column = ModelCoeffs[1:2])
+  starts <- seq(1,length(ModelCoeffs), by = 2)
+for(i in 2:(length(ModelCoeffs)/2)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+1)])
+}
+Idents <- c("NDVI", "ENDVI", "Qsoil", "EQsoil", "Tair", "ETair", "Memory")
+Labs <- c("$NDVI_{[t-1]}$ Coefficients", "Mean NDVI ", paste("Qsoil", SoilLayer, " Coefficients", sep=""), paste("Mean  Qsoil", SoilLayer, sep=""), "Tair Coefficients", "Mean Tair", paste("Qsoil", SoilLayer, " Memory Lags", sep=""))
+X <- Labs[which(Idents == X)]
+Y <- Labs[which(Idents == Y)]
+colnames(tabout) <- rep(c("$I$", "$S$"), 3)
+rownames(tabout) <- c("Value", "$p_{Value}$")
+Short <- paste("Vegetation Memory Sensitivity (",X," and ", Y,")", sep="")
+Long <- paste("Coefficients of linear regressions of vegetation sensitivity. The intercept is marked as $I$, the slope of the regression as $S$. 
+              Established via \\ref{rPatcaustab}.", sep="")
+kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+kab <- add_header_above(kable_input = kab, header = c(" " = 1, "Iberian Region" = 2, "Caatinga" = 2, "Australia" = 2), bold = TRUE, align = 'c')
+kab <- kable_styling(kab, latex_options = c("hold_position"))
+print(kab)
 }
 ```
 
@@ -378,8 +413,31 @@ print(p2)
 ```
 
 ```{r TRYresTab, echo = FALSE}
-TryTab <- function(ModelCoeffs, SoilLayer, Region){
+TryTab <- function(ModelCoeffs, SoilLayer, Region, Variable){
   ModelCoeffs <- unlist(ModelCoeffs)
+  if(Variable != "Qsoil"){
+    tabout <- data.frame(Column = ModelCoeffs[1:2])
+    starts <- seq(1,length(ModelCoeffs), by = 2)
+  for(i in 2:(length(ModelCoeffs)/2)){
+    tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+1)])
+  }
+  colnames(tabout) <- rep(c("$I$", "$S$"), 4)
+  rownames(tabout) <- c("Value", "$p_{Value}$")
+  tabout <- round(tabout,5)
+  Short <- paste("PFTs and ", Variable, " Memory (", Region, ")", sep="")
+Long <- paste("Coefficients of linear regressions of ", Variable, " memory coefficients against PFT data 
+              (vegetative height H, and leaf nitrogen mass Nmass) both as raw geo-referenced data (R), 
+              and extended maps of species-specific trait means (M). 
+              Established via \\ref{rTRYresTab}.", sep="")
+  kab <- kable(tabout, 
+            booktabs = TRUE,
+            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
+            caption.short = Short,
+            escape = FALSE,
+            format = 'latex')
+  kab <- add_header_above(kable_input = kab, header = c(" " = 1, "R" = 2, "M" = 2, "R" = 2, "M" = 2), align = 'c')
+  kab <- add_header_above(kable_input = kab, header = c(" " = 1, "Vegetative Height" = 4, "Nitrogen Content" = 4), bold = TRUE, align = 'c')
+  }else{
 tabout <- data.frame(Column = ModelCoeffs[1:4])
 starts <- seq(1,length(ModelCoeffs), by = 4)
 for(i in 2:(length(ModelCoeffs)/4)){
@@ -401,17 +459,18 @@ kab <- kable(tabout,
 kab <- add_header_above(kable_input = kab, header = c(" " = 1, "H" = 2, "Nmass" = 2,
                                                       "H" = 2, "Nmass" = 2), italic = FALSE, align = 'c')
 kab <- add_header_above(kable_input = kab, header = c(" " = 1, "Qsoil" = 4, "Lag" = 4), bold = TRUE, align = 'c')
+}
 kab <- kable_styling(kab, latex_options = c("hold_position"))
 print(kab)
 }
 ```
 
 ```{r COMRes, echo = FALSE}
-Comres <- function(Region, Variable){
+Comres <- function(Variable, Region, Legend = FALSE){
   col.tair <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "tully")
 col.ndvi <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = 1, option = "tyrell")
-col.qsoil <- got(n = 4, alpha = 1, begin = 0, end = 1, direction = 1, option = "white_walkers")
-col.mem <- got(n = 4, alpha = 1, begin = 0, end = 1, direction = 1, option = "greyjoy")
+col.qsoil <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = 1, option = "white_walkers")
+col.mem <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "greyjoy")
   VarHold <- Variable
   if(Variable == "FSC-1" | Variable == "FSC-2"){
     Variable <- "FastSlow"
@@ -422,10 +481,6 @@ col.mem <- got(n = 4, alpha = 1, begin = 0, end = 1, direction = 1, option = "gr
   Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
   SoilLayer <- 1
   Memory_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
-  for(SoilLayer in 2:4){
-    Add_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
-    Memory_ras <- stack(Memory_ras, Add_ras)
-  }
   # t-1
   Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
   Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
@@ -436,10 +491,6 @@ col.mem <- got(n = 4, alpha = 1, begin = 0, end = 1, direction = 1, option = "gr
   Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
   SoilLayer <- 1
   Qsoil_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
-  for(SoilLayer in 2:4){
-    Add_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
-    Qsoil_ras <- stack(Qsoil_ras, Add_ras)
-  }
   # Tair
   Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
   Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
@@ -458,23 +509,27 @@ col.mem <- got(n = 4, alpha = 1, begin = 0, end = 1, direction = 1, option = "gr
    values(Compad_ras)[which(values(Compad_ras) < quantile(values(Compad_ras), .05, na.rm = TRUE))] <- quantile(values(Compad_ras), .05, na.rm = TRUE) 
   }
   plot_df <- data.frame(
-    Data = c(values(Memory_ras[[1]]), values(Memory_ras[[2]]), values(Memory_ras[[3]]), values(Memory_ras[[4]]), values(NDVI_ras), values(Qsoil_ras[[1]]), values(Qsoil_ras[[2]]), values(Qsoil_ras[[3]]), values(Qsoil_ras[[4]]), values(Tair_ras)), 
-    Identifiers = rep(c("LagSoil1", "LagSoil2", "LagSoil3", "LagSoil4", "t-1", "Qsoil1", "Qsoil2", "Qsoil3", "Qsoil4", "Tair"), each = length(values(Memory_ras[[1]]))),
-   Compadre = rep(values(Compad_ras), 10)
+    Data = c(values(Memory_ras), values(NDVI_ras), values(Qsoil_ras), values(Tair_ras)), 
+    Identifiers = rep(c("Lag", "t-1", "Qsoil1", "Tair"), each = length(values(Memory_ras))),
+   Compadre = rep(values(Compad_ras), 4)
   )
   Variable <- VarHold
   plot_df <- na.omit(plot_df)
-  Output <- as.list(rep(NA,10))
-  plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair))
-  print(plot)
-  Idents <- c("t-1", "Tair", paste("Qsoil", 1:4, sep=""), paste("LagSoil", 1:4, sep=""))
+  Output <- as.list(rep(NA,16))
+  
+  if(Legend == TRUE){
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair))
+  }else{
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Memory Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + theme(legend.position = "none")
+  }
+  Idents <- c("t-1", "Tair", "Qsoil1", "Lag")
   for(i in 0:(length(Idents)-1)){
     Output[[(4*i+1)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][1,1]
     Output[[(4*i+2)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][1,4]
     Output[[(4*i+3)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][2,1]
     Output[[(4*i+4)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][2,4]
   }
-  return(list(leg,Output,dim(plot_df)[1]/10))
+  return(list(plot,Output,dim(plot_df)[1]/4))
 }
 ```
 
@@ -533,14 +588,14 @@ print(kab)
 
 ```{r COMPADTab, echo = FALSE}
 CompadTab <- function(Region, ModelCoeffs, Variable){
-  tabout <- data.frame(Column = ModelCoeffs[1:4])
-starts <- seq(1,length(ModelCoeffs), by = 4)
-for(i in 2:(length(ModelCoeffs)/4)){
-  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
+  tabout <- data.frame(Column = ModelCoeffs[1:2])
+starts <- seq(1,length(ModelCoeffs), by = 2)
+for(i in 2:(length(ModelCoeffs)/2)){
+  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+1)])
 }
-rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
+colnames(tabout) <- rep(c("$I$", "$S$"), 4)
+rownames(tabout) <- c("Value", "$p_{Value}$")
 tabout <- round(tabout,5)
-colnames(tabout) <- c("t-1", "Tair", 1:4, 1:4)
 Short <- paste("COMPADRE ", Variable, " and Vegetation Memory (", Region, ")", sep="")
 Long <- paste("Linear regression coefficients of COMPADRE data and vegetation memory coefficients. 
               Established via \\ref{rCOMPADTab}.", sep="")
@@ -550,91 +605,7 @@ kab <- kable(tabout,
             caption.short = Short,
             escape = FALSE,
             format = 'latex')
-kab <- add_header_above(kable_input = kab, header = c(" " = 3, "Qsoil" = 4, "Lag" = 4), bold = TRUE, align = 'c')
-kab <- kable_styling(kab, latex_options = c("hold_position"))
-print(kab)
-}
-```
-
-```{r PatCausAnova, echo = FALSE}
-PatCausAnova <- function(Region){
- ## LOADING
-Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
-  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
-  SoilLayer <- 1
-  Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
-  for(SoilLayer in 2:4){
-    Add_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
-    Alter_ras <- stack(Alter_ras, Add_ras)
-  }
-  Memory <- Alter_ras
-  SoilLayer <- 1
-  Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
-  for(SoilLayer in 2:4){
-    Add_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
-    Alter_ras <- stack(Alter_ras, Add_ras)
-  }
-  Qsoil <- Alter_ras
-  Files <- list.files(Dir.ERA.Monthly)[grep(list.files(Dir.ERA.Monthly), pattern = Region)]
-  Files <- Files[grep(Files, pattern = ".nc")]
-  EQsoil <- Files[grep(Files, pattern = "Qsoil")]
-  SoilLayer <- 1
-  Alter_ras <- mean(brick(paste(Dir.ERA.Monthly, EQsoil[SoilLayer], sep="/")))
-  for(SoilLayer in 2:4){
-    Add_ras <- mean(brick(paste(Dir.ERA.Monthly, EQsoil[SoilLayer], sep="/")))
-    Alter_ras <- stack(Alter_ras, Add_ras)
-  }
-  EQsoil <- Alter_ras
-  ## DATA
-  anova_df <- data.frame(EQsoil1 = values(EQsoil[[1]]),
-                         EQsoil2 = values(EQsoil[[2]]),
-                         EQsoil3 = values(EQsoil[[3]]),
-                         EQsoil4 = values(EQsoil[[4]]),
-                         Qsoil1 = values(Qsoil[[1]]),
-                         Qsoil2 = values(Qsoil[[2]]),
-                         Qsoil3 = values(Qsoil[[3]]),
-                         Qsoil4 = values(Qsoil[[4]]),
-                         Memory1 = values(Memory[[1]]),
-                         Memory2 = values(Memory[[2]]),
-                         Memory3 = values(Memory[[3]]),
-                         Memory4 = values(Memory[[4]]))
-  anova_df <- na.omit(anova_df)  
-  ## ANOVA
-  ### Memory
-  Mod1 <- lm(Memory1 ~ EQsoil1, data = anova_df)
-  Mod2 <- lm(Memory2 ~ EQsoil2, data = anova_df)
-  Mod3 <- lm(Memory3 ~ EQsoil3, data = anova_df)
-  Mod4 <- lm(Memory4 ~ EQsoil4, data = anova_df)
-  AnMem <- anova(Mod1, Mod2, Mod3, Mod4)
-  ### Qsoil
-  Mod1 <- lm(Qsoil1 ~ EQsoil1, data = anova_df)
-  Mod2 <- lm(Qsoil2 ~ EQsoil2, data = anova_df)
-  Mod3 <- lm(Qsoil3 ~ EQsoil3, data = anova_df)
-  Mod4 <- lm(Qsoil4 ~ EQsoil4, data = anova_df)
-  AnQsoil <- anova(Mod1, Mod2, Mod3, Mod4)
-  return(list(AnMem, AnQsoil))
-}
-```
-
-```{r Patcaustab, echo = FALSE}
-PatCauseTab <- function(ModelCoeffs, Region){ # using Outputs of PatcauseRes for ModelCoeffs argument
-  tabout <- data.frame(Column = ModelCoeffs[1:4])
-starts <- seq(1,length(ModelCoeffs), by = 4)
-for(i in 2:(length(ModelCoeffs)/4)){
-  tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
-}
-colnames(tabout) <- c("t-1", "Tair", "1", "2", "3", "4", "1", "2", "3", "4")
-rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
-Short <- paste("Vegetation Memory Sensitivity (",Region,")", sep="")
-Long <- paste("Coefficients of linear regressions of vegetation sensitivity across the Iberian Region. 
-              Established via \\ref{rPatcaustab}.", sep="")
-kab <- kable(tabout, 
-            booktabs = TRUE,
-            caption = paste("\\textbf{",Short, " -} ",Long, sep=""),
-            caption.short = Short,
-            escape = FALSE,
-            format = 'latex')
-kab <- add_header_above(kable_input = kab, header = c(" " = 3, "Qsoil" = 4, "Lag" = 4), bold = TRUE, align = 'c')
+kab <- add_header_above(kable_input = kab, header = c(" " = 1, "NDVI [t-1]" = 2, "Tair" = 2, "Qsoil1" = 2, "Lag1" = 2), bold = TRUE, align = 'c')
 kab <- kable_styling(kab, latex_options = c("hold_position"))
 print(kab)
 }
@@ -642,7 +613,7 @@ print(kab)
 
 ```{r PFTTab, echo = FALSE}
 PFTTab <- function(ModelCoeffs, Region, Data){ # Outputs of Tryres to ModelCOeffs
-  tabout <- data.frame(Column = ModelCoeffs[1:4])
+    tabout <- data.frame(Column = ModelCoeffs[1:4])
 starts <- seq(1,length(ModelCoeffs), by = 4)
 for(i in 2:(length(ModelCoeffs)/4)){
   tabout <- cbind(tabout, ModelCoeffs[starts[i]:(starts[i]+3)])
@@ -650,7 +621,7 @@ for(i in 2:(length(ModelCoeffs)/4)){
 colnames(tabout) <- rep(c("H", "$N_{mass}$"), 6)
 rownames(tabout) <- c("Intercept", "$p_{Intercept}$", "Slope", "$p_{Slope}$")
 Short <- paste(Data, " PFTs and Vegetation Memory (",Region,")", sep="")
-Long <- paste("Linear regression coefficients of vegetative height (H) and leaf nitrogen mass (Nmass) against 
+Long <- paste("Linear regression coefficients of vegetative height ($H$) and leaf nitrogen mass ($Nmass$) against 
               vegetation memory coefficients. 
               Established via \\ref{rPFTTab}.", sep="")
 kab <- kable(tabout, 
@@ -1826,12 +1797,11 @@ Like with \LHTs, I use regression models to assess causal links between \PFT exp
 
 I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:IBLayers} and table \ref{tab:IBRQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:IBRVegMem2}, \ref{fig:IBRVegMem3}, and \ref{fig:IBRVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change (quantitatively or qualitatively) between different soil layer models and are thus reported only in figure \ref{fig:IBRVegMem1}.
 
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across the Iberian region are represented in figure \ref{fig:IBRVegMem1}. Additionally, figure \ref{fig:IBRVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
 \begin{enumerate}
 \item \qsoila memory length (identified as cumulative lags according to \aic values) exhibits low values (short memory) in the region of the Pyrenees with a noticeable shift towards slightly longer memory lengths when moving to dryland regions (particularly across Spain).
-\item \ndvil memory follows the same pattern as presented by De Keersmaecker et al.\cite{DeKeersmaecker2015} with strong, positive memory effects in the south of the Iberian region which diminish but remain positive towards the north.
-\item \qsoila memory is predominantly positive in sign (with a notable exception of the Pyrenees). Especially strong \qsoila memory can be observed in the dryland regions of Spain and Portugal.
+\item \ndvil memory follows the same pattern as presented by De Keersmaecker et al.\cite{DeKeersmaecker2015} with strong, positive memory effects in the south of the Iberian region which diminish but remain positive towards the north. Across Spain, the \ndvil pattern is a close match of the \qsoila memory length pattern.
+\item \qsoila memory is predominantly positive in sign (with a notable exception of the Pyrenees). Especially strong \qsoila memory can be observed in the dryland regions of Spain and Portugal. \qsoila emory patterns closely resemle \ndvil memory patterns.
 \item \tair memory falls onto a clear latitudinal gradient with positive memory effects in the north to negative memory effects of almost equal absolute values in the south. Additionally, there seems to be an altitudinal gradient with negative memory effects in the Pyrenees.
 \end{enumerate}
 
@@ -1849,45 +1819,15 @@ ModelRes(Region = "Iberian Region", SoilLayer = 1)
 
 \clearpage
 
-\paragraph*{Soil Layer Comparison}  \hspace{.5cm}
-
-As stated above \qsoila has been identified as the most informative \qsoil layer in terms of vegetation memory. This is due to the fact that patterns of \qsoil memory stay consistent across \qsoil layers (see figure \ref{fig:IBLayers}) and \qsoila coefficients being larger than coefficients of other \qsoil layers at statistical significance (see table \ref{tab:IBRQsoilU}).
-\vspace{-1cm}
-```{r IBLayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Region, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:IBRVegMem1}, \\ref{fig:IBRVegMem2}, \\ref{fig:IBRVegMem3}, and \\ref{fig:IBRVegMem4} and have been scaled to be represented on the same colour axis for comparability. Figure established via \\ref{rSoilLayersRes}. \\label{fig:IBLayers}", fig.scap="Vegetation Memory Coefficients (Iberian Region, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-SoilLayersRes(Region = "Iberian Region")
-```
-\vspace{-.5cm}
-```{r IBRQsoilU, echo = FALSE, results = 'asis'}
-UQsoilres(Region = "Iberian Region")
-```
-
-\clearpage
-
-\paragraph*{Variance Partitioning}  \hspace{.5cm}
-
-Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:IBRVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
-
-Spatial patterns of explained variance (see figure \ref{fig:IBRVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the southern dryland regions of Spain and Portugal.
-
-```{r IBVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Region; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:IBRVarPar1}", fig.scap="Variance Partitioning (Iberian Region; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1)
-VarParRes(Region = "Iberian Region", SoilLayer = 2, Plot = 1)
-VarParRes(Region = "Iberian Region", SoilLayer = 3, Plot = 1)
-VarParRes(Region = "Iberian Region", SoilLayer = 4, Plot = 1)
-```
-
-\clearpage
-
 #### Caatinga
-I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:CALayers} and table \ref{tab:CAQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:CAVegMem2}, \ref{fig:CAVegMem3}, and \ref{fig:CAVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:CAVegMem1}.
+Again, I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:CALayers} and table \ref{tab:CAQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:CAVegMem2}, \ref{fig:CAVegMem3}, and \ref{fig:CAVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:CAVegMem1}.
 
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across the Caatinga are represented in figure \ref{fig:CAVegMem1}. Additionally, figure \ref{fig:CAVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
 \begin{enumerate}
 \item \qsoila memory length (identified as cumulative lags according to \aic values) exhibits lower values (shorter memory) in the north-eastern dryland regions as well as the south-western tropical regions.
-\item \ndvil memory depicts the same pattern as the vegetation sensitivity index developed by Seddon et al\cite{Seddon2016} with the north-eastern dryland region being characterised by strong intrinsic memory effects. Notice the negligible coverage of negative \ndvil memory effects as well as their minute absolute values when compared to positive \ndvil memory effect values.
-\item \qsoila memory effects are mostly positive across the entire Caatinga range with the highest absolute values being found in the north-eastern dryland region. Take note that the maximum \qsoila memory coefficient is larger than the absolute of the corresponding minimum value. Additionally, there are some changes in \qsoil memory effect sign between \qsoila and \qsoilb, and \qsoilc and \qsoild with negative \qsoil effects being identified around the region of Brasilia in the latter two layers.
-\item \tair memory patterns follow a pattern that is close to the inverse of the \qsoila pattern with large negative values in the north-eastern dryland region. Take note that the absolute of the minimum \tair memory coefficient is larger than the corresponding maximum value.
+\item \ndvil memory depicts the same pattern as the vegetation sensitivity index developed by Seddon et al\cite{Seddon2016} with the north-eastern dryland region being characterised by strong intrinsic memory effects. Notice the negligible coverage of negative \ndvil memory effects as well as their minute absolute values when compared to positive \ndvil memory effect values. Additionally, \ndvil memory patterns closely resemble an inverse of \qsoila memory length patterns with increased \ndvil effects in areas of short \qsoila memory length.
+\item \qsoila memory effects are mostly positive across the entire Caatinga range with the highest absolute values being found in the north-eastern dryland region. Take note that the maximum \qsoila memory coefficient is larger than the absolute of the corresponding minimum value. Additionally, there are some changes in \qsoil memory effect sign between \qsoila and \qsoilb, and \qsoilc and \qsoild with negative \qsoil effects being identified around the region of Brasilia in the latter two layers. Overall, the \qsoila memory pattern closely resembles that of \ndvil effects.
+\item \tair memory patterns follow a pattern that is close to the inverse of the \qsoila pattern with large negative values in the north-eastern dryland region. Take note that the absolute of the minimum \tair memory coefficient is larger than the corresponding maximum value. \tair memory patterns are a close match to an inverse \qsoila memory pattern.
 \end{enumerate}
 
 A hierarchy of vegetation memory strength has been established via median values of absolute vegetation memory coefficients. According to this analysis, \ndvil memory is stronger across the board than \qsoila memory which, in turn, is stronger than \tair memory. These differences have been assessed for statistical significance (see table \ref{tab:CAU1}). 
@@ -1906,45 +1846,15 @@ ModelRes(Region = "Caatinga", SoilLayer = 1)
 
 \clearpage
 
-\paragraph*{Soil Layer Comparison}  \hspace{.5cm}
-As stated above \qsoila has been identified as the most informative \qsoil layer in terms of vegetation memory. This is due to the fact that patterns of \qsoil memory stay consistent across \qsoil layers (see figure \ref{fig:CALayers}) and \qsoila coefficients being larger than coefficients of other \qsoil layers at statistical significance (see table \ref{tab:CAQsoilU}).
-\vspace{-1cm}
-```{r CALayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Caatinga, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:CAVegMem1}, \\ref{fig:CAVegMem2}, \\ref{fig:CAVegMem3}, and \\ref{fig:CAVegMem4} and have been scaled to be represented on the same colour axis for comparability. Figure established via \\ref{rSoilLayersRes}. \\label{fig:CALayers}", fig.scap="Vegetation Memory Coefficients (Caatinga, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-SoilLayersRes(Region = "Caatinga")
-```
-\vspace{-.5cm}
-```{r CAQsoilU, echo = FALSE, results = 'asis'}
-UQsoilres(Region = "Caatinga")
-```
-
-\clearpage
-
-\paragraph*{Variance Partitioning}  \hspace{.5cm}
-Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:CAVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
-
-Spatial patterns of explained variance (see figure \ref{fig:CAVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the north-eastern dryland region.
-
-
-```{r CAVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Caatinga; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:CAVarPar1}", fig.scap="Variance Partitioning (Caatinga; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-VarParRes(Region = "Caatinga", SoilLayer = 1, Plot = 1)
-VarParRes(Region = "Caatinga", SoilLayer = 2, Plot = 1)
-VarParRes(Region = "Caatinga", SoilLayer = 3, Plot = 1)
-VarParRes(Region = "Caatinga", SoilLayer = 4, Plot = 1)
-```
-
-\clearpage
-
 #### Australia
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
-I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:AULayers} and table \ref{tab:AUQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:AUVegMem2}, \ref{fig:AUVegMem3}, and \ref{fig:AUVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:AUVegMem1}.
+Once more, I am only presenting \qsoila results here as I have identified \qsoila to be the most informative \qsoil layer (see figure \ref{fig:AULayers} and table \ref{tab:AUQsoilU}). Results pertaining to \qsoilb, \qsoilc, and \qsoild can be found in figures \ref{fig:AUVegMem2}, \ref{fig:AUVegMem3}, and \ref{fig:AUVegMem4} respectively. Additionally, patterns of $NDVI[t-1]$ and \tair coefficients do not change between different soil layer models and are thus reported only in figure \ref{fig:AUVegMem1}.
 
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
 Vegetation memory coefficients of \ndvil and extrinsic memory (\tair and \qsoila) across Australia are represented in figure \ref{fig:AUVegMem1}. Additionally, figure \ref{fig:AUVegMem1} depicts \qsoila memory length across the Iberian region. The memory patterns are as follows:
 \begin{enumerate}
-\item \qsoila memory length (identified as cumulative lags according to \aic values) exhibits larger values (longer memory) in the western regions whilst lower memory length indices in the eastern regions of Australia identify shorter memory. Take note that these patterns do not overlap well with the previously identified memory lags of Vicente-Serrano et al.\cite{Vicente-Serrano2013}, or Liu et al.\cite{Liu2018}.
-\item \ndvil memory follows the same pattern as presented by De Keersmaecker et al.\cite{DeKeersmaecker2015} with strong, positive memory effects all across Australia with stronger \ndvil memory effects in the Outback and lower effects across the coastlines. Notice the negligible coverage of negative \ndvil memory effects as well as their minute absolute values when compared to positive \ndvil memory effect values.
-\item \qsoila memory effects are mostly positive across the entirety of Australia with the highest values being located in the Outback and negative \qsoila memory effects being found on Tasmania, along coastlines and south of the St. George Ranges. Take note that the maximum \qsoila memory coefficient is larger than the absolute of the corresponding minimum value. Additionally, there are some changes in \qsoil memory effect sign between \qsoila and \qsoilb, and \qsoilc and \qsoild with negative \qsoil effects being identified throughout the entire Outback particularly within the \qsoild layer.
-\item \tair memory patterns follow a pattern that is close to the inverse of the \tair pattern with large negative values across all of Australia. Take note that the absolute of the minimum \tair memory coefficient is larger than the corresponding maximum value.
+\item \qsoila memory length (identified as cumulative lags according to \aic values) exhibits larger values (longer memory) in the western regions whilst lower memory length indices in the eastern regions of Australia identify shorter memory. Take note that these patterns do not overlap well with the previously identified memory lags of Vicente-Serrano et al.\cite{Vicente-Serrano2013}, or Liu et al.\cite{Liu2018}. However, this pattern closely mimics that of the autoregressive coefficient (\ndvil) employed by Seddon et al\cite{Seddon2016}.
+\item \ndvil memory follows the same pattern as presented by De Keersmaecker et al.\cite{DeKeersmaecker2015} with strong, positive memory effects all across Australia with stronger \ndvil memory effects in the Outback and lower effects across the coastlines. Notice the negligible coverage of negative \ndvil memory effects as well as their minute absolute values when compared to positive \ndvil memory effect values. Unlike before, there is no obvious match between \ndvil memory patterns and \qsoila memory length.
+\item \qsoila memory effects are mostly positive across the entirety of Australia with the highest values being located in the Outback and negative \qsoila memory effects being found on Tasmania, along coastlines and south of the St. George Ranges. Take note that the maximum \qsoila memory coefficient is larger than the absolute of the corresponding minimum value. Additionally, there are some changes in \qsoil memory effect sign between \qsoila and \qsoilb, and \qsoilc and \qsoild with negative \qsoil effects being identified throughout the entire Outback particularly within the \qsoild layer. Again, the \qsoila memory pattern closely resembles that of \ndvil memory effects.
+\item \tair memory patterns follow a pattern that is close to the inverse of the \qsoila pattern with large negative values across all of Australia. Take note that the absolute of the minimum \tair memory coefficient is larger than the corresponding maximum value.
 \end{enumerate}
 
 A hierarchy of vegetation memory strength has been established via median values of absolute vegetation memory coefficients. According to this analysis, \ndvil memory is stronger across the board than \qsoila memory which, in turn, is stronger than \tair memory. These differences have been assessed for statistical significance (see table \ref{tab:AUU1}). 
@@ -1963,239 +1873,93 @@ ModelRes(Region = "Australia", SoilLayer = 1)
 
 \clearpage
 
-\paragraph*{Soil Layer Comparison}  \hspace{.5cm}
-As stated above \qsoila has been identified as the most informative \qsoil layer in terms of vegetation memory. This is due to the fact that patterns of \qsoil memory stay consistent across the first three \qsoil layers (see figure \ref{fig:AULayers}) and \qsoila coefficients being larger than coefficients of other \qsoil layers at statistical significance (see table \ref{tab:AUQsoilU}).
-\vspace{-1cm}
-```{r AULayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Australia, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:AUVegMem1}, \\ref{fig:AUVegMem2}, \\ref{fig:AUVegMem3}, and \\ref{fig:AUVegMem4} and have been scaled to be represented on the same colour axis for comparability. Figure established via \\ref{rSoilLayersRes}. \\label{fig:AULayers}", fig.scap="Vegetation Memory Coefficients (Australia, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-SoilLayersRes(Region = "Australia")
+### Variance Partitioning
+Whilst the contents of tables \ref{tab:IBRU1}, \ref{tab:CAU1}, and \ref{tab:AUU1} allow for region-wide comparisons of relative importance of model components, variance partitioning allows for far more advanced spatial analyses of relative model coefficient importance. Spatial patterns of variance partitioning results are contained in figures (1) \ref{fig:IBRVarPar1} and \ref{fig:IBRVarPar2} for the Iberian Region, (2) \ref{fig:CAVarPar1} and \ref{fig:CAVarPar2} for the Caatinga, and (3) \ref{fig:AUVarPar1} and \ref{fig:AUVarPar2} for Australia.
+
+Firstly, variance partitioning highlights the overall importance of \qsoila when compared to the variance explained by \qsoilb, \qsoilc, and \qsoild. Secondly, comparing variance partitioning results across study regions (see figure \ref{fig:VarParOverview}) patterns of different ecological system processes emerge. Whilst \qsoil and \ndvil share little to no variance across the Iberian Region, a moderate amount of variance is shared by these two variables when analysing the Caatinga range. Across Australia, however, large amounts of variance are shared by \ndvil and \qsoila. These changes hint at differences in how local vegetation is influenced by soil moisutre in these regions. Overall, \ndvil explains more variation in records of \ndvi than \qsoila.
+```{r VarParOverview, echo = FALSE, fig.width = 17, fig.height = 13, fig.subcap=c('Iberian Region', 'Caatinga', 'Australia', 'Plotting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning Across Study Regions -} Variance in \ndvi explained by \\ndvil and \\qsoila records across all three study regions. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:VarParOverview}", fig.scap="Variance Partitioning Across Study Regions", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1, Legend = FALSE)
+VarParRes(Region = "Caatinga", SoilLayer = 1, Plot = 1, Legend = FALSE)
+VarParRes(Region = "Australia", SoilLayer = 1, Plot = 1, Legend = FALSE)
+leg <- VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1)
+leg <- leg + theme_bw(base_size = 90) + guides(fill = guide_legend(override.aes = list(size = 30)))
+legend <- cowplot::get_legend(leg)
+grid.newpage()
+grid.draw(legend)
 ```
-\vspace{-.5cm}
-```{r AUQsoilU, echo = FALSE, results = 'asis'}
-UQsoilres(Region = "Australia")
-```
 
-\clearpage
 
-\paragraph*{Variance Partitioning}  \hspace{.5cm}
-Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:AUVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
-
-Spatial patterns of explained variance (see figure \ref{fig:AUVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the Outback with patchy distributions.
-
-```{r AUVarPar, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Australia; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:AUVarPar1}", fig.scap="Variance Partitioning (Australia; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-VarParRes(Region = "Australia", SoilLayer = 1, Plot = 1)
-VarParRes(Region = "Australia", SoilLayer = 2, Plot = 1)
-VarParRes(Region = "Australia", SoilLayer = 3, Plot = 1)
-VarParRes(Region = "Australia", SoilLayer = 4, Plot = 1)
-```
 \clearpage
 
 ### Vegetation Memory Sensitivity
+Vegetation memory sensitivity has been assessed as linear relationships of vegetation memory coefficients (obtained via models) and environmental mean conditions. This should serve as an information criterion of adaptation of vegetation to local conditions.
 
-#### Iberian Region
-\paragraph*{Intrinsic Memory and Air Temperature}  \hspace{.5cm}
+#### $NDVI_{[t-1]}$
+Sensitivity relationships of \ndvil are depicted alongside raw data in figure \ref{fig:PatCauseNDVI}. Linear regression coefficients of these sensitivity relationships have been assessed per study region and are depicted in table \ref{tab:PatCauseTabNDVI}.
 
-Sensitivity relationships of \ndvil and \tair are depicted alongside raw data in figure \ref{fig:IBPatCausRes}.
-\vspace{-.3cm}
-```{r IBPatCausRes, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('NDVI t-1', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (NDVI t-1 and Tair, Iberian Region) -} Vegetation memory coefficients of figure \\ref{fig:IBRVegMem1} plotted against mean intrinsic and extrinsic drivers (see figure \\ref{fig:IBPDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:IBPatCausRes}", fig.scap="Vegetation Memory Sensitivity (NDVI t-1 and Tair, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPatCauseRes <- PatcausRes(Region = "Iberian Region", SoilLayer = 1, SoilOnly = FALSE)
+```{r PatCauseNDVI, echo = FALSE, fig.width = 17, fig.height = 11, fig.cap="\\textbf{Intrinsic Vegetation Memory Sensitivity -} \\ndvil vegetation memory coefficients of figure \\ref{fig:IBRVegMem1}, \\ref{fig:CAVegMem1}, and \\ref{fig:AUVegMem1} plotted against mean intrinsic drivers (see figure \\ref{fig:IBPDataOverview}, \\ref{fig:CaatDataOverview}, and \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:PatCauseNDVI}", fig.scap="Intrinsic Vegetation Memory Sensitivity", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+PatCauseNDVI <- PatcausRes(SoilLayer = 1, X = "ENDVI", Y = "NDVI")
 ```
-\vspace{-.3cm}
-\ndvil memory effects across the Iberian region are characterised by an inverse relationship with mean \ndvi values ($intercept = `r IBPatCauseRes[[1]]`$; $p_{intercept} = `r IBPatCauseRes[[2]]`$ and $slope = `r IBPatCauseRes[[3]]`$; $p_{slope} = `r IBPatCauseRes[[4]]`$). \tair memory effects across the Iberian region are also characterised by an inverse relationship with mean \tair values ($intercept = `r IBPatCauseRes[[5]]`$; $p_{intercept} = `r IBPatCauseRes[[6]]`$ and $slope = `r IBPatCauseRes[[7]]`$; $p_{slope} = `r IBPatCauseRes[[8]]`$).
 
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
+In general, \ndvil memory effects decrease as mean \ndvi records increase. Take note that \ndvi records are bound between zero and one. Given the intercepts and slopes of the linear regressions protrayed in table \ref{tab:PatCauseTabNDVI}, \ndvil memory effects will not dip below zero in areas of high mean \ndvi.
 
-Sensitivity relationships of \qsoila memory length and \qsoila are depicted alongside raw data in figure \ref{fig:IBPatCausRes1}.
-\vspace{-.3cm}
-```{r IBPatCausRes1, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil1, Iberian Region) -} \\qsoila vegetation memory coefficients and \\qsoila memory length of figure \\ref{fig:IBRVegMem1} plotted against mean \\qsoila records (see figure \\ref{fig:IBPDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:IBPatCausRes1}", fig.scap="Vegetation Memory Sensitivity (Qsoil1, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPatCauseRes1 <- PatcausRes(Region = "Iberian Region", SoilLayer = 1, SoilOnly = TRUE)
+```{r PatCauseTabNDVI, results = 'asis', echo = FALSE}
+PatCauseTab(ModelCoeffs = unlist(PatCauseNDVI), SoilLayer = 1, X = "ENDVI", Y = "NDVI")
 ```
-\vspace{-.3cm}
-\qsoila memory length across the Iberian region are characterised by an inverse relationship with mean \qsoila values ($intercept = `r IBPatCauseRes1[[1]]`$; $p_{intercept} = `r IBPatCauseRes1[[2]]`$ and $slope = `r IBPatCauseRes1[[3]]`$; $p_{slope} = `r IBPatCauseRes1[[4]]`$). \qsoila memory effects across the Iberian region are also characterised by an inverse relationship with mean \qsoila values ($intercept = `r IBPatCauseRes1[[5]]`$; $p_{intercept} = `r IBPatCauseRes1[[6]]`$ and $slope = `r IBPatCauseRes1[[7]]`$; $p_{slope} = `r IBPatCauseRes1[[8]]`$).
 
 \clearpage
 
-\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoilb memory length and \qsoilb are depicted alongside raw data in figure \ref{fig:IBPatCausRes2}.
-\vspace{-.3cm}
-```{r IBPatCausRes2, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil2, Iberian Region) -} \\qsoilb vegetation memory coefficients and \\qsoilb memory length of figure \\ref{fig:IBRVegMem2} plotted against mean \\qsoilb records (see figure \\ref{fig:IBPDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:IBPatCausRes2}", fig.scap="Vegetation Memory Sensitivity (Qsoil2, Iberian Region)", ache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPatCauseRes2 <- PatcausRes(Region = "Iberian Region", SoilLayer = 2, SoilOnly = TRUE)
+#### Air Temperature
+Sensitivity relationships of \tair are depicted alongside raw data in figure \ref{fig:PatCauseTair}. Linear regression coefficients of these sensitivity relationships have been assessed per study region and are depicted in table \ref{tab:PatCauseTabTair}.
+```{r PatCauseTair, echo = FALSE, fig.width = 17, fig.height = 11, fig.cap="\\textbf{Tair Vegetation Memory Sensitivity -} \\tair vegetation memory coefficients of figure \\ref{fig:IBRVegMem1}, \\ref{fig:CAVegMem1}, and \\ref{fig:AUVegMem1} plotted against mean \\tair drivers (see figure \\ref{fig:IBPDataOverview}, \\ref{fig:CaatDataOverview}, and \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:PatCauseTair}", fig.scap="Tair Vegetation Memory Sensitivity", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+PatCauseTair <- PatcausRes(SoilLayer = 1, X = "ETair", Y = "Tair")
 ```
-\vspace{-.3cm}
-\qsoilb memory length across the Iberian region are characterised by an inverse relationship with mean \qsoilb values ($intercept = `r IBPatCauseRes2[[1]]`$; $p_{intercept} = `r IBPatCauseRes2[[2]]`$ and $slope = `r IBPatCauseRes2[[3]]`$; $p_{slope} = `r IBPatCauseRes2[[4]]`$). \qsoilb memory effects across the Iberian region are also characterised by an inverse relationship with mean \qsoilb values ($intercept = `r IBPatCauseRes2[[5]]`$; $p_{intercept} = `r IBPatCauseRes2[[6]]`$ and $slope = `r IBPatCauseRes2[[7]]`$; $p_{slope} = `r IBPatCauseRes2[[8]]`$).
-
-\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoilc memory length and \qsoilc are depicted alongside raw data in figure \ref{fig:IBPatCausRes3}.
-\vspace{-.3cm}
-```{r IBPatCausRes3, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil3, Iberian Region) -} \\qsoilc vegetation memory coefficients and \\qsoilc memory length of figure \\ref{fig:IBRVegMem3} plotted against mean \\qsoilc records (see figure \\ref{fig:IBPDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:IBPatCausRes3}", fig.scap="Vegetation Memory Sensitivity (Qsoil3, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPatCauseRes3 <- PatcausRes(Region = "Iberian Region", SoilLayer = 3, SoilOnly = TRUE)
+Overall, values of \tair memory effects decrease as mean \tair records increase. This relationship is most pronounced across the Iberian Region and least pintense across Australia. This may be due to the presence of altitudinal gradients across the Iberian Region which are largely basent from Australia thus limitting the range of mean \tair values. On the other hand, this may be indicative of different patterns of vegetation adaptation to \tair conditions. Take note that most \tair memory effects are negative across the selected dryland study regions.
+```{r PatCauseTabTair, results = 'asis', echo = FALSE}
+PatCauseTab(ModelCoeffs = unlist(PatCauseTair), SoilLayer = 1, X = "ETair", Y = "Tair")
 ```
-\vspace{-.3cm}
-\qsoilc memory length across the Iberian region are characterised by an positive relationship with mean \qsoilc values ($intercept = `r IBPatCauseRes3[[1]]`$; $p_{intercept} = `r IBPatCauseRes3[[2]]`$ and $slope = `r IBPatCauseRes3[[3]]`$; $p_{slope} = `r IBPatCauseRes3[[4]]`$). \qsoilc memory effects across the Iberian region are characterised by an inverse relationship with mean \qsoilc values ($intercept = `r IBPatCauseRes3[[5]]`$; $p_{intercept} = `r IBPatCauseRes3[[6]]`$ and $slope = `r IBPatCauseRes3[[7]]`$; $p_{slope} = `r IBPatCauseRes3[[8]]`$).
 
 \clearpage
 
-\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoild memory length and \qsoild are depicted alongside raw data in figure \ref{fig:IBPatCausRes4}.
-\vspace{-.3cm}
-```{r IBPatCausRes4, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil4, Iberian Region) -} \\qsoild vegetation memory coefficients and \\qsoild memory length of figure \\ref{fig:IBRVegMem4} plotted against mean \\qsoila records (see figure \\ref{fig:IBPDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:IBPatCausRes4}", fig.scap="Vegetation Memory Sensitivity (Qsoil4, Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPatCauseRes4 <- PatcausRes(Region = "Iberian Region", SoilLayer = 4, SoilOnly = TRUE)
-```
-\vspace{-.3cm}
-\qsoild memory length across the Iberian region are characterised by an positive relationship with mean \qsoild values ($intercept = `r IBPatCauseRes4[[1]]`$; $p_{intercept} = `r IBPatCauseRes4[[2]]`$ and $slope = `r IBPatCauseRes4[[3]]`$; $p_{slope} = `r IBPatCauseRes4[[4]]`$). \qsoild memory effects across the Iberian region are characterised by an inverse relationship with mean \qsoild values ($intercept = `r IBPatCauseRes4[[5]]`$; $p_{intercept} = `r IBPatCauseRes4[[6]]`$ and $slope = `r IBPatCauseRes4[[7]]`$; $p_{slope} = `r IBPatCauseRes4[[8]]`$).
-
-\paragraph*{Summary}  \hspace{.5cm}
-
-Linear regression coefficients of vegetation memory sensitivity relationships across the Iberian region are presented in table \ref{tab:IBPatCauseTab}. Almost all vegetation memory coefficients establish themselves in negative correlations with respective mean environmental values. \qsoil memory coefficients are linked more strongly to mean \qsoil data than \ndvil memory coefficients is to mean \ndvi data or \tair memory coefficients and mean \tair data.
-
-```{r IBPatCauseTab, results = 'asis', echo = FALSE}
-PatCauseTab(ModelCoeffs = c(unlist(IBPatCauseRes),
-                 unlist(IBPatCauseRes1)[5:8], unlist(IBPatCauseRes2)[5:8], unlist(IBPatCauseRes3)[5:8], unlist(IBPatCauseRes4)[5:8],
-                 unlist(IBPatCauseRes1)[1:4], unlist(IBPatCauseRes2)[1:4], unlist(IBPatCauseRes3)[1:4], unlist(IBPatCauseRes4)[1:4]), Region = "Iberian Region")
+#### Soil Moisture (0-7cm)
+Sensitivity relationships of \qsoila are depicted alongside raw data in figure \ref{fig:PatCauseQsoil1}. Linear regression coefficients of these sensitivity relationships have been assessed per study region and are depicted in table \ref{tab:PatCauseTabQsoil1}.
+```{r PatCauseQsoil1, echo = FALSE, fig.width = 17, fig.height = 11, fig.cap="\\textbf{Qsoil1 Vegetation Memory Sensitivity -} \\qsoila vegetation memory coefficients of figure \\ref{fig:IBRVegMem1}, \\ref{fig:CAVegMem1}, and \\ref{fig:AUVegMem1} plotted against mean \\qsoila drivers (see figure \\ref{fig:IBPDataOverview}, \\ref{fig:CaatDataOverview}, and \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:PatCauseQsoil1}", fig.scap="Qsoil1 Vegetation Memory Sensitivity", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+PatCauseQsoil1 <- PatcausRes(SoilLayer = 1, X = "EQsoil", Y = "Qsoil")
 ```
 
-```{r IBPatCauseANOVA, results = 'asis', echo = FALSE}
-IBANOVA <- PatCausAnova(Region = "Iberian Region")
+Whilst values of \qsoila memory effect decrease as mean \qsoila increaes, the rate at which they do differ hugely between study regions. \qsoila memory effects across Australia seem largely de-coupled from from \qsoila conditions. Across the Iberian Region and Caatinga, on the other hand, the negative relationship between \qsoila memory effects and mean \qsoila records are pronounced with \qsoila memory effects dipping into the negative range across the Iberian Region.
+
+```{r PatCauseTabQsoil1, results = 'asis', echo = FALSE}
+PatCauseTab(ModelCoeffs = unlist(PatCauseQsoil1), SoilLayer = 1, X = "EQsoil", Y = "Qsoil")
 ```
-
-The sensitivity of \qsoil vegetation memory to mean \qsoil layer data diminishes through \qsoil layers (from shallow to deep layers). This effect has been identified as statistically significant according to an \anova at $p = `r IBANOVA[[2]][1,5]`$ (established via \ref{rPatCausAnova}).
-
-The correlation of \qsoil vegetation memory length to mean \qsoil layer data starts of negative for \qsoila and \qsoilb (diminishing when going from \qsoila to \qsoilb) and flips to being positive for \qsoilc and \qsoild (intensifying from \qsoilc to \qsoild). This effect has been identified as statistically significant according to an \anova at $p = `r IBANOVA[[1]][1,5]`$  (established via \ref{rPatCausAnova}).
 
 \clearpage
 
-#### Caatinga
-\paragraph*{Intrinsic Memory and Air Temperature}  \hspace{.5cm}
-Sensitivity relationships of \ndvil and \tair are depicted alongside raw data in figure \ref{fig:CAPatCausRes}.
-\vspace{-.3cm}
-```{r CAPatCausRes, echo = FALSE, fig.width = 17, fig.height = 12, fig.subcap=c('NDVI t-1', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (NDVI t-1 and Tair, Caatinga) -} Vegetation memory coefficients of figure \\ref{fig:CAVegMem1} plotted against mean intrinsic and extrinsic drivers (see figure \\ref{fig:CaatDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:CAPatCausRes}", fig.scap="Vegetation Memory Sensitivity (NDVI t-1 and Tair, Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPatCauseRes <- PatcausRes(Region = "Caatinga", SoilLayer = 1, SoilOnly = FALSE)
+#### Memory Length
+Sensitivity relationships of \qsoila memory length (assessed via lags) are depicted alongside raw data in figure \ref{fig:PatCauseMem}. Linear regression coefficients of these sensitivity relationships have been assessed per study region and are depicted in table \ref{tab:PatCauseTabMem}.
+```{r PatCauseMem, echo = FALSE, fig.width = 17, fig.height = 11, fig.cap="\\textbf{Qsoil1 Vegetation Memory Length Sensitivity -} \\qsoila vegetation memory length coefficients of figure \\ref{fig:IBRVegMem1}, \\ref{fig:CAVegMem1}, and \\ref{fig:AUVegMem1} plotted against mean \\qsoila drivers (see figure \\ref{fig:IBPDataOverview}, \\ref{fig:CaatDataOverview}, and \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:PatCauseMem}", fig.scap="Qsoil1 Vegetation Memory Length Sensitivity", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+PatCauseMem <- PatcausRes(SoilLayer = 1, X = "EQsoil", Y = "Memory")
 ```
-\vspace{-.3cm}
-\ndvil memory effects across the Caatinga are characterised by an inverse relationship with mean \ndvi values ($intercept = `r CAPatCauseRes[[1]]`$; $p_{intercept} = `r CAPatCauseRes[[2]]`$ and $slope = `r CAPatCauseRes[[3]]`$; $p_{slope} = `r CAPatCauseRes[[4]]`$). \tair memory effects across the Caatinga are also characterised by an inverse relationship with mean \tair values ($intercept = `r CAPatCauseRes[[5]]`$; $p_{intercept} = `r CAPatCauseRes[[6]]`$ and $slope = `r CAPatCauseRes[[7]]`$; $p_{slope} = `r CAPatCauseRes[[8]]`$).
 
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoila memory length and \qsoila are depicted alongside raw data in figure \ref{fig:CAPatCausRes1}.
-\vspace{-.3cm}
-```{r CAPatCausRes1, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil1, Caatinga) -} \\qsoila vegetation memory coefficients and \\qsoila memory length of figure \\ref{fig:CAVegMem1} plotted against mean \\qsoila records (see figure \\ref{fig:CaatDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:CAPatCausRes1}", fig.scap="Vegetation Memory Sensitivity (Qsoil1, Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPatCauseRes1 <- PatcausRes(Region = "Caatinga", SoilLayer = 1, SoilOnly = TRUE)
+Across all three study regions, \qsoila vegetation memory length decreases as mean \qsoila records increase. This effect is most pronounced across the Iberian Region, followed by Australia, and the Caatinga. The intercepts of these linear regressions follow the same hierarchy, effectively suggesting a stronger influence of \qsoila conditions on memory length across the Iberian Region and Australia when compared to the Caatinga.
+
+```{r PatCauseTabMem, results = 'asis', echo = FALSE}
+PatCauseTab(ModelCoeffs = unlist(PatCauseMem), SoilLayer = 1, X = "EQsoil", Y = "Memory")
 ```
-\vspace{-.3cm}
-\qsoila memory length across the Caatinga are characterised by an inverse relationship with mean \qsoila values ($intercept = `r CAPatCauseRes1[[1]]`$; $p_{intercept} = `r CAPatCauseRes1[[2]]`$ and $slope = `r CAPatCauseRes1[[3]]`$; $p_{slope} = `r CAPatCauseRes1[[4]]`$). \qsoila memory effects across the Caatinga are also characterised by an inverse relationship with mean \qsoila values ($intercept = `r CAPatCauseRes1[[5]]`$; $p_{intercept} = `r CAPatCauseRes1[[6]]`$ and $slope = `r CAPatCauseRes1[[7]]`$; $p_{slope} = `r CAPatCauseRes1[[8]]`$).
 
 \clearpage
 
-\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoilb memory length and \qsoilb are depicted alongside raw data in figure \ref{fig:CAPatCausRes2}.
-\vspace{-.3cm}
-```{r CAPatCausRes2, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil2, Caatinga) -} \\qsoilb vegetation memory coefficients and \\qsoilb memory length of figure \\ref{fig:CAVegMem2} plotted against mean \\qsoilb records (see figure \\ref{fig:CaatDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:CAPatCausRes2}", fig.scap="Vegetation Memory Sensitivity (Qsoil2, Caatinga)", ache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPatCauseRes2 <- PatcausRes(Region = "Caatinga", SoilLayer = 2, SoilOnly = TRUE)
-```
-\vspace{-.3cm}
-\qsoilb memory length across the Caatinga are characterised by a positive relationship with mean \qsoilb values ($intercept = `r CAPatCauseRes2[[1]]`$; $p_{intercept} = `r CAPatCauseRes2[[2]]`$ and $slope = `r CAPatCauseRes2[[3]]`$; $p_{slope} = `r CAPatCauseRes2[[4]]`$). \qsoilb memory effects across the Caatinga are characterised by an inverse relationship with mean \qsoilb values ($intercept = `r CAPatCauseRes2[[5]]`$; $p_{intercept} = `r CAPatCauseRes2[[6]]`$ and $slope = `r CAPatCauseRes2[[7]]`$; $p_{slope} = `r CAPatCauseRes2[[8]]`$).
-
-\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoilc memory length and \qsoilc are depicted alongside raw data in figure \ref{fig:CAPatCausRes3}.
-\vspace{-.3cm}
-```{r CAPatCausRes3, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil3, Caatinga) -} \\qsoilc vegetation memory coefficients and \\qsoilc memory length of figure \\ref{fig:CAVegMem3} plotted against mean \\qsoilc records (see figure \\ref{fig:CaatDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:CAPatCausRes3}", fig.scap="Vegetation Memory Sensitivity (Qsoil3, Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPatCauseRes3 <- PatcausRes(Region = "Caatinga", SoilLayer = 3, SoilOnly = TRUE)
-```
-\qsoilc memory length across the Caatinga are characterised by an inverse relationship with mean \qsoilc values ($intercept = `r CAPatCauseRes3[[1]]`$; $p_{intercept} = `r CAPatCauseRes3[[2]]`$ and $slope = `r CAPatCauseRes3[[3]]`$; $p_{slope} = `r CAPatCauseRes3[[4]]`$). \qsoilc memory effects across the Caatinga are also characterised by an inverse relationship with mean \qsoilc values ($intercept = `r CAPatCauseRes3[[5]]`$; $p_{intercept} = `r CAPatCauseRes3[[6]]`$ and $slope = `r CAPatCauseRes3[[7]]`$; $p_{slope} = `r CAPatCauseRes3[[8]]`$).
-
-\clearpage
-
-\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoild memory length and \qsoild are depicted alongside raw data in figure \ref{fig:CAPatCausRes4}.
-\vspace{-.3cm}
-```{r CAPatCausRes4, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil4, Caatinga) -} \\qsoild vegetation memory coefficients and \\qsoild memory length of figure \\ref{fig:CAVegMem4} plotted against mean \\qsoila records (see figure \\ref{fig:CaatDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:CAPatCausRes4}", fig.scap="Vegetation Memory Sensitivity (Qsoil4, Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPatCauseRes4 <- PatcausRes(Region = "Caatinga", SoilLayer = 4, SoilOnly = TRUE)
-```
-\qsoild memory length across the Caatinga are characterised by an inverse relationship with mean \qsoild values ($intercept = `r CAPatCauseRes4[[1]]`$; $p_{intercept} = `r CAPatCauseRes4[[2]]`$ and $slope = `r CAPatCauseRes4[[3]]`$; $p_{slope} = `r CAPatCauseRes4[[4]]`$). \qsoild memory effects across the Caatinga are characterised by a positive relationship with mean \qsoild values ($intercept = `r CAPatCauseRes4[[5]]`$; $p_{intercept} = `r CAPatCauseRes4[[6]]`$ and $slope = `r CAPatCauseRes4[[7]]`$; $p_{slope} = `r CAPatCauseRes4[[8]]`$).
-
-\paragraph*{Summary}  \hspace{.5cm}
-
-Linear regression coefficients of vegetation memory sensitivity relationships across the Caatinga are presented in table \ref{tab:AUPatCauseTab}. Almost all vegetation memory coefficients establish themselves in negative correlations with respective mean environmental values. \qsoila, \qsoilb, \qsoilc, and \ndvil are linked especially strongly to environmental mean drivers.
-
-```{r CAPatCauseTab, results = 'asis', echo = FALSE}
-PatCauseTab(ModelCoeffs = c(unlist(CAPatCauseRes),
-                 unlist(CAPatCauseRes1)[5:8], unlist(CAPatCauseRes2)[5:8], unlist(CAPatCauseRes3)[5:8], unlist(CAPatCauseRes4)[5:8],
-                 unlist(CAPatCauseRes1)[1:4], unlist(CAPatCauseRes2)[1:4], unlist(CAPatCauseRes3)[1:4], unlist(CAPatCauseRes4)[1:4]), Region = "Caatinga")
+#### $NDVI_{[t-1]}$ and Memory Length
+Patterns of \ndvil and \qsoila memory length have been identified to overlap in region-specific manners. Relationships of the two are depicted alongside raw data in figure \ref{fig:PatCauseNDVIMem}. Linear regression coefficients of these sensitivity relationships have been assessed per study region and are depicted in table \ref{tab:PatCauseTabNDVIMem}.
+```{r PatCauseNDVIMem, echo = FALSE, fig.width = 17, fig.height = 11, fig.cap="\\textbf{Intrinsic Vegetation Memory and Qsoil1 Memory Length -} \\ndvil vegetation memory coefficients of figure \\ref{fig:IBRVegMem1}, \\ref{fig:CAVegMem1}, and \\ref{fig:AUVegMem1} plotted against \\qsoila vegetation memory length of the same figures. Figure established via \\ref{rPatCausRes}. \\label{fig:PatCauseNDVIMem}", fig.scap="Intrinsic Vegetation Memory and Qsoil1 Memory Length", out.extra='',fig.pos = 'h', cache = TRUE, cache.lazy=FALSE}
+PatCauseNDVIMem <- PatcausRes(SoilLayer = 1, X = "Memory", Y = "NDVI")
 ```
 
-```{r CAPatCauseANOVA, results = 'asis', echo = FALSE}
-CAANOVA <- PatCausAnova(Region = "Caatinga")
+As \qsoila memory length increases across the Iberian Region, \ndvil memory effects increase as well. Across Australia and the Caatinga, the reverse is true and \ndvil memory effects decrease as \qsoila memory length increases. These relationships are strongestacross the Iberian Region and the Caatinga.
+
+```{r PatCauseTabNDVIMem, results = 'asis', echo = FALSE}
+PatCauseTab(ModelCoeffs = unlist(PatCauseNDVIMem), SoilLayer = 1, X = "Memory", Y = "NDVI")
 ```
-
-The sensitivity of \qsoil vegetation memory to mean \qsoil layer data fluctuates across the soil layer range whilst diminishing from \qsoila to \qsoilb. These differences have been been identified as statistically significant according to an \anova at $p = `r CAANOVA[[2]][1,5]`$ (established via \ref{rPatCausAnova}).
-
-The correlation of \qsoil vegetation memory length to mean \qsoil layer follows no identifiable linear pattern. Differences in linear regressions have been identified as statistically significant according to an \anova at $p = `r CAANOVA[[1]][1,5]`$  (established via \ref{rPatCausAnova}).
-
-\clearpage
-
-#### Australia
-\paragraph*{Intrinsic Memory and Air Temperature}  \hspace{.5cm}
-Sensitivity relationships of \ndvil and \tair are depicted alongside raw data in figure \ref{fig:AUPatCausRes}.
-\vspace{-.3cm}
-```{r AUPatCausRes, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('NDVI t-1', 'Tair'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (NDVI t-1 and Tair, Australia) -} Vegetation memory coefficients of figure \\ref{fig:AUVegMem1} plotted against mean intrinsic and extrinsic drivers (see figure \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:AUPatCausRes}", fig.scap="Vegetation Memory Sensitivity (NDVI t-1 and Tair, Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPatCauseRes <- PatcausRes(Region = "Australia", SoilLayer = 1, SoilOnly = FALSE)
-```
-\vspace{-.3cm}
-\ndvil memory effects across Australia are characterised by an inverse relationship with mean \ndvi values ($intercept = `r AUPatCauseRes[[1]]`$; $p_{intercept} = `r AUPatCauseRes[[2]]`$ and $slope = `r AUPatCauseRes[[3]]`$; $p_{slope} = `r AUPatCauseRes[[4]]`$). \tair memory effects across Australia are also characterised by an inverse relationship with mean \tair values ($intercept = `r AUPatCauseRes[[5]]`$; $p_{intercept} = `r AUPatCauseRes[[6]]`$ and $slope = `r AUPatCauseRes[[7]]`$; $p_{slope} = `r AUPatCauseRes[[8]]`$).
-
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoila memory length and \qsoila are depicted alongside raw data in figure \ref{fig:AUPatCausRes1}.
-\vspace{-.3cm}
-```{r AUPatCausRes1, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil1, Australia) -} \\qsoila vegetation memory coefficients and \\qsoila memory length of figure \\ref{fig:AUVegMem1} plotted against mean \\qsoila records (see figure \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:AUPatCausRes1}", fig.scap="Vegetation Memory Sensitivity (Qsoil1, Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPatCauseRes1 <- PatcausRes(Region = "Australia", SoilLayer = 1, SoilOnly = TRUE)
-```
-\vspace{-.3cm}
-\qsoila memory length across Australia are characterised by an inverse relationship with mean \qsoila values ($intercept = `r AUPatCauseRes1[[1]]`$; $p_{intercept} = `r AUPatCauseRes1[[2]]`$ and $slope = `r AUPatCauseRes1[[3]]`$; $p_{slope} = `r AUPatCauseRes1[[4]]`$). \qsoila memory effects across Australia are also characterised by an inverse relationship with mean \qsoila values ($intercept = `r AUPatCauseRes1[[5]]`$; $p_{intercept} = `r AUPatCauseRes1[[6]]`$ and $slope = `r AUPatCauseRes1[[7]]`$; $p_{slope} = `r AUPatCauseRes1[[8]]`$).
-
-\clearpage
-
-\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoilb memory length and \qsoilb are depicted alongside raw data in figure \ref{fig:AUPatCausRes2}.
-\vspace{-.3cm}
-```{r AUPatCausRes2, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil2, Australia) -} \\qsoilb vegetation memory coefficients and \\qsoilb memory length of figure \\ref{fig:AUVegMem2} plotted against mean \\qsoilb records (see figure \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:AUPatCausRes2}", fig.scap="Vegetation Memory Sensitivity (Qsoil2, Australia)", ache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPatCauseRes2 <- PatcausRes(Region = "Australia", SoilLayer = 2, SoilOnly = TRUE)
-```
-\vspace{-.3cm}
-\qsoilb memory length across Australia are characterised by a negative relationship with mean \qsoilb values ($intercept = `r AUPatCauseRes2[[1]]`$; $p_{intercept} = `r AUPatCauseRes2[[2]]`$ and $slope = `r AUPatCauseRes2[[3]]`$; $p_{slope} = `r AUPatCauseRes2[[4]]`$). \qsoilb memory effects across Australia are characterised by a positive relationship with mean \qsoilb values ($intercept = `r AUPatCauseRes2[[5]]`$; $p_{intercept} = `r AUPatCauseRes2[[6]]`$ and $slope = `r AUPatCauseRes2[[7]]`$; $p_{slope} = `r AUPatCauseRes2[[8]]`$).
-
-\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoilc memory length and \qsoilc are depicted alongside raw data in figure \ref{fig:AUPatCausRes3}.
-\vspace{-.3cm}
-```{r AUPatCausRes3, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil3, Australia) -} \\qsoilc vegetation memory coefficients and \\qsoilc memory length of figure \\ref{fig:AUVegMem3} plotted against mean \\qsoilc records (see figure \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:AUPatCausRes3}", fig.scap="Vegetation Memory Sensitivity (Qsoil3, Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPatCauseRes3 <- PatcausRes(Region = "Australia", SoilLayer = 3, SoilOnly = TRUE)
-```
-\qsoilc memory length across Australia are characterised by a positive relationship with mean \qsoilc values ($intercept = `r AUPatCauseRes3[[1]]`$; $p_{intercept} = `r AUPatCauseRes3[[2]]`$ and $slope = `r AUPatCauseRes3[[3]]`$; $p_{slope} = `r AUPatCauseRes3[[4]]`$). \qsoilc memory effects across Australia are characterised by an inverse relationship with mean \qsoilc values ($intercept = `r AUPatCauseRes3[[5]]`$; $p_{intercept} = `r AUPatCauseRes3[[6]]`$ and $slope = `r AUPatCauseRes3[[7]]`$; $p_{slope} = `r AUPatCauseRes3[[8]]`$).
-
-\clearpage
-
-\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
-Sensitivity relationships of \qsoild memory length and \qsoild are depicted alongside raw data in figure \ref{fig:AUPatCausRes4}.
-\vspace{-.3cm}
-```{r AUPatCausRes4, echo = FALSE, fig.width = 17, fig.height = 11, fig.subcap=c('Memory Length (Lag)', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Sensitivity (Qsoil4, Australia) -} \\qsoild vegetation memory coefficients and \\qsoild memory length of figure \\ref{fig:AUVegMem4} plotted against mean \\qsoila records (see figure \\ref{fig:AUDataOverview}). Figure established via \\ref{rPatCausRes}. \\label{fig:AUPatCausRes4}", fig.scap="Vegetation Memory Sensitivity (Qsoil4, Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPatCauseRes4 <- PatcausRes(Region = "Australia", SoilLayer = 4, SoilOnly = TRUE)
-```
-\qsoild memory length across Australia are characterised by an inverse relationship with mean \qsoild values ($intercept = `r AUPatCauseRes4[[1]]`$; $p_{intercept} = `r AUPatCauseRes4[[2]]`$ and $slope = `r AUPatCauseRes4[[3]]`$; $p_{slope} = `r AUPatCauseRes4[[4]]`$). \qsoild memory effects across Australia are characterised by a positive relationship with mean \qsoild values ($intercept = `r AUPatCauseRes4[[5]]`$; $p_{intercept} = `r AUPatCauseRes4[[6]]`$ and $slope = `r AUPatCauseRes4[[7]]`$; $p_{slope} = `r AUPatCauseRes4[[8]]`$).
-
-\paragraph*{Summary}  \hspace{.5cm}
-
-Linear regression coefficients of vegetation memory sensitivity relationships across Australia are presented in table \ref{tab:AUPatCauseTab}. Almost all vegetation memory coefficients establish themselves in negative correlations with respective mean environmental values. \qsoila memory length, \qsoild (in a positive relationship), and \ndvil are linked especially strongly to environmental mean drivers.
-
-```{r AUPatCauseTab, results = 'asis', echo = FALSE}
-PatCauseTab(ModelCoeffs = c(unlist(AUPatCauseRes),
-                 unlist(AUPatCauseRes1)[5:8], unlist(AUPatCauseRes2)[5:8], unlist(AUPatCauseRes3)[5:8], unlist(AUPatCauseRes4)[5:8],
-                 unlist(AUPatCauseRes1)[1:4], unlist(AUPatCauseRes2)[1:4], unlist(AUPatCauseRes3)[1:4], unlist(AUPatCauseRes4)[1:4]), Region = "Australia")
-```
-
-```{r AUPatCauseANOVA, results = 'asis', echo = FALSE}
-AUANOVA <- PatCausAnova(Region = "Australia")
-```
-
-The sensitivity of \qsoil vegetation memory to mean \qsoil layer data fluctuates across the soil layer range with \qsoild coefficients' relation to mean \qsoil drivers being strong and positive. These differences have been been identified as statistically significant according to an \anova at $p = `r AUANOVA[[2]][1,5]`$ (established via \ref{rPatCausAnova}).
-
-The correlation of \qsoil vegetation memory length to mean \qsoil layer follows no identifiable linear pattern. Differences in linear regressions have been identified as statistically significant according to an \anova at $p = `r AUANOVA[[1]][1,5]`$  (established via \ref{rPatCausAnova}).
 
 \clearpage
 
@@ -2216,7 +1980,7 @@ Across the Iberian Region, \qsoila memory length is shortes for regions of negat
 
 Additionally, model coefficient comparison via Mann-Whitney U-Tests revealed that \ndvil is a larger memory component than \qsoil coefficients which, in turn, are larger components than \tair.
 
-Variance partitioning of \ndvil and \qsoil identified a \textbf{subsiding effect of \qsoil effects through soil layers}. Overall, \textbf{\ndvil explains more variance in \ndvi z-scores than \qsoil data} or variance shared by \ndvil or \qsoil data.
+Variance partitioning of \ndvil and \qsoil identified a \textbf{subsiding effect of \qsoil effects through soil layers}. Overall, \textbf{\ndvil explains more variance in \ndvi z-scores than \qsoil data} or variance shared by \ndvil or \qsoil data at different rates across the three study regions.
 
 \vspace{1cm}
 
@@ -2224,295 +1988,124 @@ Variance partitioning of \ndvil and \qsoil identified a \textbf{subsiding effect
 
 In terms of vegetation memory sensitivity:
 \begin{enumerate}
-\item \textbf{\ndvil} memory coefficients are \textbf{strongly negatively correlated} to mean \ndvi records.
-\item \textbf{\tair} memory coefficients are \textbf{weakly negatively correlated} to mean \tair records.
-\item \textbf{\qsoil} memory coefficients are \textbf{overwhelmingly correlated strongly negatively} to mean \qsoil records.
-\item \textbf{\qsoil memory length} is \textbf{largely correlated negatively} with mean \qsoil records. Noticeable exceptions include \qsoilc and \qsoild across the Iberian region.
+\item \textbf{\ndvil} memory coefficients are \textbf{negatively correlated} to mean \ndvi records.
+\item \textbf{\tair} memory coefficients are \textbf{negatively correlated} to mean \tair records.
+\item \textbf{\qsoil} memory coefficients are \textbf{negatively correlated} to mean \qsoil records at differing intensities across the three study regions.
+\item \textbf{\qsoil memory length} is \textbf{correlated negatively} with mean \qsoil records. Again, noticeable differences arise across the study regions.
 \end{enumerate}
 
-With the exception of \qsoild across Australia, \textbf{\qsoil vegetation memory sensitivity decreases as soil layers become deeper}.
-
-\textbf{Strong correlations of \qsoil memory length} and mean \qsoil records is usually found in \textbf{\qsoila} and \textbf{\qsoild}.
+Overall, whilst **general patterns of vegetation memory sensitivity** can be identifed, the intensity of these **can vary strongly from region to region**.
 
 \clearpage
 
 ## Functional Aspects of Vegetation Memory
+Due to \LHT and \PFT data limitations across two of my three study regions - the Caatinga and Australia (see figures \ref{fig:CaatTRY} and \ref{fig:AUTRY}) - I am focussing my analysis of how functional aspects of vegetation and vegetation memory are linked on the Iberian Region.
+
+```{r CompadPre, echo = FALSE}
+leg1 <- Comres(Region = "Iberian Region", Variable = "FSC-1")
+leg2 <- Comres(Region = "Iberian Region", Variable = "FSC-2")
+leg3 <- Comres(Region = "Iberian Region", Variable = "Pi")
+leg4 <- Comres(Region = "Iberian Region", Variable = "Rho")
+leg5 <- Comres(Region = "Iberian Region", Variable = "Reactivity")
+leg <- Comres(Region = "Iberian Region", Variable = "Reactivity", Legend = TRUE)
+```
+
 ### Life History Traits
-#### Iberian Region
+
 \paragraph*{Fast-Slow Continuum}  \hspace{.5cm}
 
 Relationships of vegetation memory coefficients and \fsca (life history speed) records across the Iberian region are represented in figure \ref{fig:IBCOMPAD1} (I am showing the vegetation memory characteristics for each geo-referenced \fsca record across the Iberian Region). These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab1}.
-
-```{r IBCOMPAD1, echo = FALSE, fig.width = 17, fig.height = 9.5, fig.cap="\\textbf{COMPADRE FSC-1 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-1 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD1}", fig.scap="COMPADRE FSC-1 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg1 <- Comres(Region = "Iberian Region", Variable = "FSC-1")
-```
-
-Linear relationships of \fsca and vegetation memory coefficients across the Iberian region are built on `r leg1[[3]]` data points each. Whilst most intercepts of these regressions are statistically significant, only the regression slope of \tair memory coefficients and \fsca is statistically significant but minute in nature.
 
 ```{r IBCOMPADTab1, results = 'asis', echo = FALSE}
 CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg1[[2]])), Variable = "FSC-1")
 ```
 
-\clearpage
+Linear relationships of \fsca and vegetation memory coefficients across the Iberian region are built on `r leg1[[3]]` data points each. Whilst most intercepts of these regressions are statistically significant, only the regression slope of \tair memory coefficients and \fsca is statistically significant but minute in nature.
 
 Relationships of vegetation memory coefficients and \fscb (reproductive strategy) records across the Iberian region are represented in figure \ref{fig:IBCOMPAD2}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab2}.
-
-```{r IBCOMPAD2, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-2 and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE FSC-2 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD2}", fig.scap="COMPADRE FSC-2 and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg2 <- Comres(Region = "Iberian Region", Variable = "FSC-2")
-```
-
-Linear relationships of \fscb and vegetation memory coefficients across the Iberian region are built on `r leg2[[3]]` data points each. Whilst all intercepts of these regressions are statistically significant, only the regression slopes of \ndvil and \tair memory coefficients and \fscb. \ndvil memory decreases with increasing \fscb records. \tair memory increases with increasing \fscb records.
 
 ```{r IBCOMPADTab2, results = 'asis', echo = FALSE}
 CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg2[[2]])), Variable = "FSC-2")
 ```
 
-\clearpage
+Linear relationships of \fscb and vegetation memory coefficients across the Iberian region are built on `r leg2[[3]]` data points each. Whilst all intercepts of these regressions are statistically significant, only the regression slopes of \ndvil and \tair memory coefficients and \fscb. \ndvil memory decreases with increasing \fscb records. \tair memory increases with increasing \fscb records.
+
 
 \paragraph*{Period of Oscillation ($\pi$)}  \hspace{.5cm}
 
 Relationships of vegetation memory coefficients and \cpi records across the Iberian region are represented in figure \ref{fig:IBCOMPAD3}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab3}.
 
-```{r IBCOMPAD3, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Period of Oscillation and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE Period of Oscillation and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD3}", fig.scap="COMPADRE Period of Oscillation and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg3 <- Comres(Region = "Iberian Region", Variable = "Pi")
-```
-
-Linear relationships of \cpi and vegetation memory coefficients across the Iberian region are built on `r leg3[[3]]` data points each. Only intercepts of \qsoil memory length and \ndvil regressions are statistically significant. Regression slopes, on the other hand, are only significant for \qsoilb, \qsoilc, and \qsoild.
-
 ```{r IBCOMPADTab3, results = 'asis', echo = FALSE}
 CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg3[[2]])), Variable = "Pi")
 ```
 
-\clearpage
+Linear relationships of \cpi and vegetation memory coefficients across the Iberian region are built on `r leg3[[3]]` data points each. Only intercepts of \qsoila memory length and \ndvil regressions are statistically significant.
 
 \paragraph*{Damping Ratio ($\rho$)}  \hspace{.5cm}
 Relationships of vegetation memory coefficients and \crho records across the Iberian region are represented in figure \ref{fig:IBCOMPAD4}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab4}.
-
-```{r IBCOMPAD4, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Damping Ratio and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE Damping Ratio and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD4}", fig.scap="COMPADRE Damping Ratio and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg4 <- Comres(Region = "Iberian Region", Variable = "Rho")
-```
-
-Linear relationships of \crho and vegetation memory coefficients across the Iberian region are built on `r leg4[[3]]` data points each. Intercepts of \ndvil, \qsoila, \qsoilb, \qsoilc, \qsoila memory length, and \qsoilb memory length are statistically significant. Regression slopes, on the other hand, are not statistically significant for any of the regressions.
 
 ```{r IBCOMPADTab4, results = 'asis', echo = FALSE}
 CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg4[[2]])), Variable = "Rho")
 ```
 
-\clearpage
+Linear relationships of \crho and vegetation memory coefficients across the Iberian region are built on `r leg4[[3]]` data points each. Only the intercepts of \ndvil, \qsoila, and \qsoila memory length are statistically significant.
 
 \paragraph*{Reactivity}  \hspace{.5cm}
 Relationships of vegetation memory coefficients and reactivity records across the Iberian region are represented in figure \ref{fig:IBCOMPAD5}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBCOMPADTab5}.
-
-```{r IBCOMPAD5, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Reactivity and Vegetation Memory (Iberian Region) -} Linear regression coefficients of COMPADRE Reactivity and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD5}", fig.scap="COMPADRE Reactivity and Vegetation Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg5 <- Comres(Region = "Iberian Region", Variable = "Reactivity")
-```
-
-Linear relationships of reactivity and vegetation memory coefficients across the Iberian region are built on `r leg5[[3]]` data points each. Whilst \COMPADRE reactivity is not linked statistically significantly to \qsoil memory lengths, relationships of all other vegetation memory coefficients and \COMPADRE reactivity are. 
-
-\ndvil and \qsoil memory effects decrease with increasing \COMPADRE reactivity. This effect diminishes throughout the \qsoil layers but stays statistically significant. \tair memory effects increase with increasing \COMPADRE reactivity.
 
 ```{r IBCOMPADTab5, results = 'asis', echo = FALSE}
 CompadTab(Region = "Iberian Region", ModelCoeffs = c(unlist(leg5[[2]])), Variable = "Reactivity")
 ```
 
-#### Caatinga
-
-\paragraph*{Fast-Slow Continuum}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and \fsca records across the Caatinga are represented in figure \ref{fig:CACOMPAD1}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CACOMPADTab1}.
-
-```{r CACOMPAD1, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-1 and Vegetation Memory (Caatinga) -} Linear regression coefficients of COMPADRE FSC-1 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:CACOMPAD1}", fig.scap="COMPADRE FSC-1 and Vegetation Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg1 <- Comres(Region = "Caatinga", Variable = "FSC-1")
-```
-
-Linear relationships of \fsca and vegetation memory coefficients across the Caatinga are built on `r leg1[[3]]` data points each. Almost all linear regressions coefficients are not statistically significant.
-
-```{r CACOMPADTab1, results = 'asis', echo = FALSE}
-CompadTab(Region = "Caatinga", ModelCoeffs = c(unlist(leg1[[2]])), Variable = "FSC-1")
-```
+Linear relationships of reactivity and vegetation memory coefficients across the Iberian region are built on `r leg5[[3]]` data points each. Whilst \COMPADRE reactivity is not linked statistically significantly to \qsoil memory length, relationships of \tair vegetation memory coefficients and \COMPADRE reactivity are. \tair memory effects increase with increasing \COMPADRE reactivity. Whilst relationships of \ndvil, and \qsoila memory effects and \COMPADRE reactivity aren't statistically significant, their patterns link up with what I hypothesised. \ndvil and \qsoil memory effects decrease with increasing \COMPADRE reactivity. 
 
 \clearpage
 
-Relationships of vegetation memory coefficients and \fscb records across the Caatinga are represented in figure \ref{fig:CACOMPAD2}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CACOMPADTab2}.
-
-```{r CACOMPAD2, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-2 and Vegetation Memory (Caatinga) -} Linear regression coefficients of COMPADRE FSC-2 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:CACOMPAD2}", fig.scap="COMPADRE FSC-2 and Vegetation Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg2 <- Comres(Region = "Caatinga", Variable = "FSC-2")
-```
-
-Linear relationships of \fscb and vegetation memory coefficients across the Caatinga are built on `r leg2[[3]]` data points each. Almost all linear regressions coefficients are not statistically significant.
-
-```{r CACOMPADTab2, results = 'asis', echo = FALSE}
-CompadTab(Region = "Caatinga", ModelCoeffs = c(unlist(leg2[[2]])), Variable = "FSC-2")
-```
-
-\clearpage
-
-\paragraph*{Period of Oscillation  ($\pi$)}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and \cpi records across the Caatinga are represented in figure \ref{fig:CACOMPAD3}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CACOMPADTab3}.
-
-```{r CACOMPAD3, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Period of Oscillation and Vegetation Memory (Caatinga) -} Linear regression coefficients of COMPADRE Period of Oscillation and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:CACOMPAD3}", fig.scap="COMPADRE Period of Oscillation and Vegetation Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg3 <- Comres(Region = "Caatinga", Variable = "Pi")
-```
-
-Linear relationships of \cpi and vegetation memory coefficients across the Caatinga are built on `r leg3[[3]]` data points each. Again, almost all linear regressions coefficients are not statistically significant.
-
-```{r CACOMPADTab3, results = 'asis', echo = FALSE}
-CompadTab(Region = "Caatinga", ModelCoeffs = c(unlist(leg3[[2]])), Variable = "Pi")
-```
-
-\clearpage
-
-\paragraph*{Damping Ratio ($\rho$)}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and \crho records across the Caatinga are represented in figure \ref{fig:CACOMPAD4}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CACOMPADTab4}.
-
-```{r CACOMPAD4, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Damping Ratio and Vegetation Memory (Caatinga) -} Linear regression coefficients of COMPADRE Damping Ratio and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:CACOMPAD4}", fig.scap="COMPADRE Damping Ratio and Vegetation Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg4 <- Comres(Region = "Caatinga", Variable = "Rho")
-```
-
-Linear relationships of \crho and vegetation memory coefficients across the Caatinga are built on `r leg4[[3]]` data points each. Once more, almost all linear regressions coefficients are not statistically significant.
-
-```{r CACOMPADTab4, results = 'asis', echo = FALSE}
-CompadTab(Region = "Caatinga", ModelCoeffs = c(unlist(leg4[[2]])), Variable = "Rho")
-```
-
-\clearpage
-
-\paragraph*{Reactivity}  \hspace{.5cm}
-Relationships of vegetation memory coefficients and reactivity records across the Caatinga are represented in figure \ref{fig:CACOMPAD5}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CACOMPADTab5}.
-
-```{r CACOMPAD5, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Reactivity and Vegetation Memory (Caatinga) -} Linear regression coefficients of COMPADRE Reactivity and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:CACOMPAD5}", fig.scap="COMPADRE Reactivity and Vegetation Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg5 <- Comres(Region = "Caatinga", Variable = "Reactivity")
-```
-
-Linear relationships of reactivity and vegetation memory coefficients across the Caatinga are built on `r leg5[[3]]` data points each. Again, my analyses did not identify statistically significant relationships between \COMPADRE reactivity and vegetation memory coefficients.
-
-```{r CACOMPADTab5, results = 'asis', echo = FALSE}
-CompadTab(Region = "Caatinga", ModelCoeffs = c(unlist(leg5[[2]])), Variable = "Reactivity")
-```
-
-
-\clearpage
-
-#### Australia
-
-\paragraph*{Fast-Slow Continuum}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and \fsca records across Australia are represented in figure \ref{fig:AUCOMPAD1}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUCOMPADTab1}.
-
-```{r AUCOMPAD1, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-1 and Vegetation Memory (Australia) -} Linear regression coefficients of COMPADRE FSC-1 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:AUCOMPAD1}", fig.scap="COMPADRE FSC-1 and Vegetation Memory (Australia)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg1 <- Comres(Region = "Australia", Variable = "FSC-1")
-```
-
-Linear relationships of \fsca and vegetation memory coefficients across Australia are built on `r leg1[[3]]` data points each. Whilst all intercepts of these regressions are statistically significant, none of the regression slopes are.
-
-```{r AUCOMPADTab1, results = 'asis', echo = FALSE}
-CompadTab(Region = "Australia", ModelCoeffs = c(unlist(leg1[[2]])), Variable = "FSC-1")
-```
-
-\clearpage
-
-Relationships of vegetation memory coefficients and \fscb records across Australia are represented in figure \ref{fig:AUCOMPAD2}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUCOMPADTab2}.
-
-```{r AUCOMPAD2, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE FSC-2 and Vegetation Memory (Australia) -} Linear regression coefficients of COMPADRE FSC-2 and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:AUCOMPAD2}", fig.scap="COMPADRE FSC-2 and Vegetation Memory (Australia)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg2 <- Comres(Region = "Australia", Variable = "FSC-2")
-```
-
-Linear relationships of \fscb and vegetation memory coefficients across Australia are built on `r leg2[[3]]` data points each. Whilst almost all intercepts of these regressions are statistically significant, none of the regression slopes are.
-
-```{r AUCOMPADTab2, results = 'asis', echo = FALSE}
-CompadTab(Region = "Australia", ModelCoeffs = c(unlist(leg2[[2]])), Variable = "FSC-2")
-```
-
-\clearpage
-
-\paragraph*{Period of Oscillation  ($\pi$)}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and \cpi records across Australia are represented in figure \ref{fig:AUCOMPAD3}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUCOMPADTab3}.
-
-```{r AUCOMPAD3, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Period of Oscillation and Vegetation Memory (Australia) -} Linear regression coefficients of COMPADRE Period of Oscillation and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:AUCOMPAD3}", fig.scap="COMPADRE Period of Oscillation and Vegetation Memory (Australia)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg3 <- Comres(Region = "Australia", Variable = "Pi")
-```
-
-Linear relationships of \cpi and vegetation memory coefficients across Australia are built on `r leg3[[3]]` data points each. Again, almost all intercepts of these regressions are statistically significant. However, only some linear regression slopes pertaining mostly to \qsoil memory effects and memory lengths are statistically significant.
-
-```{r AUCOMPADTab3, results = 'asis', echo = FALSE}
-CompadTab(Region = "Australia", ModelCoeffs = c(unlist(leg3[[2]])), Variable = "Pi")
-```
-
-\clearpage
-
-\paragraph*{Damping Ratio ($\rho$)}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and \crho records across Australia are represented in figure \ref{fig:AUCOMPAD4}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUCOMPADTab4}.
-
-```{r AUCOMPAD4, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Damping Ratio and Vegetation Memory (Australia) -} Linear regression coefficients of COMPADRE Damping Ratio and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:AUCOMPAD4}", fig.scap="COMPADRE Damping Ratio and Vegetation Memory (Australia)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg4 <- Comres(Region = "Australia", Variable = "Rho")
-```
-
-Linear relationships of \crho and vegetation memory coefficients across Australia are built on `r leg4[[3]]` data points each. None of the delineated linear regression coefficients are statistically significant.
-
-```{r AUCOMPADTab4, results = 'asis', echo = FALSE}
-CompadTab(Region = "Australia", ModelCoeffs = c(unlist(leg4[[2]])), Variable = "Rho")
-```
-
-\clearpage
-
-\paragraph*{Reactivity}  \hspace{.5cm}
-
-Relationships of vegetation memory coefficients and reactivity records across Australia are represented in figure \ref{fig:AUCOMPAD5}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUCOMPADTab5}.
-
-```{r AUCOMPAD5, echo = FALSE, fig.width = 17, fig.height = 10, fig.cap="\\textbf{COMPADRE Reactivity and Vegetation Memory (Australia) -} Linear regression coefficients of COMPADRE Reactivity and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:AUCOMPAD5}", fig.scap="COMPADRE Reactivity and Vegetation Memory (Australia)", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
-leg5 <- Comres(Region = "Australia", Variable = "Reactivity")
-```
-
-Linear relationships of reactivity and vegetation memory coefficients across Australia are built on `r leg5[[3]]` data points each. My analyses identified statistically significant relationships for all vegetation memory coefficients but \qsoil memory lengths with positive relationships between \ndvil as well as \qsoil memory effects and \COMPADRE reactivity. With the exception of \tair, all of these relationships are positive correlations.
-
-```{r AUCOMPADTab5, results = 'asis', echo = FALSE}
-CompadTab(Region = "Australia", ModelCoeffs = c(unlist(leg5[[2]])), Variable = "Reactivity")
+\paragraph*{Overview}  \hspace{.5cm}
+```{r IBCOMPAD, echo = FALSE, fig.width = 17, fig.height = 12.6, fig.subcap=c('FSC-1', 'FSC-2', 'Period of Oscillation', 'Damping Ratio', 'Reactivity', 'Potting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Linear regression coefficients of COMPADRE variables and vegetation memory coefficients. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+leg1[[1]]
+leg2[[1]]
+leg3[[1]]
+leg4[[1]]
+leg5[[1]]
+leg <- leg[[1]] + theme_bw(base_size = 90) + guides(color = guide_legend(override.aes = list(size = 20)))
+legend <- cowplot::get_legend(leg)
+grid.newpage()
+grid.draw(legend)
 ```
 
 \clearpage
 
 ### Plant Functional Traits
-#### Iberian Region
 \paragraph*{Intrinsic Memory}  \hspace{.5cm}
-Relationships of \ndvil vegetation memory coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT1}. These relationships have been assessed through linear regressions. 
-```{r IBPFT1, echo = FALSE, fig.width = 17, fig.height = 5.5, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Intrinsic Memory (Iberian Region) -} Intrinsic Memory (NDVI t-1, figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT1}", fig.scap="PFTs and Intrinsic Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Relationships of \ndvil vegetation memory coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT1}. These relationships have been assessed through linear regressions the coefficients of which are represented in table \ref{tab:IBPFTTab1}.
+```{r IBPFT1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Intrinsic Memory (Iberian Region) -} Intrinsic Memory (NDVI t-1, figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT1}", fig.scap="PFTs and Intrinsic Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 IBPFT1 <- Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "t-1")
 ```
 
-\vh is correlated with \ndvil memory effects as:
-\begin{enumerate}
-\item $Intercept = `r IBPFT1[[1]]`$ ($p_{Intercept} = `r IBPFT1[[2]]`$); $Slope = `r IBPFT1[[3]]`$ ($p_{Slope} = `r IBPFT1[[4]]`$) for untreated, geo-referenced data
-\item $Intercept = `r IBPFT1[[5]]`$ ($p_{Intercept} = `r IBPFT1[[6]]`$); $Slope = `r IBPFT1[[7]]`$ ($p_{Slope} = `r IBPFT1[[8]]`$) for mapped mean trait data
-\end{enumerate}
+Untreated geo-referenced records of \vh and \nmass are correlated positively with \ndvil memory effects. This is not in accordance with my earlier hypotheses but based on the most reliable data.
 
-\nmass is correlated with \ndvil memory effects as:
-\begin{enumerate}
-\item $Intercept = `r IBPFT1[[9]]`$ ($p_{Intercept} = `r IBPFT1[[10]]`$); $Slope = `r IBPFT1[[11]]`$ ($p_{Slope} = `r IBPFT1[[12]]`$) for untreated, geo-referenced data
-\item $Intercept = `r IBPFT1[[13]]`$ ($p_{Intercept} = `r IBPFT1[[14]]`$); $Slope = `r IBPFT1[[15]]`$ ($p_{Slope} = `r IBPFT1[[16]]`$) for mapped mean trait data
-\end{enumerate}
+Using the \PFT maps obtained via the \PFT mapping approach outlined in figure \ref{fig:PFTCombining}, one obtains negative correlations of \vh, and \nmass with \ndvil memory effects. These relationships can arguabely be seen as synonymous with the \ndvil vegetation memory sensitivity relationship: Areas of lower biomass (low mean \ndvi, low \vh, and low \nmass) exhibit tronger intrinsic vegetation memory.
+
+```{r IBPFTTab1, results = 'asis', echo = FALSE}
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT1, SoilLayer = 1, Variable = "$NDVI_{[t-1]}$")
+```
 
 \clearpage
 
 \paragraph*{Air Temperature}  \hspace{.5cm}
-Relationships of \tair vegetation memory coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT2}. These relationships have been assessed through linear regressions. 
-```{r IBPFT2, echo = FALSE, fig.width = 17, fig.height = 5.5, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Tair Memory (Iberian Region) -} Tair Memory (figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT2}", fig.scap="PFTs and Tair Memory (Iberian Region)",  cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Relationships of \tair vegetation memory coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT2}. These relationships have been assessed through linear regressions the coefficients of which are represented in table \ref{tab:IBPFTTab2}.
+```{r IBPFT2, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Tair Memory (Iberian Region) -} Tair Memory (figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT2}", fig.scap="PFTs and Tair Memory (Iberian Region)",  cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 IBPFT2 <- Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Tair")
 ```
-\vh is correlated with \tair memory effects as:
-\begin{enumerate}
-\item $Intercept = `r IBPFT2[[1]]`$ ($p_{Intercept} = `r IBPFT2[[2]]`$); $Slope = `r IBPFT2[[3]]`$ ($p_{Slope} = `r IBPFT2[[4]]`$) for untreated, geo-referenced data
-\item $Intercept = `r IBPFT2[[5]]`$ ($p_{Intercept} = `r IBPFT2[[6]]`$); $Slope = `r IBPFT2[[7]]`$ ($p_{Slope} = `r IBPFT2[[8]]`$) for mapped mean trait data
-\end{enumerate}
 
-\nmass is correlated with \tair memory effects as:
-\begin{enumerate}
-\item $Intercept = `r IBPFT2[[9]]`$ ($p_{Intercept} = `r IBPFT2[[10]]`$); $Slope = `r IBPFT2[[11]]`$ ($p_{Slope} = `r IBPFT2[[12]]`$) for untreated, geo-referenced data
-\item $Intercept = `r IBPFT2[[13]]`$ ($p_{Intercept} = `r IBPFT2[[14]]`$); $Slope = `r IBPFT2[[15]]`$ ($p_{Slope} = `r IBPFT2[[16]]`$) for mapped mean trait data
-\end{enumerate}
+Untreated, geo-referenced records of \vh, and \nmass are correlated negatively with \tair vegetation memory effects (not statistically significant in the case of the latter, though).
+
+When using mapped species-specific mean \PFT records, these relationships are turned around again with \vh and \nmass now positive correlated with \tair vegetation memory coefficients.
+
+```{r IBPFTTab2, results = 'asis', echo = FALSE}
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT2, SoilLayer = 1, Variable = "Tair")
+```
 
 \clearpage
 
@@ -2521,223 +2114,11 @@ Relationships of \qsoila vegetation memory length, and coefficients and \vh, and
 ```{r IBPFT3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil1 Memory (Iberian Region) -} \\qsoila Memory (figure \\ref{fig:IBRVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT3}", fig.scap="PFTs and Qsoil1 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 IBPFT3 <- Tryres(Region = "Iberian Region", SoilLayer = 1, Variable = "Qsoil")
 ```
-My analyses identified statistically significant relationships for all \qsoila related vegetation memory coefficients. Whilst geo-referenced data records of \vh and \nmass establish themselves in positive correlations with \qsoila memory effects and \qsoila memory length in the case of \vh, mapped mean trait values of \vh and \nmass are correlated negatively to \qsoila related vegetation memory coefficients.
+My analyses identified statistically significant relationships for all \qsoila related vegetation memory coefficients (with the exception of untreated \vh records and \qsoila memory length). 
+
+Whilst geo-referenced data records of \vh and \nmass establish themselves in positive correlations with \qsoila memory effects and \qsoila memory length in the case of \vh, mapped mean trait values of \vh and \nmass are correlated negatively to \qsoila related vegetation memory coefficients.
 ```{r IBPFTTab3, results = 'asis', echo = FALSE}
-TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT3, SoilLayer = 1)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
-Relationships of \qsoilb vegetation memory length, and coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT4}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBPFTTab4}. 
-```{r IBPFT4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil2 Memory (Iberian Region) -} \\qsoilb Memory (figure \\ref{fig:IBRVegMem2}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT4}", fig.scap="PFTs and Qsoil2 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPFT4 <- Tryres(Region = "Iberian Region", SoilLayer = 2, Variable = "Qsoil")
-```
-My analyses identified statistically significant relationships for all \qsoilb related vegetation memory coefficients with the exception of \vh and \qsoilb memory length. Whilst geo-referenced data records of \vh and \nmass establish themselves in positive correlations with \qsoilb memory effects, mapped mean trait values of \vh and \nmass are correlated negatively to \qsoilb related vegetation memory coefficients. \qsoilb memory length is correlated negatively to both \vh and \nmass.
-```{r IBPFTTab4, results = 'asis', echo = FALSE}
-TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT4, SoilLayer = 2)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
-Relationships of \qsoilc vegetation memory length, and coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT5}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBPFTTab5}. 
-```{r IBPFT5, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil3 Memory (Iberian Region) -} \\qsoilc Memory (figure \\ref{fig:IBRVegMem3}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT5}", fig.scap="PFTs and Qsoil3 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPFT5 <- Tryres(Region = "Iberian Region", SoilLayer = 3, Variable = "Qsoil")
-```
-Linear regression analyses identified statistically significant relationships for all \qsoilc related vegetation memory coefficients with the exception of \vh and \qsoilc memory length. Whilst geo-referenced data records of \vh and \nmass establish themselves in positive correlations with \qsoilc memory effects, mapped mean trait values of \vh and \nmass are correlated negatively to \qsoilc related vegetation memory coefficients. \qsoilc memory length is correlated negatively to both \vh and \nmass.
-```{r IBPFTTab5, results = 'asis', echo = FALSE}
-TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT5, SoilLayer = 3)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
-Relationships of \qsoild vegetation memory length, and coefficients and \vh, and \nmass records across the Iberian region are represented in figure \ref{fig:IBPFT6}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:IBPFTTab6}. 
-```{r IBPFT6, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil4 Memory (Iberian Region) -} \\qsoild Memory (figure \\ref{fig:IBRVegMem4}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:IBPTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:IBPFT6}", fig.scap="PFTs and Qsoil4 Memory (Iberian Region)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-IBPFT6 <- Tryres(Region = "Iberian Region", SoilLayer = 4, Variable = "Qsoil")
-```
-Linear regression analyses identified statistically significant relationships for all \qsoild related vegetation memory coefficients with the exception of geo-referenced \vh and \qsoilc memory effects, and memory length as well as geo-referenced \nmass and \qsoild memory lengths. Whilst geo-referenced data records of \vh and \nmass establish themselves in positive correlations with \qsoild related memory coefficients, mapped mean trait values of \vh and \nmass are correlated negatively to \qsoild related vegetation memory coefficients.
-```{r IBPFTTab6, results = 'asis', echo = FALSE}
-TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT6, SoilLayer = 4)
-```
-
-\clearpage
-
-#### Caatinga
-\paragraph*{Intrinsic Memory}  \hspace{.5cm}
-Relationships of \ndvil vegetation memory coefficients and \vh, and \nmass records across the Caatinga are represented in figure \ref{fig:CAPFT1}. These relationships have been assessed through linear regressions. 
-```{r CAPFT1, echo = FALSE, fig.width = 17, fig.height = 5.5, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Intrinsic Memory (Caatinga) -} Intrinsic Memory (NDVI t-1, figure \\ref{fig:CAVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:CaatTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:CAPFT1}", fig.scap="PFTs and Intrinsic Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPFT1 <- Tryres(Region = "Caatinga", SoilLayer = 1, Variable = "t-1")
-```
-
-Correlations of \vh with \ndvil memory effects are as follows:
-\begin{enumerate}
-\item Cannot be calculated for untreated, geo-referenced data due to a lack of data.
-\item $Intercept = `r CAPFT1[[5]]`$ ($p_{Intercept} = `r CAPFT1[[6]]`$); $Slope = `r CAPFT1[[7]]`$ ($p_{Slope} = `r CAPFT1[[8]]`$) for mapped mean trait data
-\end{enumerate}
-
-\nmass is correlated with \ndvil memory effects as:
-\begin{enumerate}
-\item $Intercept = `r CAPFT1[[9]]`$ ($p_{Intercept} = `r CAPFT1[[10]]`$); $Slope = `r CAPFT1[[11]]`$ ($p_{Slope} = `r CAPFT1[[12]]`$) for untreated, geo-referenced data
-\item $Intercept = `r CAPFT1[[13]]`$ ($p_{Intercept} = `r CAPFT1[[14]]`$); $Slope = `r CAPFT1[[15]]`$ ($p_{Slope} = `r CAPFT1[[16]]`$) for mapped mean trait data
-\end{enumerate}
-
-\clearpage
-
-\paragraph*{Air Temperature}  \hspace{.5cm}
-Relationships of \tair vegetation memory coefficients and \vh, and \nmass records across the Caatinga are represented in figure \ref{fig:CAPFT2}. These relationships have been assessed through linear regressions. 
-```{r CAPFT2, echo = FALSE, fig.width = 17, fig.height = 5.5, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Tair Memory (Caatinga) -} Tair Memory (figure \\ref{fig:CAVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:CaatTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:CAPFT2}", fig.scap="PFTs and Tair Memory (Caatinga)",  cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPFT2 <- Tryres(Region = "Caatinga", SoilLayer = 1, Variable = "Tair")
-```
-
-Correlations of \vh with \tair memory effects are as follows:
-\begin{enumerate}
-\item Cannot be calculated for untreated, geo-referenced data due to a lack of data.
-\item $Intercept = `r CAPFT2[[5]]`$ ($p_{Intercept} = `r CAPFT2[[6]]`$); $Slope = `r CAPFT2[[7]]`$ ($p_{Slope} = `r CAPFT2[[8]]`$) for mapped mean trait data
-\end{enumerate}
-
-\nmass is correlated with \tair memory effects as:
-\begin{enumerate}
-\item $Intercept = `r CAPFT2[[9]]`$ ($p_{Intercept} = `r CAPFT2[[10]]`$); $Slope = `r CAPFT2[[11]]`$ ($p_{Slope} = `r CAPFT2[[12]]`$) for untreated, geo-referenced data
-\item $Intercept = `r CAPFT2[[13]]`$ ($p_{Intercept} = `r CAPFT2[[14]]`$); $Slope = `r CAPFT2[[15]]`$ ($p_{Slope} = `r CAPFT2[[16]]`$) for mapped mean trait data
-\end{enumerate}
-
-\clearpage
-
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
-Relationships of \qsoila vegetation memory length, and coefficients and \vh, and \nmass records across the Caatinga are represented in figure \ref{fig:CAPFT3}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CAPFTTab3}. 
-```{r CAPFT3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil1 Memory (Caatinga) -} \\qsoila Memory (figure \\ref{fig:CAVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:CaatTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:CAPFT3}", fig.scap="PFTs and Qsoil1 Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPFT3 <- Tryres(Region = "Caatinga", SoilLayer = 1, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoila related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across the Caatinga.
-```{r CAPFTTab3, results = 'asis', echo = FALSE}
-TryTab(Region = "Caatinga", ModelCoeffs = CAPFT3, SoilLayer = 1)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
-Relationships of \qsoilb vegetation memory length, and coefficients and \vh, and \nmass records across the Caatinga are represented in figure \ref{fig:CAPFT4}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CAPFTTab4}. 
-```{r CAPFT4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil2 Memory (Caatinga) -} \\qsoilb Memory (figure \\ref{fig:CAVegMem2}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:CaatTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:CAPFT4}", fig.scap="PFTs and Qsoil2 Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPFT4 <- Tryres(Region = "Caatinga", SoilLayer = 2, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoilb related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass with the exception of \vh and \qsoilb memory effects. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across the Caatinga.
-```{r CAPFTTab4, results = 'asis', echo = FALSE}
-TryTab(Region = "Caatinga", ModelCoeffs = CAPFT4, SoilLayer = 2)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
-Relationships of \qsoilc vegetation memory length, and coefficients and \vh, and \nmass records across the Caatinga are represented in figure \ref{fig:CAPFT5}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CAPFTTab5}. 
-```{r CAPFT5, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil3 Memory (Caatinga) -} \\qsoilc Memory (figure \\ref{fig:CAVegMem3}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:CaatTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:CAPFT5}", fig.scap="PFTs and Qsoil3 Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPFT5 <- Tryres(Region = "Caatinga", SoilLayer = 3, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoilc related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass with the exception of \nmass and \qsoilc memory length. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across the Caatinga.
-```{r CAPFTTab5, results = 'asis', echo = FALSE}
-TryTab(Region = "Caatinga", ModelCoeffs = CAPFT5, SoilLayer = 3)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
-Relationships of \qsoild vegetation memory length, and coefficients and \vh, and \nmass records across the Caatinga are represented in figure \ref{fig:CAPFT6}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:CAPFTTab6}. 
-```{r CAPFT6, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil4 Memory (Caatinga) -} \\qsoild Memory (figure \\ref{fig:CAVegMem4}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:CaatTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:CAPFT6}", fig.scap="PFTs and Qsoil4 Memory (Caatinga)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-CAPFT6 <- Tryres(Region = "Caatinga", SoilLayer = 4, Variable = "Qsoil")
-```
-With the exception of mapped \vh and \qsoild memory effects as well as mapped \nmass and \qsoild memory length, linear regression analyses identified no statistically significant relationships for \qsoild related vegetation memory coefficients \vh and \nmass. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across the Caatinga.
-```{r CAPFTTab6, results = 'asis', echo = FALSE}
-TryTab(Region = "Caatinga", ModelCoeffs = CAPFT6, SoilLayer = 4)
-```
-
-\clearpage
-
-#### Australia
-\paragraph*{Intrinsic Memory}  \hspace{.5cm}
-Relationships of \ndvil vegetation memory coefficients and \vh, and \nmass records across Australia are represented in figure \ref{fig:AUPFT1}. These relationships have been assessed through linear regressions. 
-```{r AUPFT1, echo = FALSE, fig.width = 17, fig.height = 5.5, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Intrinsic Memory (Australia) -} Intrinsic Memory (NDVI t-1, figure \\ref{fig:AUVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:AUTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:AUPFT1}", fig.scap="PFTs and Intrinsic Memory (Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPFT1 <- Tryres(Region = "Australia", SoilLayer = 1, Variable = "t-1")
-```
-
-Correlations of \vh with \ndvil memory effects are as follows:
-\begin{enumerate}
-\item Cannot be calculated for untreated, geo-referenced data due to a lack of data.
-\item $Intercept = `r AUPFT1[[5]]`$ ($p_{Intercept} = `r AUPFT1[[6]]`$); $Slope = `r AUPFT1[[7]]`$ ($p_{Slope} = `r AUPFT1[[8]]`$) for mapped mean trait data
-\end{enumerate}
-
-\nmass is correlated with \ndvil memory effects as:
-\begin{enumerate}
-\item $Intercept = `r AUPFT1[[9]]`$ ($p_{Intercept} = `r AUPFT1[[10]]`$); $Slope = `r AUPFT1[[11]]`$ ($p_{Slope} = `r AUPFT1[[12]]`$) for untreated, geo-referenced data
-\item $Intercept = `r AUPFT1[[13]]`$ ($p_{Intercept} = `r AUPFT1[[14]]`$); $Slope = `r AUPFT1[[15]]`$ ($p_{Slope} = `r AUPFT1[[16]]`$) for mapped mean trait data
-\end{enumerate}
-
-\clearpage
-
-\paragraph*{Air Temperature}  \hspace{.5cm}
-Relationships of \tair vegetation memory coefficients and \vh, and \nmass records across Australia are represented in figure \ref{fig:AUPFT2}. These relationships have been assessed through linear regressions. 
-```{r AUPFT2, echo = FALSE, fig.width = 17, fig.height = 5.5, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 1, out.width='1\\linewidth', fig.cap="\\textbf{PFTs and Tair Memory (Australia) -} Tair Memory (figure \\ref{fig:AUVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:AUTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:AUPFT2}", fig.scap="PFTs and Tair Memory (Australia)",  cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPFT2 <- Tryres(Region = "Australia", SoilLayer = 1, Variable = "Tair")
-```
-
-Correlations of \vh with \tair memory effects are as follows:
-\begin{enumerate}
-\item Cannot be calculated for untreated, geo-referenced data due to a lack of data.
-\item $Intercept = `r AUPFT2[[5]]`$ ($p_{Intercept} = `r AUPFT2[[6]]`$); $Slope = `r AUPFT2[[7]]`$ ($p_{Slope} = `r AUPFT2[[8]]`$) for mapped mean trait data
-\end{enumerate}
-
-\nmass is correlated with \tair memory effects as:
-\begin{enumerate}
-\item $Intercept = `r AUPFT2[[9]]`$ ($p_{Intercept} = `r AUPFT2[[10]]`$); $Slope = `r AUPFT2[[11]]`$ ($p_{Slope} = `r AUPFT2[[12]]`$) for untreated, geo-referenced data
-\item $Intercept = `r AUPFT2[[13]]`$ ($p_{Intercept} = `r AUPFT2[[14]]`$); $Slope = `r AUPFT2[[15]]`$ ($p_{Slope} = `r AUPFT2[[16]]`$) for mapped mean trait data
-\end{enumerate}
-
-\clearpage
-
-\paragraph*{Soil Moisture (0-7cm)}  \hspace{.5cm}
-Relationships of \qsoila vegetation memory length, and coefficients and \vh, and \nmass records across Australia are represented in figure \ref{fig:AUPFT3}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUPFTTab3}.
-```{r AUPFT3, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil1 Memory (Australia) -} \\qsoila Memory (figure \\ref{fig:AUVegMem1}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:AUTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:AUPFT3}", fig.scap="PFTs and Qsoil1 Memory (Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPFT3 <- Tryres(Region = "Australia", SoilLayer = 1, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoila related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across Australia.
-```{r AUPFTTab3, results = 'asis', echo = FALSE}
-TryTab(Region = "Australia", ModelCoeffs = AUPFT3, SoilLayer = 1)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (7-28cm)}  \hspace{.5cm}
-Relationships of \qsoilb vegetation memory length, and coefficients and \vh, and \nmass records across Australia are represented in figure \ref{fig:AUPFT4}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUPFTTab4}.
-```{r AUPFT4, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil2 Memory (Australia) -} \\qsoilb Memory (figure \\ref{fig:AUVegMem2}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:AUTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:AUPFT4}", fig.scap="PFTs and Qsoil2 Memory (Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPFT4 <- Tryres(Region = "Australia", SoilLayer = 2, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoilb related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across Australia.
-```{r AUPFTTab4, results = 'asis', echo = FALSE}
-TryTab(Region = "Australia", ModelCoeffs = AUPFT4, SoilLayer = 2)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (28-100cm)}  \hspace{.5cm}
-Relationships of \qsoilc vegetation memory length, and coefficients and \vh, and \nmass records across Australia are represented in figure \ref{fig:AUPFT5}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUPFTTab5}.
-```{r AUPFT5, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil3 Memory (Australia) -} \\qsoilc Memory (figure \\ref{fig:AUVegMem3}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:AUTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:AUPFT5}", fig.scap="PFTs and Qsoil3 Memory (Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPFT5 <- Tryres(Region = "Australia", SoilLayer = 3, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoilc related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass. All identified significant relationships are weak. No untreated, geo-referenced \vh data is available across Australia.
-```{r AUPFTTab5, results = 'asis', echo = FALSE}
-TryTab(Region = "Australia", ModelCoeffs = AUPFT5, SoilLayer = 3)
-```
-
-\clearpage
-
-\paragraph*{Soil Moisture (100-255cm)}  \hspace{.5cm}
-Relationships of \qsoild vegetation memory length, and coefficients and \vh, and \nmass records across Australia are represented in figure \ref{fig:AUPFT6}. These relationships have been assessed through linear regressions, the coefficients of which are depicted in table \ref{tab:AUPFTTab6}.
-```{r AUPFT6, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Height', 'Nitrogen'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{PFTs and Qsoil4 Memory (Australia) -} \\qsoild Memory (figure \\ref{fig:AUVegMem4}) plotted against expressions of (a) \\vh, and (b) \\nmass both via geo-referenced \\TRY records and mapped species-specific trait means (figure \\ref{fig:AUTRY}). Figure established via \\ref{rTRYRes}. \\label{fig:AUPFT6}", fig.scap="PFTs and Qsoil4 Memory (Australia)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
-AUPFT6 <- Tryres(Region = "Australia", SoilLayer = 4, Variable = "Qsoil")
-```
-Linear regression identified statistically significant relationships for \qsoild related vegetation memory coefficients and species-specific mapped trait means of \vh and \nmass. All identified significant relationships - with the exception of \nmass and \qsoild memory length - are weak. No untreated, geo-referenced \vh data is available across Australia.
-```{r AUPFTTab6, results = 'asis', echo = FALSE}
-TryTab(Region = "Australia", ModelCoeffs = AUPFT6, SoilLayer = 4)
+TryTab(Region = "Iberian Region", ModelCoeffs = IBPFT3, SoilLayer = 1, Variable = "Qsoil")
 ```
 
 \clearpage
@@ -2745,9 +2126,9 @@ TryTab(Region = "Australia", ModelCoeffs = AUPFT6, SoilLayer = 4)
 ### Summary
 #### Life History Traits
 
-Linear regressions of \COMPADRE data against vegetation memory coefficients have proven **largely inconclusive**, especially due to low spatial \COMPADRE data coverage **across the Caatinga and Australia**.
+Linear regressions of \COMPADRE data against vegetation memory coefficients have proven **largely inconclusive**.
 
-Making use of the much higher spatial coverage of \COMPADRE data across the **Iberian region**, \COMPADRE \textbf{reactivity} emerged as an \textbf{important factor in explaining vegetation memory patterns}:
+Making use of \COMPADRE data across the **Iberian region**, \COMPADRE \textbf{reactivity} emerged as an \textbf{important factor in explaining vegetation memory patterns}:
 
 \begin{enumerate}
 \item \ndvil memory strength decreases as reactivity increases.
@@ -2760,19 +2141,24 @@ Overall, **vegetation memory strength decreases** as **reactivity increases**.
 \vspace{1cm}
 #### Plant Functional Traits
 
-Analyses of the relationships of \PFT expressions and vegetation memory characteristics (summaries of which are provided in tables \ref{tab:IBPFTTabRaw}, \ref{tab:IBPFTTabMapped} , \ref{tab:CAPFTTabRaw}, \ref{tab:CAPFTTabMapped}, \ref{tab:AUPFTTabRaw}, and \ref{tab:AUPFTTabMapped}) revealed that:
+Analyses of the relationships of \PFT expressions and vegetation memory characteristics revealed that:
 
 \begin{enumerate}
-\item \textbf{Geo-referenced \PFT records cannot be linked to vegetation memory characteristics} in a statistically significant way across all three study regions.
-\item \textbf{Mapped species-specific \PFT means can be linked to patterns of vegetation memory} characteristics across all three study regions. However, these \textbf{relationships are weak}.
+\item \textbf{Geo-referenced \PFT records can be linked to vegetation memory characteristics} in a statistically significant way:
+  \begin{itemize}
+  \item \ndvil memory effects increase as \vh and \nmass increase.
+  \item \tair memory effects decrease as \vh and \nmass increase.
+  \item \qsoila memory effects increase as \vh and \nmass increase.
+  \end{itemize}
+\item \textbf{Mapped species-specific \PFT means can be linked to patterns of vegetation memory} characteristics:\begin{itemize}
+  \item \ndvil memory effects decrease as \vh and \nmass increase.
+  \item \tair memory effects increase as \vh and \nmass increase.
+  \item \qsoila memory effects decrease as \vh and \nmass increase.
+  \end{itemize}
 \item There is a \textbf{mismatch between geo-referenced \PFT records and mapped species-specific trait means} in that relationships of the two towards the same vegetation memory characteristics often follow positive and negative relationships, respectively. 
 \end{enumerate}
 
-Overall, \textbf{\PFTs cannot be linked to vegetation memory characteristics in a meaningful way} via linear regressions.
-
-
 \clearpage
-
 
 # Discussion
 ## Vegetation Memory
@@ -3138,7 +2524,7 @@ TRYRegions(Region = "Australia")
 
 ### Vegetation Memory Models
 #### Iberian Region
-
+\paragraph*{Model Coefficients}  \hspace{.5cm}
 ```{r IBRVegMem2, echo = FALSE, fig.width = 17, fig.height = 15, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Region; Qsoil2) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. Figure established via \\ref{rModelRes}. \\label{fig:IBRVegMem2}", fig.scap="Vegetation Memory Coefficients (Iberian Region; Qsoil2)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Iberian Region", SoilLayer = 2)
 ```
@@ -3167,8 +2553,22 @@ Ures(Region = "Iberian Region", SoilLayer = 4)
 
 \clearpage
 
-#### Caatinga
+\paragraph*{Soil Layer Comparison}  \hspace{.5cm}
 
+As stated above \qsoila has been identified as the most informative \qsoil layer in terms of vegetation memory. This is due to the fact that patterns of \qsoil memory stay consistent across \qsoil layers (see figure \ref{fig:IBLayers}) and \qsoila coefficients being larger than coefficients of other \qsoil layers at statistical significance (see table \ref{tab:IBRQsoilU}).
+\vspace{-1cm}
+```{r IBLayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Iberian Region, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:IBRVegMem1}, \\ref{fig:IBRVegMem2}, \\ref{fig:IBRVegMem3}, and \\ref{fig:IBRVegMem4} and have been scaled to be represented on the same colour axis for comparability. Figure established via \\ref{rSoilLayersRes}. \\label{fig:IBLayers}", fig.scap="Vegetation Memory Coefficients (Iberian Region, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+SoilLayersRes(Region = "Iberian Region")
+```
+\vspace{-.5cm}
+```{r IBRQsoilU, echo = FALSE, results = 'asis'}
+UQsoilres(Region = "Iberian Region")
+```
+
+\clearpage
+
+#### Caatinga
+\paragraph*{Model Coefficients}  \hspace{.5cm}
 ```{r CAVegMem2, echo = FALSE, fig.width = 17, fig.height = 15, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Caatinga; Qsoil2) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. Figure established via \\ref{rModelRes}. \\label{fig:CAVegMem2}", fig.scap="Vegetation Memory Coefficients (Caatinga; Qsoil2)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Caatinga", SoilLayer = 2)
 ```
@@ -3197,8 +2597,21 @@ Ures(Region = "Caatinga", SoilLayer = 4)
 
 \clearpage
 
+\paragraph*{Soil Layer Comparison}  \hspace{.5cm}
+As stated above \qsoila has been identified as the most informative \qsoil layer in terms of vegetation memory. This is due to the fact that patterns of \qsoil memory stay consistent across \qsoil layers (see figure \ref{fig:CALayers}) and \qsoila coefficients being larger than coefficients of other \qsoil layers at statistical significance (see table \ref{tab:CAQsoilU}).
+\vspace{-1cm}
+```{r CALayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Caatinga, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:CAVegMem1}, \\ref{fig:CAVegMem2}, \\ref{fig:CAVegMem3}, and \\ref{fig:CAVegMem4} and have been scaled to be represented on the same colour axis for comparability. Figure established via \\ref{rSoilLayersRes}. \\label{fig:CALayers}", fig.scap="Vegetation Memory Coefficients (Caatinga, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+SoilLayersRes(Region = "Caatinga")
+```
+\vspace{-.5cm}
+```{r CAQsoilU, echo = FALSE, results = 'asis'}
+UQsoilres(Region = "Caatinga")
+```
+\clearpage
+
 #### Australia
 
+\paragraph*{Model Coefficients}  \hspace{.5cm}
 ```{r AUVegMem2, echo = FALSE, fig.width = 17, fig.height = 15, fig.subcap=c('SoilLag', 'Qsoil'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Australia; Qsoil2) -} Coefficients of vegetation memory obtained via model selection (figure \\ref{fig:ModScheme}) and \\pca regression (figure \\ref{fig:PCAREG}). For an interpretation of these coefficients, see table \\ref{tab:CoeffsOverview}. Figure established via \\ref{rModelRes}. \\label{fig:AUVegMem2}", fig.scap="Vegetation Memory Coefficients (Australia; Qsoil2)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 ModelRes(Region = "Australia", SoilLayer = 2)
 ```
@@ -3227,10 +2640,34 @@ Ures(Region = "Australia", SoilLayer = 4)
 
 \clearpage
 
-### Variance Partitioning
+\paragraph*{Soil Layer Comparison}  \hspace{.5cm}
+As stated above \qsoila has been identified as the most informative \qsoil layer in terms of vegetation memory. This is due to the fact that patterns of \qsoil memory stay consistent across the first three \qsoil layers (see figure \ref{fig:AULayers}) and \qsoila coefficients being larger than coefficients of other \qsoil layers at statistical significance (see table \ref{tab:AUQsoilU}).
+\vspace{-1cm}
+```{r AULayers, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Qsoil1', 'Qsoil2', 'Qsoil3', 'Qsoil4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Vegetation Memory Coefficients (Australia, QSoil Layers) -} Vegetation memory coefficients of different \\qsoil layers. These are also contained in figures \\ref{fig:AUVegMem1}, \\ref{fig:AUVegMem2}, \\ref{fig:AUVegMem3}, and \\ref{fig:AUVegMem4} and have been scaled to be represented on the same colour axis for comparability. Figure established via \\ref{rSoilLayersRes}. \\label{fig:AULayers}", fig.scap="Vegetation Memory Coefficients (Australia, QSoil Layers)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+SoilLayersRes(Region = "Australia")
+```
+\vspace{-.5cm}
+```{r AUQsoilU, echo = FALSE, results = 'asis'}
+UQsoilres(Region = "Australia")
+```
 
+\clearpage
+
+### Variance Partitioning
+\normalsize
 #### Iberian Region
-```{r IBRVarPar1, echo = FALSE, fig.width = 17, fig.height = 12.5, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 3, out.width='.33\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Region) -} Variance of \\ndvi anomalies explained by (a,d,g,j) full models of intrinsic and extrinsic memory, (b,e,h,k) intrinsic memory, (c,f,i,l) shared variance, and (d) extrinsic memory across soil layers \\qsoila to \\qsoild. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:IBRVarPar2}", fig.scap="Variance Partitioning (Iberian Region; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:IBRVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
+
+Spatial patterns of explained variance (see figure \ref{fig:IBRVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the southern dryland regions of Spain and Portugal.
+
+```{r IBVarPar1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Region; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:IBRVarPar1}", fig.scap="Variance Partitioning (Iberian Region; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1)
+VarParRes(Region = "Iberian Region", SoilLayer = 2, Plot = 1)
+VarParRes(Region = "Iberian Region", SoilLayer = 3, Plot = 1)
+VarParRes(Region = "Iberian Region", SoilLayer = 4, Plot = 1)
+```
+\clearpage
+```{r IBRVarPar2, echo = FALSE, fig.width = 17, fig.height = 12.5, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 3, out.width='.33\\linewidth', fig.cap="\\textbf{Variance Partitioning (Iberian Region) -} Variance of \\ndvi anomalies explained by (a,d,g,j) full models of intrinsic and extrinsic memory, (b,e,h,k) intrinsic memory, (c,f,i,l) shared variance, and (d) extrinsic memory across soil layers \\qsoila to \\qsoild. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:IBRVarPar2}", fig.scap="Variance Partitioning (Iberian Region; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 2)
 VarParRes(Region = "Iberian Region", SoilLayer = 2, Plot = 2)
 VarParRes(Region = "Iberian Region", SoilLayer = 3, Plot = 2)
@@ -3240,7 +2677,19 @@ VarParRes(Region = "Iberian Region", SoilLayer = 4, Plot = 2)
 \clearpage
 
 #### Caatinga
-```{r CAVarPar1, echo = FALSE, fig.width = 17, fig.height = 12.5, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 3, out.width='.33\\linewidth', fig.cap="\\textbf{Variance Partitioning (Caatinga) -} Variance of \\ndvi anomalies explained by (a,d,g,j) full models of intrinsic and extrinsic memory, (b,e,h,k) intrinsic memory, (c,f,i,l) shared variance, and (d) extrinsic memory across soil layers \\qsoila to \\qsoild. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:CAVarPar2}", fig.scap="Variance Partitioning (Caatinga; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:CAVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
+
+Spatial patterns of explained variance (see figure \ref{fig:CAVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the north-eastern dryland region.
+
+
+```{r CAVarPar1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Caatinga; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:CAVarPar1}", fig.scap="Variance Partitioning (Caatinga; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Caatinga", SoilLayer = 1, Plot = 1)
+VarParRes(Region = "Caatinga", SoilLayer = 2, Plot = 1)
+VarParRes(Region = "Caatinga", SoilLayer = 3, Plot = 1)
+VarParRes(Region = "Caatinga", SoilLayer = 4, Plot = 1)
+```
+\clearpage
+```{r CAVarPar2, echo = FALSE, fig.width = 17, fig.height = 12.5, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 3, out.width='.33\\linewidth', fig.cap="\\textbf{Variance Partitioning (Caatinga) -} Variance of \\ndvi anomalies explained by (a,d,g,j) full models of intrinsic and extrinsic memory, (b,e,h,k) intrinsic memory, (c,f,i,l) shared variance, and (d) extrinsic memory across soil layers \\qsoila to \\qsoild. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:CAVarPar2}", fig.scap="Variance Partitioning (Caatinga; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Caatinga", SoilLayer = 1, Plot = 2)
 VarParRes(Region = "Caatinga", SoilLayer = 2, Plot = 2)
 VarParRes(Region = "Caatinga", SoilLayer = 3, Plot = 2)
@@ -3250,7 +2699,19 @@ VarParRes(Region = "Caatinga", SoilLayer = 4, Plot = 2)
 \clearpage
 
 #### Australia
-```{r AUVarPar1, echo = FALSE, fig.width = 17, fig.height = 12.5, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 3, out.width='.33\\linewidth', fig.cap="\\textbf{Variance Partitioning (Australia) -} Variance of \\ndvi anomalies explained by (a,d,g,j) full models of intrinsic and extrinsic memory, (b,e,h,k) intrinsic memory, (c,f,i,l) shared variance, and (d) extrinsic memory across soil layers \\qsoila to \\qsoild. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:AUVarPar2}", fig.scap="Variance Partitioning (Australia; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+
+Variance partitioning of \ndvil and \qsoil has been assessed for all \qsoil layers. These results are presented in figure \ref{fig:AUVarPar1} and show a clear pattern of \ndvil explaining an overwhelming majority of \ndvi z-scores. Variance explained by \qsoil and variance shared by \qsoil and \ndvil decrease through the soil layers.
+
+Spatial patterns of explained variance (see figure \ref{fig:AUVarPar2}) reveal that \ndvil and \qsoil are the most valuable as predictors \ndvi across the Outback with patchy distributions.
+
+```{r AUVarPar1, echo = FALSE, fig.width = 17, fig.height = 14, fig.subcap=c('Soil Layer 1', 'Soil Layer 2', 'Soil Layer 3', 'Soil Layer 4'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Variance Partitioning (Australia; Qsoil1) -} Variance of \\ndvi anomalies explained by (a) full models of intrinsic and extrinsic memory, (b) intrinsic memory, (c) shared variance, and (d) extrinsic memory. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:AUVarPar1}", fig.scap="Variance Partitioning (Australia; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
+VarParRes(Region = "Australia", SoilLayer = 1, Plot = 1)
+VarParRes(Region = "Australia", SoilLayer = 2, Plot = 1)
+VarParRes(Region = "Australia", SoilLayer = 3, Plot = 1)
+VarParRes(Region = "Australia", SoilLayer = 4, Plot = 1)
+```
+\clearpage
+```{r AUVarPar2, echo = FALSE, fig.width = 17, fig.height = 12.5, fig.subcap=c('Total', 't-1', 'Shared', 'Qsoil'), fig.ncol = 3, out.width='.33\\linewidth', fig.cap="\\textbf{Variance Partitioning (Australia) -} Variance of \\ndvi anomalies explained by (a,d,g,j) full models of intrinsic and extrinsic memory, (b,e,h,k) intrinsic memory, (c,f,i,l) shared variance, and (d) extrinsic memory across soil layers \\qsoila to \\qsoild. A representation of how these were calculated can be retrieved in figure \\ref{fig:VarPar}. Figure established via \\ref{rVarParRes}. \\label{fig:AUVarPar2}", fig.scap="Variance Partitioning (Australia; Qsoil1)", cache = TRUE, cache.lazy=FALSE, fig.pos = 'h!'}
 VarParRes(Region = "Australia", SoilLayer = 1, Plot = 2)
 VarParRes(Region = "Australia", SoilLayer = 2, Plot = 2)
 VarParRes(Region = "Australia", SoilLayer = 3, Plot = 2)
@@ -3259,57 +2720,56 @@ VarParRes(Region = "Australia", SoilLayer = 4, Plot = 2)
 
 \clearpage
 
-### Functional Aspects of Vegetation Memory
-#### Iberian Region
-```{r IBPFTTabRaw, results = 'asis', echo = FALSE}
-options(digits=2, width = 90)
-PFTTab(ModelCoeffs = c(unlist(IBPFT1)[c(1:4, 9:12)], unlist(IBPFT2)[c(1:4, 9:12)], 
-                 unlist(IBPFT3)[c(1:4, 9:12)], unlist(IBPFT4)[c(1:4, 9:12)], 
-                 unlist(IBPFT5)[c(1:4, 9:12)], unlist(IBPFT6)[c(1:4, 9:12)]), Region = "Iberian Region", Data = "Geo-referenced")
-```
+<!-- ### Functional Aspects of Vegetation Memory -->
+<!-- ```{r IBPFTTabRaw, results = 'asis', echo = FALSE} -->
+<!-- options(digits=2, width = 90) -->
+<!-- PFTTab(ModelCoeffs = c(unlist(IBPFT1)[c(1:4, 9:12)], unlist(IBPFT2)[c(1:4, 9:12)],  -->
+<!--                  unlist(IBPFT3)[c(1:4, 9:12)], unlist(IBPFT4)[c(1:4, 9:12)],  -->
+<!--                  unlist(IBPFT5)[c(1:4, 9:12)], unlist(IBPFT6)[c(1:4, 9:12)]), Region = "Iberian Region", Data = "Geo-referenced") -->
+<!-- ``` -->
 
-```{r IBPFTTabMapped, results = 'asis', echo = FALSE}
-options(digits=2, width = 90)
-PFTTab(ModelCoeffs = c(unlist(IBPFT1)[c(5:8, 13:16)], unlist(IBPFT2)[c(5:8, 13:16)], 
-                 unlist(IBPFT3)[c(5:8, 13:16)], unlist(IBPFT4)[c(5:8, 13:16)], 
-                 unlist(IBPFT5)[c(5:8, 13:16)], unlist(IBPFT6)[c(5:8, 13:16)]), Region = "Iberian Region", Data = "Mapped species-specific mean")
-```
-
-
-#### Caatinga
+<!-- ```{r IBPFTTabMapped, results = 'asis', echo = FALSE} -->
+<!-- options(digits=2, width = 90) -->
+<!-- PFTTab(ModelCoeffs = c(unlist(IBPFT1)[c(5:8, 13:16)], unlist(IBPFT2)[c(5:8, 13:16)],  -->
+<!--                  unlist(IBPFT3)[c(5:8, 13:16)], unlist(IBPFT4)[c(5:8, 13:16)],  -->
+<!--                  unlist(IBPFT5)[c(5:8, 13:16)], unlist(IBPFT6)[c(5:8, 13:16)]), Region = "Iberian Region", Data = "Mapped species-specific mean") -->
+<!-- ``` -->
 
 
-```{r CAPFTTabRaw, results = 'asis', echo = FALSE}
-options(digits=2, width = 90)
-PFTTab(ModelCoeffs = c(unlist(CAPFT1)[c(1:4, 9:12)], unlist(CAPFT2)[c(1:4, 9:12)], 
-                 unlist(CAPFT3)[c(1:4, 9:12)], unlist(CAPFT4)[c(1:4, 9:12)], 
-                 unlist(CAPFT5)[c(1:4, 9:12)], unlist(CAPFT6)[c(1:4, 9:12)]), Region = "Caatinga", Data = "Geo-referenced")
-```
+<!-- #### Caatinga -->
 
-```{r CAPFTTabMapped, results = 'asis', echo = FALSE}
-options(digits=2, width = 90)
-PFTTab(ModelCoeffs = c(unlist(CAPFT1)[c(5:8, 13:16)], unlist(CAPFT2)[c(5:8, 13:16)], 
-                 unlist(CAPFT3)[c(5:8, 13:16)], unlist(CAPFT4)[c(5:8, 13:16)], 
-                 unlist(CAPFT5)[c(5:8, 13:16)], unlist(CAPFT6)[c(5:8, 13:16)]), Region = "Caatinga", Data = "Mapped species-specific mean")
-```
 
-\clearpage
+<!-- ```{r CAPFTTabRaw, results = 'asis', echo = FALSE} -->
+<!-- options(digits=2, width = 90) -->
+<!-- PFTTab(ModelCoeffs = c(unlist(CAPFT1)[c(1:4, 9:12)], unlist(CAPFT2)[c(1:4, 9:12)],  -->
+<!--                  unlist(CAPFT3)[c(1:4, 9:12)], unlist(CAPFT4)[c(1:4, 9:12)],  -->
+<!--                  unlist(CAPFT5)[c(1:4, 9:12)], unlist(CAPFT6)[c(1:4, 9:12)]), Region = "Caatinga", Data = "Geo-referenced") -->
+<!-- ``` -->
 
-#### Australia
+<!-- ```{r CAPFTTabMapped, results = 'asis', echo = FALSE} -->
+<!-- options(digits=2, width = 90) -->
+<!-- PFTTab(ModelCoeffs = c(unlist(CAPFT1)[c(5:8, 13:16)], unlist(CAPFT2)[c(5:8, 13:16)],  -->
+<!--                  unlist(CAPFT3)[c(5:8, 13:16)], unlist(CAPFT4)[c(5:8, 13:16)],  -->
+<!--                  unlist(CAPFT5)[c(5:8, 13:16)], unlist(CAPFT6)[c(5:8, 13:16)]), Region = "Caatinga", Data = "Mapped species-specific mean") -->
+<!-- ``` -->
 
-```{r AUPFTTabRaw, results = 'asis', echo = FALSE}
-options(digits=2, width = 90)
-PFTTab(ModelCoeffs = c(unlist(AUPFT1)[c(1:4, 9:12)], unlist(AUPFT2)[c(1:4, 9:12)], 
-                 unlist(AUPFT3)[c(1:4, 9:12)], unlist(AUPFT4)[c(1:4, 9:12)], 
-                 unlist(AUPFT5)[c(1:4, 9:12)], unlist(AUPFT6)[c(1:4, 9:12)]), Region = "Australia", Data = "Geo-referenced")
-```
+<!-- \clearpage -->
 
-```{r AUPFTTabMapped, results = 'asis', echo = FALSE}
-options(digits=2, width = 90)
-PFTTab(ModelCoeffs = c(unlist(AUPFT1)[c(5:8, 13:16)], unlist(AUPFT2)[c(5:8, 13:16)], 
-                 unlist(AUPFT3)[c(5:8, 13:16)], unlist(AUPFT4)[c(5:8, 13:16)], 
-                 unlist(AUPFT5)[c(5:8, 13:16)], unlist(AUPFT6)[c(5:8, 13:16)]), Region = "Australia", Data = "Mapped species-specific mean")
-```
+<!-- #### Australia -->
+
+<!-- ```{r AUPFTTabRaw, results = 'asis', echo = FALSE} -->
+<!-- options(digits=2, width = 90) -->
+<!-- PFTTab(ModelCoeffs = c(unlist(AUPFT1)[c(1:4, 9:12)], unlist(AUPFT2)[c(1:4, 9:12)],  -->
+<!--                  unlist(AUPFT3)[c(1:4, 9:12)], unlist(AUPFT4)[c(1:4, 9:12)],  -->
+<!--                  unlist(AUPFT5)[c(1:4, 9:12)], unlist(AUPFT6)[c(1:4, 9:12)]), Region = "Australia", Data = "Geo-referenced") -->
+<!-- ``` -->
+
+<!-- ```{r AUPFTTabMapped, results = 'asis', echo = FALSE} -->
+<!-- options(digits=2, width = 90) -->
+<!-- PFTTab(ModelCoeffs = c(unlist(AUPFT1)[c(5:8, 13:16)], unlist(AUPFT2)[c(5:8, 13:16)],  -->
+<!--                  unlist(AUPFT3)[c(5:8, 13:16)], unlist(AUPFT4)[c(5:8, 13:16)],  -->
+<!--                  unlist(AUPFT5)[c(5:8, 13:16)], unlist(AUPFT6)[c(5:8, 13:16)]), Region = "Australia", Data = "Mapped species-specific mean") -->
+<!-- ``` -->
 
 \clearpage
 
@@ -3444,9 +2904,9 @@ ElevationF <- raster(list.files()[1], varname = "Elevation")
 \footnotesize
 ```{r ref.label='Patcaustab', eval = FALSE, ref = "rPatcaustab", codecap = "Linear regression coefficients of vegetation memory sensitivity.", tidy = TRUE}
 ```
-\footnotesize
-```{r ref.label='PatCausAnova', eval = FALSE, ref = "rPatCausAnova", codecap = "ANOVAs of Qsoil layer and Memory length models.", tidy = TRUE}
-```
+<!-- \footnotesize -->
+<!-- ```{r ref.label='PatCausAnova', eval = FALSE, ref = "rPatCausAnova", codecap = "ANOVAs of Qsoil layer and Memory length models.", tidy = TRUE} -->
+<!-- ``` -->
 
 \clearpage
 
@@ -3469,9 +2929,9 @@ ElevationF <- raster(list.files()[1], varname = "Elevation")
 \footnotesize
 ```{r ref.label='TRYresTab', eval = FALSE, ref = "rTRYresTab", codecap = "Linear regression coefficients of TRY data and vegetation memory coeffcients.", tidy = TRUE}
 ```
-\footnotesize
-```{r ref.label='PFTTab', eval = FALSE, ref = "rPFTTab", codecap = "Overview of linear regression coefficients of TRY data and vegetation memory coeffcients.", tidy = TRUE}
-```
+<!-- \footnotesize -->
+<!-- ```{r ref.label='PFTTab', eval = FALSE, ref = "rPFTTab", codecap = "Overview of linear regression coefficients of TRY data and vegetation memory coeffcients.", tidy = TRUE} -->
+<!-- ``` -->
 
 \clearpage
 
