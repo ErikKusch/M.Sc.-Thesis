@@ -1,0 +1,835 @@
+---
+title: "Inferring Vegetation Memory from Remote Sensing Data using novel Climate Reconstruction Products"
+subtitle: "M.Sc. Thesis Defense"
+author: "Erik Kusch"
+date: "05/07/2019"
+fontsize: 10pt
+output: 
+  beamer_presentation: # handouts can be established by going into the intermediate .tex file and adding [handout] to \documentclass[]{beamer}, remember to compilate that file often enough to receive a TOC
+    keep_tex: true
+    toc: false # this is added through a later command
+    slide_level: 3 # at how many pound signs (#) to assume slide title level
+    includes:
+      in_header: Style.tex
+classoption: t
+---
+
+```{r setup, include=FALSE}
+Dir.Pres <- getwd()
+Dir.Base <- paste(c(strsplit(getwd(), "/")[[1]][1:(length(strsplit(getwd(), "/")[[1]])-2)]), collapse="/")
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE, cache.lazy=TRUE, tidy.opts=list(width.cutoff=60),tidy=TRUE)
+options(digits=2)
+
+install.load.package <- function(x) {
+  if (!require(x, character.only = TRUE))
+    install.packages(x, repos='http://cran.us.r-project.org')
+  require(x, character.only = TRUE)
+}
+package_vec <- c("knitr", "raster", "pracma", "gameofthrones", "ggplot2", "cowplot", 
+                 "grid", "gridExtra", "xlsx", "kableExtra")
+sapply(package_vec, install.load.package)
+oldSource <- knit_hooks$get("source")
+knit_hooks$set(source = function(x, options) {
+  x <- oldSource(x, options)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
+  ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
+})
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE, cache.lazy=FALSE, tidy.opts=list(width.cutoff=80),tidy=TRUE, fig.height=5.5)
+options(digits=4, width = 90)
+
+setwd(Dir.Base)
+source("Y - Codes/S0b_Directories.R") # setting directories
+source("Y - Codes/S0c_Functions.R") # Loading miscellaneous functions
+setwd(Dir.Pres)
+
+SR_Titles <- list("NDVI", "Air Temperature", "Soil Moisture (0-7cm)", "Soil Moisture (7-28cm)", "Soil Moisture (28-100cm)", "Soil Moisture (100-255cm)")
+setwd(Dir.KrigCov)
+Elevation <- raster(list.files()[2], varname = "Elevation")
+ElevationF <- raster(list.files()[1], varname = "Elevation")
+
+col.signeg <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "targaryen2")
+col.sigpos <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "tyrell")
+col.nonsig <- colorRampPalette(c("grey"))(1)
+col.lags <- got(n = 12, alpha = 1, begin = 0, end = 1, direction = 1, option = "daenerys")
+```
+
+```{r ModelRes, echo = FALSE}
+ModelRes <- function(Region, SoilLayer, Plot = "ALL"){
+  if(Plot == "ALL"){
+    par(mfrow=c(2,2))
+    smallplotxpos <- c(0.5,.93,.12,.17) # where to put colour scales
+    smallplotxneg <- c(0.085,.5,.12,.17) # where to put colour scales
+    smallplotsing <- c(.085, .93, .12, .17)
+  }else{
+    par(mfrow=c(1,1))
+    smallplotxpos <- c(.5,.938,.03,.08) # where to put colour scales
+    smallplotxneg <- c(.045,.5,.03,.08) # where to put colour scales
+    smallplotsing <- c(.045, .938, .03, .08)
+  }
+  SR_Titles <- list("NDVI", "Air Temperature", "Soil Moisture (0-7cm)", "Soil Moisture (7-28cm)", "Soil Moisture (28-100cm)", "Soil Moisture (100-255cm)")
+  Titles <- c('Soil Memory Lag', 'NDVI [t-1]', SR_Titles[SoilLayer+2], 'Air Temperature')
+  Files <- list.files(Dir.Memory)[grep(list.files(Dir.Memory), pattern = Region)]
+  Files <- Files[grep(Files, pattern = ".nc")]
+  plot_ras <- brick(paste(Dir.Memory, Files[SoilLayer], sep="/"))
+  if(Plot == "ALL" | Plot == 1){
+  plot(plot_ras[[1]], col = col.lags, colNA = "black", legend=FALSE, axes=FALSE, main = Titles[1], cex.main = 3.5)
+  plot(plot_ras[[1]], legend.only=TRUE, col=col.lags, smallplot= smallplotsing, horizontal = TRUE, axis.args=list(cex.axis=2.5))
+}
+  if(SoilLayer == 1){
+    RasLay <- 4:6
+  }else{
+    RasLay <- c(5)
+  }
+  if(Plot != "ALL"){
+    RasLay <- c(Plot+2)
+  }
+  if(Plot == "ALL" | Plot != 1){
+   for(Plot in RasLay){
+    Neg_ras <- plot_ras[[Plot]]
+    Neg_ras[which(values(Neg_ras) >= 0)] <- NA
+    Pos_ras <- plot_ras[[Plot]]
+    Pos_ras[which(values(Pos_ras) < 0)] <- NA
+    plot(Neg_ras, col=col.signeg, colNA = "black", legend=FALSE, axes=FALSE, main = Titles[(Plot-2)], cex.main = 3.5)
+    if(Plot == 4 & Region == "Iberian Region"){
+      plot(Pos_ras, col=col.sigpos, colNA = "black", legend=FALSE, axes=FALSE, add=TRUE)
+    }else{
+      plot(Pos_ras, col=col.sigpos, legend=FALSE, axes=FALSE, add=TRUE) 
+    }
+    plot(Neg_ras, legend.only=TRUE, col=col.signeg, colNA = "black", smallplot=smallplotxneg, horizontal = TRUE, axis.args=list(cex.axis=2.5))
+    if(Plot == 4 & Region == "Iberian Region"){
+      plot(Pos_ras, legend.only=TRUE, col=col.sigpos, smallplot=smallplotsing, horizontal = TRUE, axis.args=list(cex.axis=2.5))
+    }else{
+      plot(Pos_ras, legend.only=TRUE, col=col.sigpos, smallplot=smallplotxpos, horizontal = TRUE, axis.args=list(cex.axis=2.5))
+    }
+  } 
+  }
+}
+```
+
+```{r VarParRes, echo = FALSE}
+VarParRes <- function(Region, SoilLayer, Plot = 1, Legend = TRUE, lim = FALSE){
+  col.varpar1 <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "wildfire")
+col.varpar2 <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "targaryen")
+col.varpar3 <- got(n = 100, alpha = 1, begin = 0, end = 1, direction = -1, option = "jon_snow")
+col.list <- list(col.varpar1, col.varpar2, col.varpar3) 
+  Files <- list.files(Dir.Memory)[grep(list.files(Dir.Memory), pattern = Region)]
+  Files <- Files[grep(Files, pattern = ".nc")]
+  Alter_ras <- brick(paste(Dir.Memory, Files[SoilLayer], sep="/"))[[7:10]]
+  Alter_ras[2] <- 0
+  values(Alter_ras)[which(values(Alter_ras) < 0)] <- 0
+  cells <- order(values(Alter_ras[[1]]))
+  `%nin%` = Negate(`%in%`) # create a 'not in' statement
+  cells <- cells[which(cells %nin% which(values(Alter_ras[[1]])>quantile(values(Alter_ras[[1]]), .95, na.rm = TRUE)))]
+  plot_df <- data.frame(Data =NA, 
+                        Cell =NA,
+                        Variance =NA)
+  Idents <- c("Total", "t-1", "Shared", "Qsoil")
+  for(i in 1:4){
+    if(i > 1){
+      plot_df1 <- data.frame(Data = values(Alter_ras[[i]])[cells],
+                             Cell = 1:length(cells), 
+                             Variance = rep(Idents[i], length(cells)))
+      plot_df <- rbind(plot_df, plot_df1)
+    }
+  }
+  if(lim == TRUE){
+    Lims <- c(0, 0.7)
+  }else{
+    Lims <- c(0, max(plot_df$Data, na.rm = TRUE))
+  }
+  plot_df <- na.omit(plot_df)
+  if(Legend == TRUE){
+   p <- ggplot(data = plot_df, aes(y = Data, x = Cell, fill = Variance)) + geom_bar(stat = "identity") + theme_bw(base_size= 45) + xlab("Raster Cells") + ylab("Variance") + scale_fill_manual(values=c(col.list[[3]][1], col.list[[2]][50], col.list[[1]][30])) + ylim(Lims)
+  }else{
+   p <- ggplot(data = plot_df, aes(y = Data, x = Cell, fill = Variance)) + geom_bar(stat = "identity") + theme_bw(base_size= 45) + xlab("Raster Cells") + ylab("Variance") + scale_fill_manual(values=c(col.list[[3]][1], col.list[[2]][50], col.list[[1]][30])) + theme(legend.position = "none") + ylim(Lims)
+  }
+  if(Plot == 1){
+    return(p)
+  }else{
+   for(i in 2:4){
+    col.varpar <- col.list[[i-1]]
+    plot(Alter_ras[[i]], col=col.varpar, colNA = "black", legend=FALSE, axes=FALSE)
+    plot(Alter_ras[[i]], legend.only=TRUE, col=col.varpar, smallplot=c(.05, .93, .03, .065), horizontal = TRUE, axis.args=list(cex.axis=2.5))
+  } 
+  }
+}
+```
+
+```{r PatCausRes, echo = FALSE}
+PatcausRes <- function(SoilLayer = 1, X, Y){
+  Regions <- c("Iberian Region"
+               , "Caatinga", "Australia"
+               )
+  Idents <- c("NDVI", "ENDVI", "Qsoil", "EQsoil", "Tair", "ETair", "Memory")
+  Labs <- c("NDVI [t-1] Coefficients", "Mean NDVI ", paste("Qsoil", SoilLayer, " Coefficients", sep=""), paste("Mean  Qsoil", SoilLayer, sep=""), "Tair Coefficients", "Mean Tair", paste("Qsoil", SoilLayer, " Memory Lags", sep=""))
+  # data
+  plot_df <- data.frame(X = NA, Y = NA, Region = NA)
+  for(i in 1:length(Regions)){
+    Region <- Regions[i]
+    Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+    Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+    Alter_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))
+    Files <- list.files(Dir.ERA.Monthly)[grep(list.files(Dir.ERA.Monthly),
+                                              pattern = Region)]
+    Files <- Files[grep(Files, pattern = ".nc")]
+    EQsoil <- Files[grep(Files, pattern = "Qsoil")]
+    EQsoil <- brick(paste(Dir.ERA.Monthly, EQsoil[SoilLayer], sep="/"))
+    EQsoil <- values(mean(EQsoil))
+    ETair <- Files[grep(Files, pattern = "Tair")]
+    ETair <- brick(paste(Dir.ERA.Monthly, ETair, sep="/"))
+    ETair <- values(mean(ETair))
+    ENDVI <- list.files(Dir.Gimms.Monthly)[grep(list.files(Dir.Gimms.Monthly),
+                                                pattern =Region)]
+    ENDVI <- brick(paste(Dir.Gimms.Monthly, ENDVI, sep="/"))
+    ENDVI <- values(mean(ENDVI))
+    values <- list(values(Alter_ras[[2]]), ENDVI,
+                   values(Alter_ras[[3]]), EQsoil,
+                   values(Alter_ras[[4]]), ETair,
+                   values(Alter_ras[[1]])
+                   )
+    plot_df1 <- data.frame(X = values[[which(Idents == X)]],
+                          Y = values[[which(Idents == Y)]],
+                          Region = rep(Region, length(values[[which(Idents == X)]])))
+    plot_df1 <- na.omit(plot_df1)
+    plot_df <- rbind(plot_df, plot_df1)
+  QsoilTitle <- c("(0-7cm)", "(7-28cm)", "(28-100cm)", "(100-255cm)")
+  }
+  plot_df <- na.omit(plot_df)
+  # plotting
+  p <- ggplot(plot_df, aes(x = X, y = Y, col = Region)) + 
+    geom_point(shape = ".", alpha = 0.4, size = 0.5) + 
+  theme_bw(base_size = 35) + ylab(Labs[which(Idents == Y)]) + xlab(Labs[which(Idents == X)]) +
+  stat_smooth(method = "lm",level = 0.95)+
+  geom_hline(yintercept = 0, linetype="dotted") + 
+    scale_color_manual(values=got(n = length(Regions), alpha = 1, direction = -1, option = "margaery"))
+  if(X == "Memory"){
+   p <- ggplot(plot_df, aes(x = as.factor(X), y = Y, col = Region)) + geom_boxplot() + theme_bw(base_size = 35) + ylab(Labs[which(Idents == Y)]) + xlab(Labs[which(Idents == X)]) + 
+  geom_hline(yintercept = 0, linetype="dotted") + 
+    scale_color_manual(values=got(n = length(Regions), alpha = 1, direction = -1, option = "margaery")) + 
+     stat_smooth(method = "lm",level = 0.95, aes(group=plot_df$Region))
+  }
+  if(Y == "Memory"){
+   p <- ggplot(plot_df, aes(x = as.factor(Y), y = X, col = Region)) + geom_boxplot() + theme_bw(base_size = 35) + xlab(Labs[which(Idents == Y)]) + ylab(Labs[which(Idents == X)]) + coord_flip() +
+  geom_hline(yintercept = 0, linetype="dotted") + 
+    scale_color_manual(values=got(n = length(Regions), alpha = 1, direction = -1, option = "margaery")) + 
+       stat_smooth(method = "lm",level = 0.95, aes(group=plot_df$Region))
+  }
+  print(p)
+  # Regressions
+  Output <- as.list(rep(NA, 4*length(Regions)))
+  pos <- 1
+  for(i in 1:length(Regions)){
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][1,1]
+    pos <- pos+1
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][1,4]
+    pos <- pos+1
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][2,1]
+    pos <- pos+1
+    Output[[pos]] <- summary(lm(Y ~ X, data = plot_df[which(plot_df$Region == Regions[i]),]))[["coefficients"]][2,4]
+    pos <- pos+1
+  }
+  return(Output)
+}
+```
+
+```{r COMRes, echo = FALSE}
+Comres <- function(Variable, Region, Legend = FALSE){
+  col.tair <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "tully")
+col.ndvi <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = 1, option = "tyrell")
+col.qsoil <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = 1, option = "white_walkers")
+col.mem <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "greyjoy")
+  VarHold <- Variable
+  if(Variable == "FSC-1" | Variable == "FSC-2"){
+    Variable <- "FastSlow"
+  }
+  ## Memory Data
+  # Memory
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  Memory_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[1]]
+  # t-1
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  NDVI_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[2]]
+  # Qsoil
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  Qsoil_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[3]]
+  # Tair
+  Dir.Reg <- paste(Dir.Memory, "/", Region, "-1981_2015", sep="")
+  Files <- list.files(Dir.Reg)[grep(list.files(Dir.Reg), pattern = ".nc")]
+  SoilLayer <- 1
+  Tair_ras <- brick(paste(Dir.Reg, Files[SoilLayer], sep="/"))[[4]]
+  ## COMPADRE data
+  Dir.Comp <- paste(Dir.Compadre, Variable, sep="/")
+  Compad_ras <- list.files(Dir.Comp)[grep(list.files(Dir.Comp), pattern = Region)]
+  if(VarHold != "FSC-2"){
+    Compad_ras <- raster(paste(Dir.Comp, Compad_ras, sep="/"))[[1]]
+  }else{
+    Compad_ras <- brick(paste(Dir.Comp, Compad_ras, sep="/"))[[2]]
+  }
+  values(Compad_ras)[which(values(Compad_ras) > quantile(values(Compad_ras), .66, na.rm = TRUE))] <- quantile(values(Compad_ras), .66, na.rm = TRUE)
+  if(VarHold == "FSC-1" | VarHold == "FSC-2"){
+   values(Compad_ras)[which(values(Compad_ras) < quantile(values(Compad_ras), .05, na.rm = TRUE))] <- quantile(values(Compad_ras), .05, na.rm = TRUE) 
+  }
+  plot_df <- data.frame(
+    Data = c(values(Memory_ras), values(NDVI_ras), values(Qsoil_ras), values(Tair_ras)), 
+    Identifiers = rep(c("Lag", "t-1", "Qsoil1", "Tair"), each = length(values(Memory_ras))),
+   Compadre = rep(values(Compad_ras), 4)
+  )
+  Variable <- VarHold
+  plot_df <- na.omit(plot_df)
+  Output <- as.list(rep(NA,16))
+  Idents <- c("t-1", "Tair", "Qsoil1", "Lag")
+  for(i in 0:(length(Idents)-1)){
+    Output[[(4*i+1)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][1,1]
+    Output[[(4*i+2)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][1,4]
+    Output[[(4*i+3)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][2,1]
+    Output[[(4*i+4)]] <- summary(lm(Data ~ Compadre, data = plot_df[which(plot_df$Identifiers == Idents[(i+1)]),]))[["coefficients"]][2,4]
+  }
+  Linesa <- rep(1,4)
+  Linesa[which(unlist(Output)[c(4,8,12,16)] > .05)] <- 2
+  Lines <- c(Linesa[4], Linesa[1], Linesa[3], Linesa[2])
+  Lines <- rep(Lines, each = length(which(plot_df$Identifiers == "Lag")))
+  Lines <- as.factor(Lines)
+  plot_df <- cbind(plot_df, Lines)
+  if(length(levels(Lines)) == 2){
+    if(Legend == TRUE){
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, aes(linetype = Lines)) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + 
+     labs(linetype="p < .05", colour="Identifiers") + scale_linetype_manual(values = c(1, 2), labels = c("Yes", "No")) + guides(colour = guide_legend(ncol=2, override.aes = list(size = 5)),linetype = guide_legend(override.aes = list(size = .5)))
+  }else{
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, aes(linetype = Lines)) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + theme(legend.position = "none")
+  }
+  }else{
+    if(Legend == TRUE){
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, linetype = 2) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + 
+     labs(linetype="p < .05", colour="Identifiers") + scale_linetype_manual(values = c(1, 2), labels = c("Yes", "No")) + guides(colour = guide_legend(ncol=2, override.aes = list(size = 5)),linetype = guide_legend(override.aes = list(size = .5)))
+  }else{
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, linetype = 2) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + theme(legend.position = "none")
+  }
+  }
+  return(list(plot,Output,dim(plot_df)[1]/4))
+}
+```
+
+\tableofcontents
+
+# Background
+## Motivation
+### What is this?
+\centering \textbf{Vegetation Memory} is the effect of \textbf{antecedent ecosystem/environmental anomalies} on \textbf{current vegetation performance}\cite{Liu2018}.
+
+\vspace{.4cm}
+\begincols[T]
+  \begincol{.5\linewidth}
+  \pause
+  \textbf{Components of Memory:}\cite{Ogle2015}
+    \begin{enumerate}
+      \item \textit{Intrinsic Memory} (e.g. antecedent vegetation characteristics)\cite{DeKeersmaecker2015,Ogle2015}
+      \item \textit{Extrinsic Memory} (antecedent climate characteristics)\cite{DeKeersmaecker2015,Vicente-Serrano2013,Ogle2015}
+    \end{enumerate}
+    \pause
+    \vspace{0.3cm}
+    \begin{tcolorbox}[colback=bondiblue!5,colframe=bondiblue!40!black,title= ]
+    \centering Can we \textbf{distinguish} between \textbf{intrinsic} and \textbf{extrinsic} memory effects?
+    \end{tcolorbox}
+  \endcol
+  \begincol{.5\linewidth}
+  \pause
+  \textbf{Explaining Memory:}
+  \begin{enumerate}
+      \item \textit{Causal pathways} remain poorly understood \cite{Smith2017}
+      \item Expressions of \textit{Plant Functional} as a possible solution
+    \end{enumerate}
+    \pause
+    \vspace{0.3cm}
+    \begin{tcolorbox}[colback=bondiblue!5,colframe=bondiblue!40!black,title= ]
+    \centering What \textbf{biological traits cause} areas to exert        \textbf{intrinsic} and \textbf{extrinsic memory}?
+    \end{tcolorbox}
+  \endcol
+\endcols
+
+### Why do this?
+\centering \textbf{Vegetation Memory} proposed to be a \textit{proxy} of \textbf{engineering resilience in ecosystems} (\textit{high memory} $\sim$ \textit{low resilience})\cite{DeKeersmaecker2015}.
+
+\vspace{.2cm}
+  \includegraphics[width=1\linewidth]{Figures/DeKeers.png}
+  \vspace{-.4cm}
+  \pause
+      \begin{tcolorbox}[colback=bondiblue!5,colframe=bondiblue!40!black,title= ]
+    \centering How \textbf{valid} is this \textbf{assumption?}
+    \end{tcolorbox}
+
+
+## Concept
+### Intrinsic vs. Extrinsic Memory Components
+\includegraphics[width=1\linewidth]{Figures/Scheme_VegMem.jpg}
+
+\pause
+$\rightarrow$ Big emphasis on \textbf{dryland regions} due to demonstrated vegetation memory effects\cite{Seddon2016,Liu2018,DeKeersmaecker2015,Vicente-Serrano2013}, and the strong dependence of dryland vegetation on local water regimes\cite{Smith2017}
+
+### Study Region
+\vspace{-.2cm}
+
+\textbf{The Iberian Region}
+\vspace{.1cm}
+\centering \includegraphics[height=1\textheight]{Figures/Ombro_EU_Detail.png}
+\pause
+\vspace{.3cm}
+\raggedright Additional Study Regions:
+\vspace{-.73cm}
+\begincols
+  \begincol{.33\linewidth}
+  \begin{itemize}
+\item Caatinga, Brazil
+\end{itemize}
+  \endcol
+  \begincol{.33\linewidth}
+  \begin{itemize}
+\item Australia
+\end{itemize}
+  \endcol
+  \begincol{.33\linewidth}
+  \begin{itemize}
+\item Contiguous US
+\end{itemize}
+  \endcol
+\endcols
+
+
+<!-- \only<1>{\centering \vspace{0.2cm} -->
+<!-- \textbf{The Iberian Region} \vspace{0.2cm} -->
+<!-- \includegraphics[height=1\textheight]{Figures/Ombro_EU_Detail.png}} -->
+<!-- \only<2>{\centering \includegraphics[height=.85\textheight]{Figures/Ombro_SA.png}} -->
+<!-- \only<3>{\centering \includegraphics[height=.85\textheight]{Figures/Ombro_AU.png}} -->
+
+<!-- ### Study Outline -->
+<!-- \vspace{.2cm} -->
+<!-- \includegraphics[width=1\linewidth]{Figures/ThesisOutlinebw.png} -->
+
+# Allocating and Preparing Data
+## Vegetation Data
+### Normalised Difference Vegetation Index (NDVI)
+\centering We are using the \textbf{GIMMS NDVI3g} (v.1).  
+
+\begin{equation}
+NDVI = \frac{\rho\textsubscript{NIR} - \rho\textsubscript{RED}}{\rho\textsubscript{NIR} + \rho\textsubscript{RED}}
+\end{equation}
+
+\raggedright
+\begin{itemize}
+\pause
+\item \textbf{Why:}
+  \begin{itemize}
+  \item \textit{Biological Relevance:} Proxy of biomass and vegetation cover
+  \item \textit{Comparability:} Has been used in other studies of vegetation memory
+  \end{itemize}
+\pause
+\vspace{.2cm}
+\item \textbf{Core Characteristics:}
+  \begin{itemize}
+  \item \textit{Resolution:} $0.083^\circ \sim 9.27km \times 9.27km$
+  \item \textit{Availability:} 1982 - 2015
+  \end{itemize}
+\end{itemize}
+
+### Monthly Composites
+```{r NDVIOverview, echo = FALSE, fig.width = 18, fig.height = 9.9, cache.lazy=FALSE}
+setwd(Dir.Gimms.Monthly)
+NDVIMean_ras <- mean(brick(list.files()[1:7]), na.rm = TRUE)
+plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2, 
+     legend.width = 1.5, legend.shrink=1, axis.args=list(cex.axis=1.5), cex.axis = 1.5
+     )
+```
+
+## Climate Data
+### ERA5 & Variables I
+\centering We are using the \textbf{ERA5} Data Set\cite{Albergel2013,Balsamo2015}.  
+
+\raggedright
+\begin{itemize}
+\pause
+\vspace{.2cm}
+\item \textbf{Why:}
+  \begin{itemize}
+  \item Applicable globally
+  \item Gap-less time series
+  \item More sophisticated approach than previously utilised:
+    \begin{itemize}
+    \item Worldclim - Superior Temporal Resolution (superior resolving of climate extremes)
+    \item CRU - Superior Spatial Resolution
+    \end{itemize}
+  \item \textit{Climatological Relevance:} Assesment of climate uncertainty possible
+  \end{itemize}
+\pause
+\vspace{.2cm}
+\item \textbf{Core Characteristics:}
+  \begin{itemize}
+  \item \textit{Resolution:} $30km \times 30km$
+  \item \textit{Availability:} 1950 - Present
+  \end{itemize}
+\end{itemize}
+
+### ERA5 & Variables II
+We are using the following \textbf{climate variables}:
+\begin{itemize}
+\vspace{.2cm}
+\visible<2->{
+\item \textbf{Soil Moisture} - $Qsoil$
+}
+  \begin{itemize}
+  \visible<3->{
+  \item \textit{Why:} Soil moisture effects on vegetation may indiciate if/how the local ecosystem may deal with drought stress\cite{Rudgers2018,Smith2017,Papagiannopoulou2017a}.
+  \item \textit{How:} as different layers of depth
+    \begin{itemize}
+    \item $Qsoil$ - 0-7cm layer
+    \item $Qsoil2$ - 7-28cm layer
+    \item $Qsoil3$ - 28-100cm layer
+    \item $Qsoil4$ - 100-255cm layer
+    \end{itemize}
+  }
+  \end{itemize}
+\vspace{.2cm}
+\visible<2->{
+\item \textbf{Air Temperature} - $Tair$
+}
+  \begin{itemize}
+  \visible<4->{
+  \item \textit{Why:} Temperature drives plant physiology and drives levels of aridity\cite{Rudgers2018,DeKeersmaecker2015}.
+  \item \textit{How:} As one single layer (2m above ground)
+  }
+  \end{itemize}
+\end{itemize}
+
+### Kriging
+\includegraphics[width=1\linewidth]{Figures/Kriging.jpg}
+
+## Plant Functional Data
+### Plant Functional Data
+\vspace{-.5cm}
+\begincols
+  \begincol{.5\linewidth}
+  \textbf{Plant Functional Traits} (PFTs)
+    \begin{itemize}
+    \pause
+    \item \textbf{Why:}
+      \begin{itemize}
+      \item \textit{Biological Relevance:} Snapshots of functional reality
+      \item \textit{Comparability:} Have widely been used in functional ecology\cite{Ordonez2015,Diaz2015}
+      \end{itemize}
+    \pause
+    \vspace{.2cm}
+    \item \textbf{Core Measures:}
+      \begin{itemize}
+      \item \textit{Vegetative Height:} Ability to pre-empt light
+      \item \textit{Leaf Nitrogen Content:} Measure of photosynthetic potential and nitrogen acquisition
+      \end{itemize}
+    \end{itemize}
+  \endcol
+  \begincol{.5\linewidth}
+  \pause
+  \textbf{Life History Traits} (LHTs)
+    \begin{itemize}
+    \pause
+    \item \textbf{Why:}
+      \begin{itemize}
+      \item \textit{Biological Relevance:} Indices of plant behaviour through time
+      \item \textit{Comparability:} Capture much of natural life strategy variation\cite{Salguero-Gomez2015}
+      \end{itemize}
+    \pause
+    \vspace{.2cm}
+    \item \textbf{Core Measures:}
+      \begin{itemize}
+      \item \textit{Fast-Slow Continuum (FSC):} Capture over 60\% of the variation in plant life history strategies
+      \begin{itemize}
+        \item FSC-1: Life History Speed
+        \item FSC-2: Reproductive Strategy/Output
+        \end{itemize}
+      \item \textit{Reactivity:} Instantaneous biological responses
+      \end{itemize}
+    \end{itemize}
+  \endcol
+\endcols
+
+
+# Delineating Vegetation Memory
+### Pixyel-Wise Model Building
+ \vspace{.2cm}
+\centering \includegraphics[width=1\linewidth]{Figures/ModScheme.jpg}
+
+<!-- ### Examplary Data -->
+<!--  \vspace{.4cm} -->
+<!-- \centering \includegraphics[width=.9\linewidth]{Figures/ExMod.jpg} -->
+
+### PCA Regression
+ \vspace{.2cm}
+\centering \includegraphics[width=1\linewidth]{Figures/PCAREG.jpg}
+ \pause
+\raggedright \textbf{Model Comparisons:}
+\begin{itemize}
+\item \textit{Which variable exerts the greatest influence on vegetation anomalies?} 
+\item \textit{Which soil moisture layer is the most biologically influential?} 
+\end{itemize}
+
+<!-- ## Causes of Vegetation Memory -->
+<!-- ### Vegetation Memory Adaptation -->
+<!-- ### Plant Function -->
+
+
+# Results
+## Coefficients of Vegetation Memory
+
+### Vegetation Memory Coefficients
+```{r IBR, echo = FALSE, fig.width = 18, fig.height = 9.9, cache = TRUE, cache.lazy=FALSE}
+ModelRes(Region = "Iberian Region", SoilLayer = 1)
+```
+\pause
+\centering $\rightarrow$ Is \textbf{intrinsic} memory really \textit{intrinsic}?
+
+### Distinguishing Intrinsic and Extrinsic Memory
+\centering \textbf{Qsoil1} is the \textbf{most informative} of the \textbf{soil moisture} layers!
+```{r IBR3, echo = FALSE, fig.width = 18, fig.height = 10}
+VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1)
+```
+
+### Identifying Underlying Extrinsic Patterns I
+\centering Uniform **$NDVI[t-1]$ effect** across Australia **contrasts** with **other studies**.
+\begincols
+  \begincol{.5\linewidth}
+  ```{r AU1, echo = FALSE, fig.width = 18, fig.height = 20, cache =     TRUE, cache.lazy=FALSE}
+  ModelRes(Region = "Australia", SoilLayer = 1, Plot = 2)
+  ```
+  \endcol
+  \begincol{.5\linewidth}
+  \vspace{-6.75cm}
+  
+  Intrinsic Memory by Seddon et al.\cite{Seddon2016}:  
+  \vspace{.1cm}
+  \centering \includegraphics[width=1\linewidth]{Figures/SeddonAU.jpg}
+  
+  \endcol
+\endcols
+
+### Identifying Underlying Extrinsic Patterns II
+\centering Uniform **$NDVI[t-1]$ effect** across Australia **contrasts** with **other studies**.
+
+\vspace{-.41cm}
+
+\begincols
+  \begincol{.5\linewidth}
+  ```{r AU3, echo = FALSE, fig.width = 18, fig.height = 20, cache =     TRUE, cache.lazy=FALSE}
+  ModelRes(Region = "Australia", SoilLayer = 1, Plot = 1)
+  ```
+  
+  \endcol
+  \begincol{.5\linewidth}
+  
+  Intrinsic Memory by Seddon et al.\cite{Seddon2016}:  
+  \vspace{.1cm}
+  \centering \includegraphics[width=1\linewidth]{Figures/SeddonAU.jpg}   
+  \vspace{-.1cm}
+  
+  \only<2>{
+    \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title= ]
+    \centering \textbf{Previous $t-1$ variation } can be \textbf{understood through extrinsic vegetation memory}.
+    \end{tcolorbox}
+  }
+  \endcol
+\endcols
+
+## Regional Aspects of Vegetation Memory
+### Vegetation Memory Adaptation
+```{r VegMemSens5, echo = FALSE, fig.width = 18, fig.height = 8.5}
+PatCauseMem <- PatcausRes(SoilLayer = 1, X = "Memory", Y = "NDVI")
+```
+
+\pause
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title= ]
+\centering Relationship of $t-1$ coefficient and extrinsic vegetation memory length is not uniform within or between study regions.
+\end{tcolorbox}
+
+
+## Functional Aspects to Vegetation Memory
+### Plant Function I
+\centering Linking **plant functional traits** and vegetation memory proved **non-conclusive** but **life history traits** showed **interesting patterns**:
+```{r IBCOMPAD1, echo = FALSE, fig.width = 17, fig.height = 8.5, cache = TRUE, cache.lazy=FALSE, out.extra=''}
+leg2 <- Comres(Region = "Iberian Region", Variable = "FSC-2", Legend = TRUE)
+leg2[[1]]
+```
+
+### Plant Function II
+```{r IBCOMPAD2, echo = FALSE, fig.width = 17, fig.height = 8.5, cache = TRUE, cache.lazy=FALSE, out.extra=''}
+leg5 <- Comres(Region = "Iberian Region", Variable = "Reactivity", Legend = TRUE)
+leg5[[1]]
+```
+
+\pause
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title= ]
+\centering Some LHTs can be linked to some vegetation memory characteristcs,
+\end{tcolorbox}
+
+# Conclusion
+### Conclusion  
+\begincols[T]
+  \begincol{.5\linewidth}
+  \textbf{Summary:}
+  \begin{tcolorbox}[colback=violet!5,colframe=violet!40!black,title= ]
+  \centering Extrinsic memory should not be neglected in favour of intrinsic memory. 
+  \end{tcolorbox}
+  \endcol
+  \begincol{.5\linewidth}
+  ```{r conclus1, echo = FALSE, fig.width = 18, fig.height = 20, cache = TRUE, cache.lazy=FALSE}
+  ModelRes(Region = "Iberian Region", SoilLayer = 1, Plot = 2)
+  ```
+  \endcol
+\endcols
+
+### Conclusion  
+\begincols[T]
+  \begincol{.5\linewidth}
+  \textbf{Summary:}
+  \begin{tcolorbox}[colback=violet!5,colframe=violet!40!black,title= ]
+  \centering Extrinsic memory should not be neglected in favour of intrinsic memory. 
+  \end{tcolorbox}
+  \begin{enumerate}
+  \vspace{.2cm}
+  \item Intrinsic vegetation memory as a proxy for engineering resilience may be an oversimplification.
+  \end{enumerate}
+  \endcol
+  \begincol{.5\linewidth}
+  ```{r conclus2, echo = FALSE, fig.width = 18, fig.height = 20, cache = TRUE, cache.lazy=FALSE}
+  ModelRes(Region = "Iberian Region", SoilLayer = 1, Plot = 3)
+  ```
+  \endcol
+\endcols
+
+### Conclusion  
+\begincols[T]
+  \begincol{.5\linewidth}
+  \textbf{Summary:}
+  \only<1-2>{
+  \begin{tcolorbox}[colback=violet!5,colframe=violet!40!black,title= ]
+  \centering Extrinsic memory should not be neglected in favour of intrinsic memory. 
+  \end{tcolorbox}
+  }
+  \visible<1-3>{
+  \begin{enumerate}
+  \vspace{.2cm}
+  \item Intrinsic vegetation memory as a proxy for engineering resilience may be an oversimplification.
+  \end{enumerate}
+  }
+  \endcol
+  \begincol{.5\linewidth}
+  \raggedleft
+  ```{r conclus3, echo = FALSE, fig.width = 18, fig.height = 16}
+  VarParRes(Region = "Iberian Region", SoilLayer = 1, Plot = 1)
+  ```
+  \visible<2->{
+  Distinguishing intrinsic and extrinsic memory components remains challenging.
+  }
+  \endcol
+\endcols
+
+### Conclusion  
+\begincols[T]
+  \begincol{.5\linewidth}
+  \textbf{Summary:}
+  \begin{enumerate}
+  \vspace{.2cm}
+  \item Intrinsic vegetation memory as a proxy for engineering resilience may be an oversimplification.
+  \end{enumerate}
+  \vspace{.6cm}
+  \begin{tcolorbox}[colback=violet!5,colframe=violet!40!black,title= ]
+  \centering Interactions of vegetation memory characteristics are region-dependant.
+  \end{tcolorbox}
+  \visible<2>{
+  \begin{enumerate}
+  \setcounter{enumi}{1}
+  \vspace{.2cm}
+  \item Vegetation memory processes differ greatly between regions.
+  \end{enumerate}
+  }
+  \endcol
+  \begincol{.5\linewidth}
+  ```{r conclus4, echo = FALSE, fig.width = 18, fig.height = 20}
+  PatCauseMem <- PatcausRes(SoilLayer = 1, X = "Memory", Y = "NDVI")
+  ```
+  \endcol
+\endcols
+
+### Conclusion  
+\begincols[T]
+  \begincol{.5\linewidth}
+  \textbf{Summary:}
+  \begin{enumerate}
+  \vspace{.2cm}
+  \item Intrinsic vegetation memory as a proxy for engineering resilience may be an oversimplification.
+  \vspace{.2cm}
+  \item Vegetation memory processes differ greatly between regions.
+  \end{enumerate}
+  \only<1-2>{
+  \vspace{.6cm}
+  \begin{tcolorbox}[colback=violet!5,colframe=violet!40!black,title= ]
+  \centering Some measures of life history strategies are related to vegetation memory characteristics.
+  \end{tcolorbox}
+  }
+  \visible<3>{
+  \begin{enumerate}
+  \setcounter{enumi}{2}
+  \vspace{.2cm}
+  \item The relationship of plant function and vegetation memory requires further research.
+  \end{enumerate}
+  }
+  \endcol
+  \begincol{.5\linewidth}
+  \raggedleft
+  ```{r conclus5, echo = FALSE, fig.width = 18, fig.height = 16}
+  leg5[[1]]
+  ```
+  \visible<2->{
+  Challenging to establish direct proxies of either intrinsic or extrinsic vegetation memory components.
+  }
+  \endcol
+\endcols
+
+### Conclusion  
+\begincols[T]
+  \begincol{.5\linewidth}
+  \textbf{Summary:}
+  \begin{enumerate}
+  \vspace{.2cm}
+  \item Intrinsic vegetation memory as a proxy for engineering resilience may be an oversimplification.
+  \vspace{.2cm}
+  \item Vegetation memory processes differ greatly between regions.
+  \vspace{.2cm}
+  \item The relationship of plant function and vegetation memory requires further research.
+  \end{enumerate}
+  \endcol
+  \begincol{.5\linewidth}
+  \textbf{Future Directions:}
+  \begin{enumerate}
+  \vspace{.2cm} \pause
+  \item Identify additional relevant climate parameters (e.g. cloud cover and soil type)
+  \vspace{.2cm} \pause
+  \item Extend analyses beyond dryland regions
+  \vspace{.2cm} \pause
+  \item Analyse changes in vegetation memory over time
+  \vspace{.2cm} \pause
+  \item Use additional plant functional data (e.g. BIEN data base)
+  \vspace{.2cm} \pause
+  \item Implement advanced mapping methods for plant functional data
+  \end{enumerate}
+  \endcol
+\endcols
+
+
+
+### Sources
+\tiny
+\MakeBib

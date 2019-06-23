@@ -4,8 +4,9 @@
 # But not these files...
 !.gitignore
 !D0_Manuscript.pdf
-!D0_Manuscript_Scaled.pdf
 !D0_Manuscript.Rmd
+!M.Sc._Defense.pdf
+!M.Sc._Defense.Rmd
 !y - Codes/*
 !y - Codes/*/*
 !Thesis.bib
