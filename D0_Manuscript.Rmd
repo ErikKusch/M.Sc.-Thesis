@@ -543,19 +543,20 @@ col.mem <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "g
   Lines <- c(Linesa[4], Linesa[1], Linesa[3], Linesa[2])
   Lines <- rep(Lines, each = length(which(plot_df$Identifiers == "Lag")))
   Lines <- as.factor(Lines)
-  if(unique(Lines) == 2){
+  plot_df <- cbind(plot_df, Lines)
+  if(length(levels(Lines)) == 2){
+    if(Legend == TRUE){
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, aes(linetype = Lines)) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + 
+     labs(linetype="p < .05", colour="Identifiers") + scale_linetype_manual(values = c(1, 2), labels = c("Yes", "No")) + guides(colour = guide_legend(ncol=2, override.aes = list(size = 5)),linetype = guide_legend(override.aes = list(size = 3)))
+  }else{
+   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, aes(linetype = Lines)) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + theme(legend.position = "none")
+  }
+  }else{
     if(Legend == TRUE){
    plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, linetype = 2) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + 
      labs(linetype="p < .05", colour="Identifiers") + scale_linetype_manual(values = c(1, 2), labels = c("Yes", "No")) + guides(colour = guide_legend(ncol=2, override.aes = list(size = 5)),linetype = guide_legend(override.aes = list(size = 3)))
   }else{
    plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66, linetype = 2) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + theme(legend.position = "none")
-  }
-  }else{
-    if(Legend == TRUE){
-   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + 
-     labs(linetype="p < .05", colour="Identifiers") + scale_linetype_manual(values = c(1, 2), labels = c("Yes", "No")) + guides(colour = guide_legend(ncol=2, override.aes = list(size = 5)),linetype = guide_legend(override.aes = list(size = 3)))
-  }else{
-   plot <- ggplot(data = plot_df, aes(x = Compadre, y = Data, col = Identifiers, linetype = Lines)) + geom_point(alpha = 0.5, size = 3.5) + theme_bw(base_size = 35) +  xlab(paste("COMPADRE", Variable)) + ylab("Vegetation Response Coefficients") + geom_hline(yintercept = 0, linetype="dotted") + stat_smooth(method = "lm", level = 0.66) + scale_color_manual(values=c(col.mem, col.qsoil, col.ndvi, col.tair)) + theme(legend.position = "none")
   }
   }
   return(list(plot,Output,dim(plot_df)[1]/4))
@@ -1093,7 +1094,7 @@ Using an empirical approach similar to the aforementioned FSC, Díaz et al. iden
 \vspace{-.1cm}
 as the most important \PFTs to understanding the global spectrum of plant functioning\cite{Diaz2015}. Recovery rates of vegetation post-disturbance (i.e. vegetation memory) is influenced by energy and biomass availability. Resource allocation and hence recovery potential using the above six traits is best understood employing $H$, $LMA$, and \nmass due to their direct link to realising photosynthetic potential. Resistance potential, on the other hand, is influenced heavily by the physical toughness of plant material, presence of storage organs, and many other aspects of plant function captured by \PFTs and so $SSD$, $LMA$, and \nmass are especially promising as drivers of ecosystem resistance.
 
-<!-- \clearpage -->
+\clearpage
 
 ### Ecological Relevance  
 The diverse range in which measures of plant function can be expressed are representative of the diverse strategies for establishing, growing and reproducing of plants\cite{Laughlin2014}. Hence, understanding how plant functioning enables plants to persist despite (a)biotic forcing (i.e. vegetation memory) is a promising step to understanding ecosystem-scale responses to climate change. This is due to the positive effect of biodiversity on ecological stability which has long been recorded\cite{DeBoeck2017} and even led to the formulation of prominent concepts like Yacchi's insurance hypothesis which postulates that the loss of a subset of species can be compensated for by the presence of other species given a sufficient overlap in functional aspects of both, thus leading to a stabilisation of ecosystem processes\cite{Yachi1999}. 
@@ -1615,7 +1616,7 @@ grid.draw(legend)
 
 \begin{figure}[h!]
 \centering \includegraphics[width=.9\linewidth]{3 - Figures/ExMod.jpg}
-\caption[exemplary Vegetation Memory PCA]{\textbf{exemplary Vegetation Memory PCA - } Overview of Z-Score data for \ndvil, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}). Some parts of this figure have been generated via \ref{rFigs}.}
+\caption[Exemplary Vegetation Memory PCA]{\textbf{exemplary Vegetation Memory PCA - } Overview of Z-Score data for \ndvil, $Qsoil_{1;6}$, and $Tair$ for a single pixel in the dryland region of the Iberian study region (red colouring on \ndvi background in central plot) as well as their representation in a \pca. Also pictured: $NDVI_t$ Z-Scores required for \pca regression models (see figure \ref{fig:ModScheme} and \ref{fig:PCAREG}). Some parts of this figure have been generated via \ref{rFigs}.}
 \label{fig:ExMod}
 \end{figure}
 
@@ -2136,7 +2137,7 @@ Whilst relationships of \ndvil, and \qsoila memory effects and \COMPADRE reactiv
 
 \paragraph*{Overview}  \hspace{.5cm}
 \vspace{-.3cm}
-```{r IBCOMPAD, echo = FALSE, fig.width = 17, fig.height = 12.6, fig.subcap=c('FSC-1', 'FSC-2', 'Period of Oscillation', 'Damping Ratio', 'Reactivity', 'Potting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{Short -} Linear regression coefficients of COMPADRE variables and vegetation response coefficients. Vegetation memory characteristics for each geo-referenced \\COMPADRE record across the Iberian Region are shown. Statistically non-significant regression slopes are presented as dashed lines. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD}", fig.scap="Short", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
+```{r IBCOMPAD, echo = FALSE, fig.width = 17, fig.height = 12.6, fig.subcap=c('FSC-1', 'FSC-2', 'Period of Oscillation', 'Damping Ratio', 'Reactivity', 'Potting Colour Reference'), fig.ncol = 2, out.width='.5\\linewidth', fig.cap="\\textbf{COMPADRE and Vegetation Memory -} Linear regression coefficients of COMPADRE variables and vegetation response coefficients. Vegetation memory characteristics for each geo-referenced \\COMPADRE record across the Iberian Region are shown. Statistically non-significant regression slopes are presented as dashed lines. Figure established via \\ref{rCOMRes}. \\label{fig:IBCOMPAD}", fig.scap="COMPADRE and Vegetation Memory", cache = TRUE, cache.lazy=FALSE, out.extra='', fig.pos = 'h!'}
 leg1[[1]]
 leg2[[1]]
 leg3[[1]]
