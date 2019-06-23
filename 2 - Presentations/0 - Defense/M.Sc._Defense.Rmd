@@ -463,7 +463,7 @@ plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2
     \item Worldclim - Superior Temporal Resolution (superior resolving of climate extremes)
     \item CRU - Superior Spatial Resolution
     \end{itemize}
-  \item \textit{Climatological Relevance:} Assesment of climate uncertainty possible
+  \item \textit{Climatological Relevance:} Assessment of climate uncertainty possible
   \end{itemize}
 \pause
 \vspace{.2cm}
@@ -483,7 +483,7 @@ We are using the following \textbf{climate variables}:
 }
   \begin{itemize}
   \visible<3->{
-  \item \textit{Why:} Soil moisture effects on vegetation may indiciate if/how the local ecosystem may deal with drought stress\cite{Rudgers2018,Smith2017,Papagiannopoulou2017a}.
+  \item \textit{Why:} Soil moisture effects on vegetation may indicate if/how the local ecosystem may deal with drought stress\cite{Rudgers2018,Smith2017,Papagiannopoulou2017a}.
   \item \textit{How:} as different layers of depth
     \begin{itemize}
     \item $Qsoil$ - 0-7cm layer
@@ -671,7 +671,7 @@ leg5[[1]]
 \pause
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title= ]
-\centering Some LHTs can be linked to some vegetation memory characteristcs,
+\centering Some LHTs can be linked to some vegetation memory characteristics,
 \end{tcolorbox}
 
 # Conclusion
