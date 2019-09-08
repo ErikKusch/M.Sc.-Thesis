@@ -102,6 +102,10 @@ VegMem <- function(ClimVar, ClimVar2, Region, Cumlags, FromY, ToY){
     if(length(ThreshPos) > 0){ # set threshold months to NA if necessary
       ModData_df$NDVI_anom[ThreshPos] <- NA}
     ModData_df <- na.omit(ModData_df) # get rid of NA rows
+    if(dim(ModData_df)[1] == 0){ # if there are no anomalies
+      ModelEval_ras[pixel] <- c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA)
+      next()
+    }
     ## MODELS ----
     ### Establishing models----
     # list to save Model objects
