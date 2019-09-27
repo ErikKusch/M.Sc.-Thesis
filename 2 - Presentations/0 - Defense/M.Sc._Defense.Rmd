@@ -320,7 +320,7 @@ col.mem <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "g
 
 # Background
 ## Motivation
-### What is this?
+### What is Vegetation Memory?
 \centering \textbf{Vegetation Memory} is the effect of \textbf{antecedent ecosystem/environmental anomalies} on \textbf{current vegetation performance}\cite{Liu2018}.
 
 \vspace{.4cm}
@@ -361,7 +361,7 @@ col.mem <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "g
 $\rightarrow$ Big emphasis on \textbf{dryland regions} due to demonstrated vegetation memory effects\cite{Seddon2016,Liu2018,DeKeersmaecker2015,Vicente-Serrano2013}, and the strong dependence of dryland vegetation on local water regimes\cite{Smith2017}
 
 ### Why do this?
-\centering \textbf{Intrinsic vegetation Memory} proposed to be a \textit{proxy} of \textbf{engineering resilience in ecosystems} (\textit{high memory} $\sim$ \textit{low resilience})\cite{DeKeersmaecker2015}.
+\centering \textbf{Intrinsic Vegetation Memory} proposed to be a \textit{proxy} of \textbf{engineering resilience in ecosystems} (\textit{high memory} $\sim$ \textit{low resilience})\cite{DeKeersmaecker2015}.
 
 \vspace{.2cm}
   \includegraphics[width=1\linewidth]{Figures/DeKeers.png}
@@ -505,7 +505,7 @@ plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2
   \end{itemize}
 \vspace{1cm}
 \pause
-Expressions of \textbf{Plant Functional Traits} (PFTs) were tested against vegetation memory but require further research aso of this point in time.
+Expressions of \textbf{Plant Functional Traits} (PFTs) were tested against vegetation memory but require further research as of this point in time.
    
 <!-- \textbf{Plant Functional Traits} (PFTs) -->
 <!--     \begin{itemize} -->
@@ -525,7 +525,7 @@ Expressions of \textbf{Plant Functional Traits} (PFTs) were tested against veget
 <!--     \end{itemize} -->
 
 # Delineating Vegetation Memory
-### Pixyel-Wise Model Building
+### Pixel-Wise Model Building
 \begin{itemize}
 \item Linear detrending  
 \item Z-Scores:
@@ -801,18 +801,16 @@ leg5[[1]]
   \end{enumerate}
   \endcol
   \begincol{.5\linewidth}
-  \textbf{Future Directions:}
+  \textbf{Future Research:}
   \begin{enumerate}
   \vspace{.2cm} \pause
-  \item Identify additional relevant climate parameters (e.g. cloud cover and soil type)
+  \item In which ways does vegetation react to anomalies of other climatic factors?
   \vspace{.2cm} \pause
-  \item Extend analyses beyond dryland regions
+  \item How robust are my findings when applied to non-dryland regions?
   \vspace{.2cm} \pause
-  \item Analyse changes in vegetation memory over time
+  \item Is there a change in vegetation memory patterns over time (e.g. with large-scale climate systems)?
   \vspace{.2cm} \pause
-  \item Use additional plant functional data (e.g. BIEN data base)
-  \vspace{.2cm} \pause
-  \item Implement advanced mapping methods for plant functional data
+  \item How can we enhance our functional understanding of vegetation memory?
   \end{enumerate}
   \endcol
 \endcols
