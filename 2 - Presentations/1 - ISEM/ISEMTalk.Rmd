@@ -410,24 +410,25 @@ plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2
     \item Worldclim - Superior Temporal Resolution (superior resolving of climate extremes)
     \item CRU - Superior Spatial Resolution
     \end{itemize}
-  \item \textit{Climatological Relevance:} Assessment of climate uncertainty possible
+  \item \textit Assessment of climate uncertainty possible
+  \item Access to variables not contained within gridded-observation products
   \end{itemize}
-\vspace{.5cm}
-\visible<2->{
+\vspace{.3cm}
+\visible<3->{
 \item \textbf{Soil Moisture} - $Qsoil$
 }
   \begin{itemize}
-  \visible<3->{
+  \visible<4->{
   \item \textit{Why:} Soil moisture effects on vegetation may indicate if/how the local ecosystem may deal with drought stress\cite{Rudgers2018,Smith2017,Papagiannopoulou2017a}.
   \item \textit{How:} as different layers of depth ($Qsoil1$ - $Qsoil4$)
   }
   \end{itemize}
-\vspace{.2cm}
-\visible<2->{
+\vspace{.1cm}
+\visible<3->{
 \item \textbf{Air Temperature} - $Tair$
 }
   \begin{itemize}
-  \visible<4->{
+  \visible<5->{
   \item \textit{Why:} Temperature drives plant physiology and drives levels of aridity\cite{Rudgers2018,DeKeersmaecker2015}.
   \item \textit{How:} As one single layer (2m above ground)
   }
