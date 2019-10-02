@@ -2,7 +2,7 @@
 title: "Identifying ecological-memory patterns in drylands using remote sensing and state-of-the-art climate-reanalysis products"
 subtitle: ""
 author: "Erik Kusch"
-date: "??/10/2019"
+date: "04/10/2019"
 fontsize: 10pt
 output: 
   beamer_presentation: 
