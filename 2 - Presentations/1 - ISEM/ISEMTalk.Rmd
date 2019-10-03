@@ -359,7 +359,7 @@ col.mem <- got(n = 1, alpha = 1, begin = 0, end = 1, direction = -1, option = "g
 
 \textbf{South-Western Europe}
 \vspace{.1cm}
-\centering \includegraphics[height=1\textheight]{Figures/Ombro_EU_Detail.png}
+\centering \includegraphics[height=1\textheight]{Figures/Ombro_EU_Detail2.png}
 \pause
 \vspace{.3cm}
 \raggedright Additional Study Regions:
@@ -411,6 +411,7 @@ plot(NDVIMean_ras, colNA = "black", main = "Mean NDVI 1982 - 2015", cex.main = 2
     \item CRU - Superior Spatial Resolution
     \end{itemize}
   \item \textit Assessment of climate uncertainty possible
+  \pause
   \item Access to variables not contained within gridded-observation products
   \end{itemize}
 \vspace{.3cm}
@@ -475,8 +476,6 @@ NDVI_t = \beta_{t-1}*NDVI_{[t-1]} + \beta_{Qsoil}*Qsoil_{k;m} + \beta_{Tair}*Tai
 ```{r IBR, echo = FALSE, fig.width = 18, fig.height = 11.2, cache = TRUE, cache.lazy=FALSE}
 ModelRes(Region = "Iberian Region", SoilLayer = 1)
 ```
-<!-- \pause -->
-<!-- \centering $\rightarrow$ Is \textbf{intrinsic} memory really \textit{intrinsic}? -->
 
 ### Distinguishing Intrinsic and Extrinsic Memory
 \centering \textbf{Qsoil1} is the \textbf{most informative} of the \textbf{soil moisture} layers!
@@ -628,34 +627,6 @@ PatCauseMem <- PatcausRes(SoilLayer = 1, X = "Memory", Y = "NDVI")
   ```
   \endcol
 \endcols
-
-<!-- ### Conclusion   -->
-<!-- \begincols[T] -->
-<!--   \begincol{.5\linewidth} -->
-<!--   \textbf{Summary:} -->
-<!--   \begin{enumerate} -->
-<!--   \vspace{.2cm} -->
-<!--   \item Intrinsic vegetation memory as a proxy for engineering resilience may be an oversimplification. -->
-<!--   \vspace{.2cm} -->
-<!--   \item Vegetation memory processes differ greatly between regions. -->
-<!--   \vspace{.2cm} -->
-<!--   \item The relationship of plant function and vegetation memory requires further research. -->
-<!--   \end{enumerate} -->
-<!--   \endcol -->
-<!--   \begincol{.5\linewidth} -->
-<!--   \textbf{Future Research:} -->
-<!--   \begin{enumerate} -->
-<!--   \vspace{.2cm} \pause -->
-<!--   \item In which ways does vegetation react to anomalies of other climatic factors? -->
-<!--   \vspace{.2cm} \pause -->
-<!--   \item How robust are my findings when applied to non-dryland regions? -->
-<!--   \vspace{.2cm} \pause -->
-<!--   \item Is there a change in vegetation memory patterns over time (e.g. with large-scale climate systems)? -->
-<!--   \vspace{.2cm} \pause -->
-<!--   \item How can we enhance our functional understanding of vegetation memory? -->
-<!--   \end{enumerate} -->
-<!--   \endcol -->
-<!-- \endcols -->
 
 ### Sources
 \tiny
